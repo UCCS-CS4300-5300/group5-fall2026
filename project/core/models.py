@@ -4,7 +4,7 @@ class StarterItem(models.Model):
  description=models.TextField(blank=True)
  is_active=models.BooleanField(default=True)
  def __str__(self): return self.title
-
+    
 class Food(models.Model):
 
     name = models.CharField(max_length = 100)
@@ -23,4 +23,3 @@ class Food(models.Model):
         string_expiration_status = f"Expiration Status: {self.expiration_status"
 
         return f"{string_name}, {string_date_stored}, {string_date_expired},{string_expiration_status}."
-    
