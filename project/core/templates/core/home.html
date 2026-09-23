@@ -1,1 +1,120 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Project Starter</title></head><body><small>CS 4300 / 5300</small><h1>Your project starts here.</h1><p>Trace this generic feature, then evolve it into your inherited product.</p>{% for item in items %}<h2>{{ item.title }}</h2><p>{{ item.description }}</p>{% empty %}<p>No starter items yet. Replace this with your first vertical slice.</p>{% endfor %}</body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Title displayed in the browser tab -->
+    <title>Shelf-Life | Pantry</title>
+
+    <style>
+        /* This creates the basic styling for the entire pantry page.
+        A more detailed styling will be added as the pantry view is completed. */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* Header is used at the top of the Shelf-Life application.
+         This gives the page a simple title area for now. */
+        header {
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+
+        /* This will Place the sidebar and main pantry content next to each other.
+         Flexbox will let us keep the navigation on the left and pantry on the right. */
+        .page-container {
+            display: flex;
+        }
+
+        /* This is the left side of the pantry page.
+         This area will contain searching and controls for pantry the items. */
+        .sidebar {
+            width: 220px;
+            min-height: 100vh;
+            padding: 20px;
+            background-color: #e8e8e8;
+        }
+
+        /* Add spacing around the main pantry content */
+        main {
+            padding: 25px;
+        }
+
+        /* This is a temporary shared button styling.
+         Individual buttons can be styled differently later if we needed it. */
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Main application heading -->
+    <header>
+        <h1>Shelf-Life Application</h1>
+    </header>
+
+    <!--
+        Main page layout.
+        The sidebar contains pantry controls and the main section
+        will display the user's pantry.
+    -->
+    <div class="page-container">
+
+        <!--
+            Pantry sidebar based on the lo-fi diagram.
+            Search and Add Item are only visual elements right now.
+            Their functionality will be implemented in later stories.
+        -->
+        <aside class="sidebar">
+            <h2>Pantry</h2>
+
+            <!-- Search box for eventually finding pantry items -->
+            <input type="text" placeholder="Search pantry...">
+
+            <!-- Add Item button is not connected to CRUD functionality yet -->
+            <button type="button">Add Item</button>
+        </aside>
+
+        <!-- Main area where pantry items will eventually be displayed -->
+        <main>
+
+            <!-- Current Pantry will eventually display Food objects that have not expired yet. -->
+            <h2>Current Pantry</h2>
+
+            <!-- Temporary message until database items are connected -->
+            <p>No current pantry items to display.</p>
+
+            <!-- Required action buttons for story #12. These are intentionally visual only for now. -->
+            <button type="button">Add</button>
+            <button type="button">Consumed</button>
+            <button type="button">Trashed</button>
+
+            <!--
+                Work I still have to do:
+
+                Story #12:
+                Add the Expired Pantry section.
+
+                Story #12:
+                Continue styling the page to better match
+                the team's lo-fi diagram.
+
+                Story #17:
+                Retrieve the Food objects from the database and
+                display their information in the pantry.
+            -->
+
+        </main>
+
+    </div>
+
+</body>
+</html>
