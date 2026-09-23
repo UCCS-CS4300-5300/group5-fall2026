@@ -80,22 +80,24 @@
             background-color: cyan; /* White background */
             padding: 20px;
             border: 2px solid #333;
-            border-radius: 15px; /* Curves all 4 corners equally */
+            border-radius: 15px; /* Curves corners */
+            
         }
 
         /* 3/4 Column (75% width) painted orange */
         .right-column {
             flex: 3; 
-            background-color: skyblue; /* Orange background */
+            background-color: skyblue; 
             padding: 20px;
             border: 2px solid #333;
-            border-radius: 15px; /* Curves all 4 corners equally */
+            border-radius: 15px; /* Curves corners */
         }
 
         .pantry-box {
             /*flex: 1 1 auto; */
             
             display: flex;           /* Defines this div as a flexbox container */
+            flex-wrap: wrap; 
             gap: 15px;               /* Adds empty space between items inside this div */
             padding: 20px;           /* Adds empty space (buffer) around the inner items */
 
@@ -104,7 +106,7 @@
 
             /* Fallback constraint to ensure content doesn't break */
             min-height: 300px;    
-
+            max-width: 550px;
             background-color: aquamarine;
             border: 2px solid #333;
             border-radius: 15px; /* Curves all 4 corners equally */
@@ -116,7 +118,7 @@
             padding: 20px;
             gap: 20px;
         }
-
+        
         /* Collapse into a column when screen width is 600px or less */
         @media screen and (max-width: 600px) {
             /* Stacks items vertically on collapse */
@@ -128,13 +130,25 @@
                 display: none;       
             }
         }
+
+        .circle {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            border-radius: 50%; /* Makes the square circular */
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         
     </style>
     
 </head>
 <body>
     <div>
-        <nav class="navbar">
+        <nav class="flex-container">
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
                 <li class="dropdown">
@@ -165,10 +179,51 @@
                     <div class="pantry-box">
                         <h2>Pantry</h2>
                         <p>Is the pantry.</p>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
                     </div>
                     <div class="pantry-box">
                         <h2>Pantry</h2>
                         <p>Is the pantry.</p>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+
                     </div>
                 </div>
             </div>
