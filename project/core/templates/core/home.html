@@ -1,1 +1,92 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Project Starter</title></head><body><small>CS 4300 / 5300</small><h1>Your project starts here.</h1><p>Trace this generic feature, then evolve it into your inherited product.</p>{% for item in items %}<h2>{{ item.title }}</h2><p>{{ item.description }}</p>{% empty %}<p>No starter items yet. Replace this with your first vertical slice.</p>{% endfor %}</body></html>
+<!--
+{% load static %}
+
+{% block extra_css %}
+<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Django Split Window</title>
+    <style>
+        /* Ensures the container fills the entire viewport height */
+        .split-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 1/4 Column (25% width) */
+        .left-column {
+            flex: 1; 
+            background-color: #ffffff; /* White background */
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 15px; /* Curves all 4 corners equally */
+        }
+
+        /* 3/4 Column (75% width) painted orange */
+        .right-column {
+            flex: 3; 
+            background-color: skyblue; /* Orange background */
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 15px; /* Curves all 4 corners equally */
+        }
+
+        .pantry-box {
+            display: flex;           /* Defines this div as a flexbox container */
+            gap: 15px;               /* Adds empty space between items inside this div */
+            padding: 20px;           /* Adds empty space (buffer) around the inner items */
+            background-color: aquamarine;
+            border: 2px solid #333;
+            border-radius: 15px; /* Curves all 4 corners equally */
+            height: 70vh;
+            width: 60vh;
+        }
+
+        .flex-container {
+            display: flex; /* Aligns children in a row by default */
+        }
+
+        
+    </style>
+    
+</head>
+<body>
+
+    <div class="split-container">
+        <!-- 1/4 Column -->
+        <div class="left-column">
+            <h2>Sidebar</h2>
+            <p>This is the 1/4 width column.</p>
+        </div>
+
+        <!-- 3/4 Column (Orange) -->
+        <div class="right-column">
+            <h2>Main Content</h2>
+            <p>This is the 3/4 width orange column.</p>
+
+            <div class="flex-container">
+    
+                <div class="pantry-box">
+                    <h2>Pantry</h2>
+                    <p>Is the pantry.</p>
+                </div>
+                <div class="pantry-box">
+                    <h2>Pantry</h2>
+                    <p>Is the pantry.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<a target="_blank" href="https://icons8.com/icon/lPoyByxq65W4/banana">Banana</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+</html>
