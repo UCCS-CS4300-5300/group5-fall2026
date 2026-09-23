@@ -1,11 +1,3 @@
-<!--
-{% load static %}
-
-{% block extra_css %}
-<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-{% endblock %}
--->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,6 +5,66 @@
     <meta charset="UTF-8">
     <title>Django Split Window</title>
     <style>
+
+        .navbar {
+            border-radius: 15px; /* Curves all 4 corners equally */
+            border: 2px solid #333;
+
+        }
+        /* Reset & Main Navbar Layout */
+        .nav-links {
+            list-style: none;
+            display: flex;
+            background-color: lightcoral;
+            padding: 0;
+            margin: 0;
+            border-radius: 15px; /* Curves all 4 corners equally */
+        }
+
+        .nav-links a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            background-color: #444;
+        }
+
+        /* ─── THE DROPDOWN LOGIC ─── */
+
+        /* 1. Parent must be relative */
+        .dropdown {
+            position: relative;
+        }
+
+        /* 2. Dropdown menu must be absolute, hidden by default */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%; /* Positions it exactly at the bottom of the parent */
+            left: 0;
+            min-width: 160px;
+            background-color: #333;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            
+            /* Hidden states */
+            display: none; 
+        }
+
+        /* 3. Submenu links display as block to stack vertically */
+        .dropdown-menu li a {
+            padding: 12px 16px;
+        }
+
+        /* 4. Reveal the menu when hovering over the parent li */
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
         /* Ensures the container fills the entire viewport height */
         .split-container {
             display: flex;
@@ -25,7 +77,7 @@
         /* 1/4 Column (25% width) */
         .left-column {
             flex: 1; 
-            background-color: #ffffff; /* White background */
+            background-color: cyan; /* White background */
             padding: 20px;
             border: 2px solid #333;
             border-radius: 15px; /* Curves all 4 corners equally */
@@ -65,38 +117,62 @@
             gap: 20px;
         }
 
+        /* Collapse into a column when screen width is 600px or less */
+        @media screen and (max-width: 600px) {
+            /* Stacks items vertically on collapse */
+            .flex-container {
+                flex-direction: column; 
+            }
+            /* Completely hides the left column on collapse */
+            .left-column {
+                display: none;       
+            }
+        }
         
     </style>
     
 </head>
 <body>
+    <div>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li class="dropdown">
+                <a href="#" class="dropdown-trigger">Services ▾</a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">Web Design</a></li>
+                    <li><a href="#">SEO</a></li>
+                    <li><a href="#">Marketing</a></li>
+                </ul>
+                </li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </nav>
+        <div class="split-container">
+            <!-- 1/4 Column -->
+            <div class="left-column">
+                <h2>Sidebar</h2>
+                <p>column.</p>
+            </div>
 
-    <div class="split-container">
-        <!-- 1/4 Column -->
-        <div class="left-column">
-            <h2>Sidebar</h2>
-            <p>This is the 1/4 width column.</p>
-        </div>
+            <!-- 3/4 Column (Orange) -->
+            <div class="right-column">
+                <h2>Main Content</h2>
+                <p>column.</p>
 
-        <!-- 3/4 Column (Orange) -->
-        <div class="right-column">
-            <h2>Main Content</h2>
-            <p>This is the 3/4 width orange column.</p>
-
-            <div class="flex-container">
-    
-                <div class="pantry-box">
-                    <h2>Pantry</h2>
-                    <p>Is the pantry.</p>
-                </div>
-                <div class="pantry-box">
-                    <h2>Pantry</h2>
-                    <p>Is the pantry.</p>
+                <div class="flex-container">
+        
+                    <div class="pantry-box">
+                        <h2>Pantry</h2>
+                        <p>Is the pantry.</p>
+                    </div>
+                    <div class="pantry-box">
+                        <h2>Pantry</h2>
+                        <p>Is the pantry.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 </body>
-<a target="_blank" href="https://icons8.com/icon/lPoyByxq65W4/banana">Banana</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 </html>
