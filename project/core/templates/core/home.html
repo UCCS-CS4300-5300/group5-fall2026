@@ -6,6 +6,12 @@
     <title>Django Split Window</title>
     <style>
 
+        /* 
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Navbar Style 
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        */
+
         .navbar {
             border-radius: 15px; /* Curves all 4 corners equally */
             border: 2px solid #333;
@@ -26,10 +32,11 @@
             color: white;
             padding: 15px 20px;
             text-decoration: none;
+            border-radius: 15px; /* Curves all 4 corners equally */
         }
 
         .nav-links a:hover {
-            background-color: #444;
+            background-color: lightcoral;
         }
 
         /* ─── THE DROPDOWN LOGIC ─── */
@@ -65,11 +72,19 @@
             display: block;
         }
 
+        /* 
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Body Style 
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        */
+
         /* Ensures the container fills the entire viewport height */
         .split-container {
             display: flex;
-            height: 100vh;
-            width: 100vw;
+            
+            width: 95vw;
+            min-height: 100vh;
+            height: auto;
             margin: 0;
             padding: 0;
         }
@@ -91,6 +106,7 @@
             padding: 20px;
             border: 2px solid #333;
             border-radius: 15px; /* Curves corners */
+            height: auto;
         }
 
         .pantry-box {
@@ -162,6 +178,7 @@
                 <li><a href="#">About</a></li>
             </ul>
         </nav>
+        <!-- ---------------- Body for HTML page ------------------ -->
         <div class="split-container">
             <!-- 1/4 Column -->
             <div class="left-column">
@@ -179,6 +196,22 @@
                     <div class="pantry-box">
                         <h2>Pantry</h2>
                         <p>Is the pantry.</p>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
+                        <div class="circle">Bananas</div>
+                        <div class="circle">Peaaches</div>
                         <div class="circle">Bananas</div>
                         <div class="circle">Peaaches</div>
                         <div class="circle">Bananas</div>
