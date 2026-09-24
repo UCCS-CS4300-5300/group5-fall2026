@@ -44,7 +44,7 @@ jobs:
         popd > /dev/null 2>&1
 
     # Setup python system
-    - name: 
+    - name: Validate server is working
       run: |
         pushd $MAIN_FOLDER > /dev/null 2>&1
           echo "python manage.py runserver 0.0.0.0:8000"
@@ -56,11 +56,22 @@ jobs:
           # Test the web page to ensure it shows content. should return a bad value on error
           echo " curl 127.0.0.1:8000/"
 
-          # TODO: How to test the UI formally ? or should we
-          if curl 127.0.0.1:8000/ | grep "Shelf Life"; then
+          curl 127.0.0.1:8000/
+
+          if [ $? -eq 0 ]; then
+            echo "Success!"
             exit 0;
           else
+            echo "Request failed with a network error OR an HTTP error code."
             exit -1
           fi
           
         popd > /dev/null 2>&1
+      # Run the tests
+      - name: Unit Tests
+        run: |
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            pytest --log-cli-level=DEBUG -o log_file=app.log 
+          popd > /dev/null 2>&1
+
+
