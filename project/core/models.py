@@ -10,7 +10,7 @@ class GlobalCatalogItem(models.Model):
    name = models.CharField(max_length=100, unique=True)
    category = models.CharField(max_length=50)
    # Positive BIg Integer field works with whole numbers and zero
-   estimated_expiration_days = models.PositiveBigIntegerField(default=7)
+   estimated_expiration_days = models.PositiveSmallIntegerField(default=7)
 
    def __str__(self):
       return self.name
@@ -36,7 +36,7 @@ class PantryItem(models.Model):
    catalog_item = models.ForeignKey(GlobalCatalogItem, on_delete=models.CASCADE)
 
 
-   quantity = models.PositiveBigIntegerField(default=1)
+   quantity = models.PositiveSmallIntegerField(default=1)
    date_stored = models.DateField(default=timezone.now)
    date_expired = models.DateField()
 
@@ -46,10 +46,11 @@ class PantryItem(models.Model):
       # This function will help calculate the status of the expiration
       today = timezone.now().date()
       # Expired if more than the date it expired
-      if today > self.date_expired:
+      if today >= self.date_expired: #Fixed
          return "Expired"
+      
       # For letting the user know if its 3 days before expiring (subject to change)
-      elif (self.date_expired - today).days <= 3:
+      elif 0 < (self.date_expired - today).days <= 3:
          return "Expiring Soon"
       # Otherwise it is categorized as fresh for simplicity
       return "Fresh"
