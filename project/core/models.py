@@ -20,6 +20,6 @@ class Food(models.Model):
         string_name = f"Name: {self.name}"
         string_date_stored = f"Date Stored: {self.name_stored}"
         string_date_expired = f"Expiration Date: {self.date_expired}"
-        string_expiration_status = f"Expiration Status: {self.expiration_status"
+        string_expiration_status = f"Expiration Status: {self.expiration_status}"
 
         return f"{string_name}, {string_date_stored}, {string_date_expired},{string_expiration_status}."
