@@ -1,261 +1,118 @@
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Django Split Window</title>
-    <style>
-
-        /* 
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        Navbar Style 
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        */
-
-        .navbar {
-            border-radius: 15px; /* Curves all 4 corners equally */
-            border: 2px solid #333;
-
-        }
-        /* Reset & Main Navbar Layout */
-        .nav-links {
-            list-style: none;
-            display: flex;
-            background-color: lightcoral;
-            padding: 0;
-            margin: 0;
-            border-radius: 15px; /* Curves all 4 corners equally */
-        }
-
-        .nav-links a {
-            display: block;
-            color: white;
-            padding: 15px 20px;
-            text-decoration: none;
-            border-radius: 15px; /* Curves all 4 corners equally */
-        }
-
-        .nav-links a:hover {
-            background-color: lightcoral;
-        }
-
-        /* ─── THE DROPDOWN LOGIC ─── */
-
-        /* 1. Parent must be relative */
-        .dropdown {
-            position: relative;
-        }
-
-        /* 2. Dropdown menu must be absolute, hidden by default */
-        .dropdown-menu {
-            position: absolute;
-            top: 100%; /* Positions it exactly at the bottom of the parent */
-            left: 0;
-            min-width: 160px;
-            background-color: #333;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-            
-            /* Hidden states */
-            display: none; 
-        }
-
-        /* 3. Submenu links display as block to stack vertically */
-        .dropdown-menu li a {
-            padding: 12px 16px;
-        }
-
-        /* 4. Reveal the menu when hovering over the parent li */
-        .dropdown:hover .dropdown-menu {
-            display: block;
-        }
-
-        /* 
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        Body Style 
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        */
-
-        /* Ensures the container fills the entire viewport height */
-        .split-container {
-            display: flex;
-            
-            width: 95vw;
-            min-height: 100vh;
-            height: auto;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* 1/4 Column (25% width) */
-        .left-column {
-            flex: 1; 
-            background-color: cyan; /* White background */
-            padding: 20px;
-            border: 2px solid #333;
-            border-radius: 15px; /* Curves corners */
-            
-        }
-
-        /* 3/4 Column (75% width) painted orange */
-        .right-column {
-            flex: 3; 
-            background-color: skyblue; 
-            padding: 20px;
-            border: 2px solid #333;
-            border-radius: 15px; /* Curves corners */
-            height: auto;
-        }
-
-        .pantry-box {
-            /*flex: 1 1 auto; */
-            
-            display: flex;           /* Defines this div as a flexbox container */
-            flex-wrap: wrap; 
-            gap: 15px;               /* Adds empty space between items inside this div */
-            padding: 20px;           /* Adds empty space (buffer) around the inner items */
-
-
-            flex: 1 1 250px;       
-
-            /* Fallback constraint to ensure content doesn't break */
-            min-height: 300px;    
-            max-width: 550px;
-            background-color: aquamarine;
-            border: 2px solid #333;
-            border-radius: 15px; /* Curves all 4 corners equally */
-
-        }
-
-        .flex-container {
-            display: flex; /* Aligns children in a row by default */
-            padding: 20px;
-            gap: 20px;
-        }
-        
-        /* Collapse into a column when screen width is 600px or less */
-        @media screen and (max-width: 600px) {
-            /* Stacks items vertically on collapse */
-            .flex-container {
-                flex-direction: column; 
-            }
-            /* Completely hides the left column on collapse */
-            .left-column {
-                display: none;       
-            }
-        }
-
-        .circle {
-            width: 100px;
-            height: 100px;
-            background-color: #3498db;
-            border-radius: 50%; /* Makes the square circular */
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-    </style>
-    
+    <title>Shelf Life</title>
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
 </head>
 <body>
     <div>
-        <nav class="flex-container">
-            <ul class="nav-links">
-                <li><a href="#">Home</a></li>
-                <li class="dropdown">
-                <a href="#" class="dropdown-trigger">Services ▾</a>
-                <ul class="dropdown-menu">
-                    <li><a href="#">Web Design</a></li>
-                    <li><a href="#">SEO</a></li>
-                    <li><a href="#">Marketing</a></li>
+        <header>
+            <nav class="kitchen-bg flex-container">
+                <ul class="nav-links">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-trigger">Menu ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Pantry</a></li>
+                            <li><a href="#">Shopping List</a></li>
+                            <li><a href="#">Ai assisted Chef</a></li>
+                            <li><a href="#">About</a></li>
+                        </ul>
+                    </li>
                 </ul>
-                </li>
-                <li><a href="#">About</a></li>
-            </ul>
-        </nav>
+                <div class="flex-upper-border">
+                    <h2 style="text-align: center;">Shelf Life</h2>
+                </div>
+
+            </nav>
+
+        </header>
         <!-- ---------------- Body for HTML page ------------------ -->
         <div class="split-container">
+            
             <!-- 1/4 Column -->
             <div class="left-column">
-                <h2>Sidebar</h2>
-                <p>column.</p>
+                <div class="flex-upper-border">
+                    <h2>Pantry Organizer</h2>
+                </div>
             </div>
 
-            <!-- 3/4 Column (Orange) -->
-            <div class="right-column">
-                <h2>Main Content</h2>
-                <p>column.</p>
-
+            <!-- 3/4 Column -->
+            <div class="kitchen-bg right-column">
+                <div class="flex-upper-border">
+                    <h2>Main Pantry</h2>
+                </div>
                 <div class="flex-container">
-        
-                    <div class="pantry-box">
-                        <h2>Pantry</h2>
-                        <p>Is the pantry.</p>
+                    <div class="kitchen-bg pantry-box">
+                        <div class="flex-upper-border">
+                            <h2>Pantry</h2>
+                        </div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
+                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
                     </div>
-                    <div class="pantry-box">
-                        <h2>Pantry</h2>
-                        <p>Is the pantry.</p>
-                        <div class="circle">Peaaches</div>
+                    <div class="kitchen-bg pantry-box">
+                        <div class="flex-upper-border">
+                            <h2>Exausted Pantry</h2>
+                        </div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
-                        <div class="circle">Peaaches</div>
+                        <div class="circle">Peaches</div>
 
                     </div>
                 </div>
