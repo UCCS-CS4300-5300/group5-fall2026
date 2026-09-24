@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User # Django built-in user model
 from django.utils import timezone # Useful for date tracking
+from datetime import timedelta
 
 
 # Shared list of global item catalog
@@ -38,13 +39,15 @@ class PantryItem(models.Model):
 
    quantity = models.PositiveSmallIntegerField(default=1)
    date_stored = models.DateField(default=timezone.now)
-   date_expired = models.DateField()
+
+   date_expired = models.DateField(blank=True, null=True) # fields inside make it posible to accept empty inputs
 
    @property
    # Will keep anapaula's expiration status function name
    def expiration_status(self): 
       # This function will help calculate the status of the expiration
       today = timezone.localdate() # made it localdate for more accurate date representation
+
       # Expired if more than the date it expired
       if today >= self.date_expired: #Fixed
          return "Expired"
@@ -52,11 +55,20 @@ class PantryItem(models.Model):
       # For letting the user know if its 3 days before expiring (subject to change)
       elif 0 < (self.date_expired - today).days <= 3:
          return "Expiring Soon"
+      
       # Otherwise it is categorized as fresh for simplicity
       return "Fresh"
+   
+   # This save methods makes it possible to have a safety net. In case there is 
+   # an empty expiration date, then we will calculate the expiration date deadline.
+   def save(self, *args, **kwargs):
+      if not self.date_expired and self.catalog_item:
+         self.date_expired = timezone.localdate() + timedelta(days=self.catalog_item.estimated_expiration_days)
+         
+      super().save(*args, **kwargs) #saves the item into the database
 
    def __str__(self):
-      return f"Name: {self.catalog_item.name}, Stored: {self.date_stored}, Expired: {self.expiration_status}"
+      return f"Name: {self.catalog_item.name}, Stored: {self.date_stored}, Status: {self.expiration_status}"
 
 
 
