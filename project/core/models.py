@@ -44,7 +44,7 @@ class PantryItem(models.Model):
    # Will keep anapaula's expiration status function name
    def expiration_status(self): 
       # This function will help calculate the status of the expiration
-      today = timezone.now().date()
+      today = timezone.localdate() # made it localdate for more accurate date representation
       # Expired if more than the date it expired
       if today >= self.date_expired: #Fixed
          return "Expired"
