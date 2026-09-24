@@ -1,0 +1,66 @@
+name: UCCS-CS4300-5300 Group 5 Ci-Cd
+
+# Define global environment variables here
+env:
+  MAIN_FOLDER: "project"
+  API_URL: "https://example.com"
+
+# 1. When should this run?
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 2. What should this pipeline do?
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Uses a free Linux computer provided by GitHub
+
+    steps:
+    # Step 1: Copy the project code onto the GitHub computer
+    - name: Get project code
+      uses: actions/checkout@v4
+
+    # Install prerequisites
+    - name: Install Prerequisites
+      run: |
+        pushd $MAIN_FOLDER > /dev/null 2>&1
+          echo "Installing Requirements:\n"
+          for i in `cat requirements.txt`; do 
+            echo "$i"
+          done
+          pip install -r requirements.txt
+        popd > /dev/null 2>&1
+
+    # Setup python system
+    - name: setup Python pre-reqs
+      run: |
+        pushd $MAIN_FOLDER > /dev/null 2>&1
+          # need to feed the prompt yes... :)
+          yes yes | python manage.py flush
+          python manage.py makemigrations
+          python manage.py migrate
+        popd > /dev/null 2>&1
+
+    # Setup python system
+    - name: 
+      run: |
+        pushd $MAIN_FOLDER > /dev/null 2>&1
+          echo "python manage.py runserver 0.0.0.0:8000"
+          python manage.py runserver 0.0.0.0:8000 &
+
+          # wait for system to come up
+          sleep 5
+
+          # Test the web page to ensure it shows content. should return a bad value on error
+          echo " curl 127.0.0.1:8000/"
+
+          # TODO: How to test the UI formally ? or should we
+          if curl 127.0.0.1:8000/ | grep "Shelf Life"; then
+            exit 0;
+          else
+            exit -1
+          fi
+          
+        popd > /dev/null 2>&1
