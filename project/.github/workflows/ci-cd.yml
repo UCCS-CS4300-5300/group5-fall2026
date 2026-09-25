@@ -12,9 +12,11 @@ on:
   pull_request:
     branches: [ main ]
   types:
+    pull_request:
       - opened
       - synchronize 
       - reopened
+      - edited
 
 jobs:
   build-and-test:
