@@ -11,8 +11,11 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  types:
+      - opened
+      - synchronize 
+      - reopened
 
-# 2. What should this pipeline do?
 jobs:
   build-and-test:
     runs-on: ubuntu-latest # Uses a free Linux computer provided by GitHub
@@ -43,7 +46,7 @@ jobs:
           python manage.py migrate
         popd > /dev/null 2>&1
 
-    # Setup python system
+    # validate system is working
     - name: Validate server is working
       run: |
         pushd $MAIN_FOLDER > /dev/null 2>&1
@@ -67,7 +70,7 @@ jobs:
           fi
           
         popd > /dev/null 2>&1
-      # Run the tests
+      # Run the Unit tests
       - name: Unit Tests
         run: |
           pushd $MAIN_FOLDER > /dev/null 2>&1
