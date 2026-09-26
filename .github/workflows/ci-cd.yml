@@ -11,12 +11,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  types:
-    pull_request:
-      - opened
-      - synchronize 
-      - reopened
-      - edited
+#   types:
+#     pull_request:
+#       - opened
+#       - synchronize 
+#       - reopened
+#       - edited
 
 jobs:
   build-and-test:
@@ -38,45 +38,45 @@ jobs:
             pip install -r requirements.txt
           popd > /dev/null 2>&1
   
-#       # Setup python system
-#       - name: setup Python pre-reqs
-#         run: |
-#           pushd $MAIN_FOLDER > /dev/null 2>&1
-#             # need to feed the prompt yes... :)
-#             yes yes | python manage.py flush
-#             python manage.py makemigrations
-#             python manage.py migrate
-#           popd > /dev/null 2>&1
-#   
-#       # validate system is working
-#       - name: Validate server is working
-#         run: |
-#           pushd $MAIN_FOLDER > /dev/null 2>&1
-#             echo "python manage.py runserver 0.0.0.0:8000"
-#             python manage.py runserver 0.0.0.0:8000 &
-#   
-#             # wait for system to come up
-#             sleep 5
-#   
-#             # Test the web page to ensure it shows content. should return a bad value on error
-#             echo " curl 127.0.0.1:8000/"
-#   
-#             curl 127.0.0.1:8000/
-#   
-#             if [ $? -eq 0 ]; then
-#               echo "Success!"
-#               exit 0;
-#             else
-#               echo "Request failed with a network error OR an HTTP error code."
-#               exit -1
-#             fi
-#             
-#           popd > /dev/null 2>&1
-#       # Run the Unit tests
-#       - name: Unit Tests
-#         run: |
-#           pushd $MAIN_FOLDER > /dev/null 2>&1
-#             pytest --log-cli-level=DEBUG -o log_file=app.log 
-#           popd > /dev/null 2>&1
-#   
-# 
+       # Setup python system
+       - name: setup Python pre-reqs
+         run: |
+           pushd $MAIN_FOLDER > /dev/null 2>&1
+             # need to feed the prompt yes... :)
+             yes yes | python manage.py flush
+             python manage.py makemigrations
+             python manage.py migrate
+           popd > /dev/null 2>&1
+   
+       # validate system is working
+       - name: Validate server is working
+         run: |
+           pushd $MAIN_FOLDER > /dev/null 2>&1
+             echo "python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8000 &
+   
+             # wait for system to come up
+             sleep 5
+   
+             # Test the web page to ensure it shows content. should return a bad value on error
+             echo " curl 127.0.0.1:8000/"
+   
+             curl 127.0.0.1:8000/
+   
+             if [ $? -eq 0 ]; then
+               echo "Success!"
+               exit 0;
+             else
+               echo "Request failed with a network error OR an HTTP error code."
+               exit -1
+             fi
+             
+           popd > /dev/null 2>&1
+       # Run the Unit tests
+       - name: Unit Tests
+         run: |
+           pushd $MAIN_FOLDER > /dev/null 2>&1
+             pytest --log-cli-level=DEBUG -o log_file=app.log 
+           popd > /dev/null 2>&1
+   
+ 
