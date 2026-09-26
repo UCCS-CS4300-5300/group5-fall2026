@@ -3,21 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Title displayed in the browser tab -->
+    <!-- This will be the title displayed in the browser tab -->
     <title>Shelf-Life | Pantry</title>
 
     <style>
-        /* This creates the basic styling for the entire pantry page.
-        A more detailed styling will be added as the pantry view is completed. */
+        /* Basic page styling for the pantry view. */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
+            color: #222;
         }
 
-        /* Header is used at the top of the Shelf-Life application.
-         This gives the page a simple title area for now. */
+        /* Header that is displayed at the top of the application. */
         header {
             padding: 20px;
             background-color: #333;
@@ -25,96 +25,172 @@
             text-align: center;
         }
 
-        /* This will Place the sidebar and main pantry content next to each other.
-         Flexbox will let us keep the navigation on the left and pantry on the right. */
+        /* Removes the default spacing around the main heading. */
+        header h1 {
+            margin: 0;
+        }
+
+        /* Flexbox keeps the sidebar and pantry content next to each other. */
         .page-container {
             display: flex;
+            min-height: calc(100vh - 75px);
         }
 
-        /* This is the left side of the pantry page.
-         This area will contain searching and controls for pantry the items. */
+        /* Sidebar for search and other pantry controls. */
         .sidebar {
             width: 220px;
-            min-height: 100vh;
             padding: 20px;
             background-color: #e8e8e8;
+            border-right: 1px solid #ccc;
         }
 
-        /* Add spacing around the main pantry content */
+        /* Removes some extra spacing from the Pantry heading. */
+        .sidebar h2 {
+            margin-top: 0;
+        }
+
+        /* Makes the search box fit correctly inside the sidebar. */
+        .search-box {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Main content area for the current and expired pantry sections. */
         main {
+            flex: 1;
             padding: 25px;
         }
 
-        /* This is a temporary shared button styling.
-         Individual buttons can be styled differently later if we needed it. */
+        /* Gives each pantry section its own visible container. */
+        .pantry-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        /* Removes extra spacing above the pantry section headings. */
+        .pantry-section h2 {
+            margin-top: 0;
+        }
+
+        /* Pantry items from the database will eventually be shown in this area. */
+        .pantry-items {
+            min-height: 100px;
+            padding: 15px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Keeps the empty pantry message a little less noticeable than the headings. */
+        .empty-message {
+            color: #666;
+        }
+
+        /* Shared button styling so the pantry controls stay consistent. */
         button {
             padding: 8px 12px;
             margin: 5px;
+            cursor: pointer;
+        }
+
+        /* Keeps the pantry action buttons grouped together. */
+        .action-buttons {
+            margin-top: 15px;
+        }
+
+        /* Stack the page vertically so it is still usable on smaller screens. */
+        @media screen and (max-width: 600px) {
+            .page-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: auto;
+                min-height: auto;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Main application heading -->
+    <!-- Main heading for the Shelf-Life application -->
     <header>
         <h1>Shelf-Life Application</h1>
     </header>
 
-    <!--
-        Main page layout.
-        The sidebar contains pantry controls and the main section
-        will display the user's pantry.
-    -->
+    <!-- The sidebar and pantry sections are kept together inside this container -->
     <div class="page-container">
 
-        <!--
-            Pantry sidebar based on the lo-fi diagram.
-            Search and Add Item are only visual elements right now.
-            Their functionality will be implemented in later stories.
-        -->
+        <!-- Pantry controls are kept in the sidebar so they are easy for the user to find -->
         <aside class="sidebar">
             <h2>Pantry</h2>
 
-            <!-- Search box for eventually finding pantry items -->
-            <input type="text" placeholder="Search pantry...">
+            <!-- Search is only part of the layout right now and can be connected later -->
+            <input
+                class="search-box"
+                type="text"
+                placeholder="Search pantry..."
+            >
 
-            <!-- Add Item button is not connected to CRUD functionality yet -->
+            <!-- Add Item is visual for now; the CRUD story will handle its functionality -->
             <button type="button">Add Item</button>
         </aside>
 
-        <!-- Main area where pantry items will eventually be displayed -->
+        <!-- The main area separates current items from expired items -->
         <main>
 
-            <!-- Current Pantry will eventually display Food objects that have not expired yet. -->
-            <h2>Current Pantry</h2>
+            <!-- Current pantry items will be displayed in this section -->
+            <section class="pantry-section">
+                <h2>Current Pantry</h2>
 
-            <!-- Temporary message until database items are connected -->
-            <p>No current pantry items to display.</p>
+                <!-- Story #17 can populate this area with PantryItem objects -->
+                <div class="pantry-items">
 
-            <!-- Required action buttons for story #12. These are intentionally visual only for now. -->
-            <button type="button">Add</button>
-            <button type="button">Consumed</button>
-            <button type="button">Trashed</button>
+                    <!-- Keep an empty state so the section still makes sense with no items -->
+                    <p class="empty-message">
+                        No current pantry items to display.
+                    </p>
 
-            <!--
-                Work I still have to do:
+                </div>
 
-                Story #12:
-                Add the Expired Pantry section.
+                <!-- These controls are shown here but their functionality belongs to the CRUD stories -->
+                <div class="action-buttons">
+                    <button type="button">Add</button>
+                    <button type="button">Consumed</button>
+                    <button type="button">Trashed</button>
+                </div>
+            </section>
 
-                Story #12:
-                Continue styling the page to better match
-                the team's lo-fi diagram.
+            <!-- Expired items are separated from the user's current pantry -->
+            <section class="pantry-section">
+                <h2>Expired Pantry</h2>
 
-                Story #17:
-                Retrieve the Food objects from the database and
-                display their information in the pantry.
-            -->
+                <!-- Expired PantryItem objects can be displayed here once the data is connected -->
+                <div class="pantry-items">
+
+                    <!-- Keeps an empty state for users who do not have any expired items -->
+                    <p class="empty-message">
+                        No expired pantry items to display.
+                    </p>
+
+                </div>
+            </section>
+
+            <!-- Story #17 will connect the PantryItem database data to these sections -->
 
         </main>
 
     </div>
 
 </body>
+
 </html>
