@@ -33,11 +33,25 @@
         </header>
         <!-- ---------------- Body for HTML page ------------------ -->
         <div class="split-container">
-            
             <!-- 1/4 Column -->
             <div class="left-column">
                 <div class="flex-upper-border">
                     <h2>Pantry Organizer</h2>
+                </div>
+                <div class="flex-container">
+                    <div class="kitchen-bg pantry-box">
+
+                        {% for product in catalog %}
+                            <div class="circle">
+                                {{ product.name }}                                
+                            </div>
+                            
+                            <!-- <strong></strong> - ${{ product.catalog_item.date_stored }} -->
+                        {% empty %}
+                            <!-- This handles cases where the array is empty -->
+                            <h1>No products found.</h1>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -49,8 +63,25 @@
                 <div class="flex-container">
                     <div class="kitchen-bg pantry-box">
                         <div class="flex-upper-border">
-                            <h2>Pantry</h2>
+                            <h2>Pantry: {{ pantry.name }}</h2>
                         </div>
+                            <!-- Loop through the array of objects -->
+                            {% for product in pantryItems %}
+                                <div class="circle">
+                                    {{ product.catalog_item.name }}
+                                    <br/>
+                                    {{ product.quantity }}
+                                    <br/>
+                                    {{ product.date_stored }}
+                                    
+                                </div>
+                                
+                                <!-- <strong></strong> - ${{ product.catalog_item.date_stored }} -->
+                            {% empty %}
+                                <!-- This handles cases where the array is empty -->
+                                <h1>No products found.</h1>
+                            {% endfor %}
+<!--
                         <div class="circle">Bananas</div>
                         <div class="circle">Peaches</div>
                         <div class="circle">Bananas</div>
@@ -115,6 +146,7 @@
                         <div class="circle">Peaches</div>
 
                     </div>
+    -->
                 </div>
             </div>
         </div>
