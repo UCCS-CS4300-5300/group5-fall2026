@@ -72,11 +72,11 @@ jobs:
             fi
             
           popd > /dev/null 2>&1
-        # Run the Unit tests
-        - name: Unit Tests
-          run: |
-            pushd $MAIN_FOLDER > /dev/null 2>&1
-              pytest --log-cli-level=DEBUG -o log_file=app.log 
-            popd > /dev/null 2>&1
+      # Run the Unit tests
+      - name: Unit Tests
+        run: |
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            pytest --log-cli-level=DEBUG -o log_file=app.log 
+          popd > /dev/null 2>&1
   
 
