@@ -42,6 +42,8 @@ class PantryItem(models.Model):
 
    date_expired = models.DateField(blank=True, null=True) # fields inside make it posible to accept empty inputs
 
+   # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?  
+
    @property
    # Will keep anapaula's expiration status function name
    def expiration_status(self): 

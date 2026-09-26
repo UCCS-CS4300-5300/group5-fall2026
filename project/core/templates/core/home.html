@@ -7,7 +7,10 @@
     <title>Shelf Life</title>
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- TODO: GIve Credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
+
 </head>
 <body>
     <div>
@@ -25,13 +28,11 @@
                     </li>
                 </ul>
                 <div class="flex-upper-border">
-                    <h2 style="text-align: center;">Shelf Life</h2>
+                    <h2 style="text-align: center;">Shelf Life Application: User: {{user.username}}</h2> 
                 </div>
-
             </nav>
-
         </header>
-        <!-- ---------------- Body for HTML page ------------------ -->
+        <!-- ────────────────────── Body for HTML page ────────────────────── -->
         <div class="split-container">
             <!-- 1/4 Column -->
             <div class="left-column">
@@ -41,14 +42,12 @@
                 <div class="flex-container">
                     <div class="kitchen-bg pantry-box">
 
-                        {% for product in catalog %}
+                        {% for item in catalog %}
                             <div class="circle">
-                                {{ product.name }}                                
+                                {{ item.name }}
                             </div>
-                            
-                            <!-- <strong></strong> - ${{ product.catalog_item.date_stored }} -->
                         {% empty %}
-                            <!-- This handles cases where the array is empty -->
+                            <!-- When the array is empty -->
                             <h1>No products found.</h1>
                         {% endfor %}
                     </div>
@@ -65,88 +64,25 @@
                         <div class="flex-upper-border">
                             <h2>Pantry: {{ pantry.name }}</h2>
                         </div>
-                            <!-- Loop through the array of objects -->
+                            <!-- Loop through the array of Pantry Items -->
                             {% for product in pantryItems %}
                                 <div class="circle">
-                                    {{ product.catalog_item.name }}
-                                    <br/>
-                                    {{ product.quantity }}
-                                    <br/>
-                                    {{ product.date_stored }}
                                     
+                                    <div class="container">
+                                        {{ product.catalog_item.name }}
+                                        <br/>
+                                        {{ product.quantity }}
+                                        <br/>
+                                        {{ product.date_stored }}
+                                    </div>
                                 </div>
-                                
-                                <!-- <strong></strong> - ${{ product.catalog_item.date_stored }} -->
                             {% empty %}
-                                <!-- This handles cases where the array is empty -->
+                                <!-- When the array is empty -->
                                 <h1>No products found.</h1>
                             {% endfor %}
-<!--
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                    </div>
-                    <div class="kitchen-bg pantry-box">
-                        <div class="flex-upper-border">
-                            <h2>Exausted Pantry</h2>
-                        </div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
-                        <div class="circle">Bananas</div>
-                        <div class="circle">Peaches</div>
 
-                    </div>
-    -->
+                        <!-- TODO: GIve Credit in about page -->
+                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
                 </div>
             </div>
         </div>
