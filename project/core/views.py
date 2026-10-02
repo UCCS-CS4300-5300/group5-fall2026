@@ -1,5 +1,5 @@
 import logging
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from .models import PantryItem
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
@@ -91,33 +91,37 @@ def populateDefaultCatalog():
 # Should handle the scenario where an item is added and moved to the user pantry without existing first   
 # TODO: handle the inital splash page as a user login / create request
 # TODO: create Mock user for this situation ? 
+# TODO Migrate this to a class
 
 def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user 
     """
-    [pantry, user, catalogItems] = getOrCreateDefaults()
+    if request.method == "GET":
+        [pantry, user, catalogItems] = getOrCreateDefaults()
 
-    pantryItems = PantryItem.objects.all()
-    # TODO: add ability to make this per user in objects query. 
-    # form = PantryItemForm()
-    return render(
-        request,
-        "core/home.html",
-        {
-            "user" : user,
-            "pantry" : pantry,
-            "pantryItems" : PantryItem.objects.all(),
-            "catalog" : GlobalCatalogItem.objects.all(),
-            "form" : PantryItemForm()
-        }
-    )
+        # TODO: add ability to make this per user in objects query. 
+        pantryItems = PantryItem.objects.all()
+        return render(
+            request,
+            "core/home.html",
+            {
+                "user" : user,
+                "pantry" : pantry,
+                "pantryItems" : PantryItem.objects.all(),
+                "catalog" : GlobalCatalogItem.objects.all(),
+                "form" : PantryItemForm()
+            }
+        )
+
+    if request.method == "POST":
+        return add_pantry_item(request)
 
 def add_pantry_item(request):
     #first existing pantry for now
-    pantry = Pantry.objects.first()
-
+    # TODO pass Id for pantry back in post URL ? 
     if request.method == "POST":
+        pantry = Pantry.objects.first()
         form = PantryItemForm(request.POST)
         if form.is_valid():
             #pantry isn't set yet
@@ -125,19 +129,20 @@ def add_pantry_item(request):
             #attach item to pantry
             item.pantry = pantry
             item.save()
-            return redirect("home")
+            # logging.debug("----------------------> " + item)
+            # print("----------------------> " + item)
+        return redirect("core:home")            
     else:
         #empty form for GET request
         form = PantryItemForm()
+        return redirect("core:home")
 
-    return render(request, "core/add_item.html", {"form":form})
+# def delete_pantry_item(request, item_id):
+#     #any item can be deleted by id
+#     item = get_onject_or_404(PantryItem, id=item_id)
 
-def delete_pantry_item(request, item_id):
-    #any item can be deleted by id
-    item = get_onject_or_404(PantryItem, id=item_id)
+#     if request.method == "POST":
+#         item.delete()
+#         return redirect("home")
 
-    if request.method == "POST":
-        item.delete()
-        return redirect("home")
-
-    return render(request, "core/delete_item.html", {"item": item})
+#     return render(request, "core/delete_item.html", {"item": item})

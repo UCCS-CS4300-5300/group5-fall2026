@@ -39,7 +39,7 @@
                 <div class="flex-upper-border">
                     <h2>Pantry Organizer</h2>
                 </div>
-                <div class="flex-container">
+                <!-- <div class="flex-container">
                     <div class="kitchen-bg pantry-box">
 
                         {% for item in catalog %}
@@ -47,10 +47,19 @@
                                 {{ item.name }}
                             </div>
                         {% empty %}
-                            <!-- When the array is empty -->
                             <h1>No products found.</h1>
                         {% endfor %}
                     </div>
+                </div> -->
+                <div class="flex-container">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Render quickly using a built-in formatting shortcut -->
+                        {{ form.as_p }}  <!-- Renders fields inside <p> tags -->
+                        
+                        <button type="submit">Submit</button>
+                    </form>
                 </div>
             </div>
 
@@ -84,16 +93,7 @@
                         <!-- TODO: GIve Credit in about page -->
                         <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
                 </div>
-                <div class="flex-container">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <!-- Render quickly using a built-in formatting shortcut -->
-                        {{ form.as_p }}  <!-- Renders fields inside <p> tags -->
-                        
-                        <button type="submit">Submit</button>
-                    </form>
-                </div>
+                
             </div>
         </div>
     </div>
