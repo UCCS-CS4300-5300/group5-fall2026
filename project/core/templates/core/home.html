@@ -52,14 +52,21 @@
                     </div>
                 </div> -->
                 <div class="flex-container">
-                    <form method="post">
+                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
+                        {% csrf_token %}
+                            
+                            {{ form.as_p }} 
+                            
+                            <button type="submit">Submit</button>
+                    </form>
+                
+                    <!-- <form method="post">
                         {% csrf_token %}
                         
-                        <!-- Render quickly using a built-in formatting shortcut -->
-                        {{ form.as_p }}  <!-- Renders fields inside <p> tags -->
+                        {{ form.as_p }}
                         
                         <button type="submit">Submit</button>
-                    </form>
+                    </form> -->
                 </div>
             </div>
 
@@ -76,13 +83,12 @@
                             <!-- Loop through the array of Pantry Items -->
                             {% for product in pantryItems %}
                                 <div class="circle">
-                                    
                                     <div class="container">
                                         {{ product.catalog_item.name }}
                                         <br/>
                                         {{ product.quantity }}
                                         <br/>
-                                        {{ product.date_stored }}
+                                        {{ product.date_expired }}
                                     </div>
                                 </div>
                             {% empty %}

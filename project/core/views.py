@@ -113,10 +113,8 @@ def home(request):
                 "catalog" : GlobalCatalogItem.objects.all(),
                 "form" : PantryItemForm()
             }
-        )
-
-    if request.method == "POST":
-        return add_pantry_item(request)
+        )    
+    return redirect("core:home")
 
 def add_pantry_item(request):
     # first existing pantry for now
