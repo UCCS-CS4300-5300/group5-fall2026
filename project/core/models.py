@@ -26,6 +26,7 @@ class Pantry(models.Model):
    created_at = models.DateTimeField(default=timezone.now) # keeping track of when it was created
 
    def __str__(self):
+      return f"{self.name}"
       return f"{self.user.username}'s {self.name}"
 
 class PantryItem(models.Model):

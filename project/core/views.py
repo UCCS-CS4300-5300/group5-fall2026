@@ -87,6 +87,7 @@ def populateDefaultCatalog():
         )
 
 # TODO: Add in the createOrAdd logic here...
+#       This should be a method to assist the user on a different form. 
 # TODO: create addOrRetrieval methods for the various objects. 
 # Should handle the scenario where an item is added and moved to the user pantry without existing first   
 # TODO: handle the inital splash page as a user login / create request
@@ -118,19 +119,20 @@ def home(request):
         return add_pantry_item(request)
 
 def add_pantry_item(request):
-    #first existing pantry for now
+    # first existing pantry for now
     # TODO pass Id for pantry back in post URL ? 
     if request.method == "POST":
-        pantry = Pantry.objects.first()
+        # pantry = Pantry.objects.first()
         form = PantryItemForm(request.POST)
         if form.is_valid():
-            #pantry isn't set yet
+
+            # pantry isn't set yet
             item = form.save(commit=False)
-            #attach item to pantry
+            pantry = Pantry.objects.get(name=item.pantry)
+
+            # attach item to pantry
             item.pantry = pantry
             item.save()
-            # logging.debug("----------------------> " + item)
-            # print("----------------------> " + item)
         return redirect("core:home")            
     else:
         #empty form for GET request
