@@ -1,5 +1,5 @@
 import logging
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import PantryItem
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
@@ -120,7 +120,6 @@ def add_pantry_item(request):
     # first existing pantry for now
     # TODO pass Id for pantry back in post URL ? 
     if request.method == "POST":
-        # pantry = Pantry.objects.first()
         form = PantryItemForm(request.POST)
         if form.is_valid():
 
@@ -137,12 +136,14 @@ def add_pantry_item(request):
         form = PantryItemForm()
         return redirect("core:home")
 
-# def delete_pantry_item(request, item_id):
-#     #any item can be deleted by id
-#     item = get_onject_or_404(PantryItem, id=item_id)
+def delete_pantry_item(request, id):
+    #any item can be deleted by id
+    logging.debug(id)
+    logging.debug(id)
+    logging.debug(id)
+    logging.debug(id)
+    item = get_object_or_404(PantryItem, id=id)
 
-#     if request.method == "POST":
-#         item.delete()
-#         return redirect("home")
-
-#     return render(request, "core/delete_item.html", {"item": item})
+    if request.method == "POST":
+        item.delete()
+    return redirect("core:home")
