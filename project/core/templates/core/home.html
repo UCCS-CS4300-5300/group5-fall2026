@@ -74,6 +74,10 @@
                                         {{ product.quantity }}
                                         <br/>
                                         {{ product.date_stored }}
+                                        <br/>
+                                        <a href="{% url 'core:pantry_item_detail' product.id %}">
+                                            View Details
+                                        </a>
                                     </div>
                                 </div>
                             {% empty %}

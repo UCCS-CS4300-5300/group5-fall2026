@@ -1,8 +1,8 @@
-
 import logging
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import PantryItem
 from django.contrib.auth.models import User
+from django.utils import timezone
 from .models import GlobalCatalogItem, Pantry, PantryItem
 
 logging.basicConfig(
@@ -98,7 +98,10 @@ def home(request):
     """
     [pantry, user, catalogItems] = getOrCreateDefaults()
 
-    pantryItems = PantryItem.objects.all()
+    # Retrieve only pantry items that are still current.
+    pantryItems = PantryItem.objects.filter(
+        date_expired__gt=timezone.localdate()
+    )
     # TODO: add ability to make this per user in objects query. 
     
     return render(
@@ -107,7 +110,21 @@ def home(request):
         {
             "user" : user,
             "pantry" : pantry,
-            "pantryItems" : PantryItem.objects.all(),
+            "pantryItems" : pantryItems,
             "catalog" : GlobalCatalogItem.objects.all()
+        }
+    )
+
+def pantry_item_detail(request, item_id):
+    """
+        Retrieve one pantry item and display its details.
+    """
+    pantry_item = get_object_or_404(PantryItem, id=item_id)
+
+    return render(
+        request,
+        "core/pantry_item_detail.html",
+        {
+            "pantry_item" : pantry_item
         }
     )

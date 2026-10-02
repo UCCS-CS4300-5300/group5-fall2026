@@ -1,4 +1,3 @@
-
 import pytest
 import logging
 from django.urls import reverse
@@ -78,3 +77,116 @@ def test_item_passed():
  assert pantry_item.catalog_item == catalog_item
  assert pantry_item.quantity == 5
  assert pantry.items.filter(id=pantry_item.id).exists()
+
+
+# --- Pantry Retrieve / Read Tests ---
+
+@pytest.mark.django_db
+def test_pantry_item_details(client):
+ # Create a pantry item that can be opened on the detail page
+ user = User.objects.create_user(username="detail_test_user", password="password")
+ pantry = Pantry.objects.create(user=user, name="Test Pantry")
+
+ catalog_item = GlobalCatalogItem.objects.create(
+  name="Orange",
+  category="Fruit",
+  estimated_expiration_days=7
+ )
+
+ pantry_item = PantryItem.objects.create(
+  pantry=pantry,
+  catalog_item=catalog_item,
+  quantity=3
+ )
+
+ response = client.get(
+  reverse("core:pantry_item_detail", args=[pantry_item.id])
+ )
+
+ # Make sure the page loads and displays the item details
+ assert response.status_code == 200
+ assert b"Orange" in response.content
+ assert b"Quantity:" in response.content
+ assert b"Date Stored:" in response.content
+ assert b"Expiration Date:" in response.content
+ assert b"Status:" in response.content
+ assert b"Fresh" in response.content
+
+
+@pytest.mark.django_db
+def test_missing_pantry_item_returns_404(client):
+ # Request an item ID that does not exist
+ response = client.get(
+  reverse("core:pantry_item_detail", args=[9999])
+ )
+
+ assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_current_pantry_item_displayed_on_home_page(client):
+ # Create a pantry item that has not expired yet
+ user = User.objects.create_user(username="home_test_user", password="password")
+ pantry = Pantry.objects.create(user=user, name="Test Pantry")
+
+ catalog_item = GlobalCatalogItem.objects.create(
+  name="Banana",
+  category="Fruit",
+  estimated_expiration_days=7
+ )
+
+ pantry_item = PantryItem.objects.create(
+  pantry=pantry,
+  catalog_item=catalog_item,
+  quantity=4,
+  date_expired=timezone.localdate() + timedelta(days=7)
+ )
+
+ response = client.get(reverse("core:home"))
+
+ # Make sure the current item is shown on the pantry page
+ assert response.status_code == 200
+ assert b"Banana" in response.content
+ assert b"4" in response.content
+
+ # Make sure the user can select the item and open its detail page
+ detail_url = reverse(
+  "core:pantry_item_detail",
+  args=[pantry_item.id]
+ )
+
+ assert detail_url.encode() in response.content
+ assert b"View Details" in response.content
+
+
+@pytest.mark.django_db
+def test_expired_pantry_item_not_displayed_as_current(client):
+ # Create a pantry item whose expiration date has already passed
+ user = User.objects.create_user(username="expired_test_user", password="password")
+ pantry = Pantry.objects.create(user=user, name="Test Pantry")
+
+ catalog_item = GlobalCatalogItem.objects.create(
+  name="Old Milk",
+  category="Dairy",
+  estimated_expiration_days=7
+ )
+
+ pantry_item = PantryItem.objects.create(
+  pantry=pantry,
+  catalog_item=catalog_item,
+  quantity=9,
+  date_expired=timezone.localdate() - timedelta(days=1)
+ )
+
+ response = client.get(reverse("core:home"))
+
+ assert response.status_code == 200
+
+ # Old Milk can still exist in the global catalog, but its pantry
+ # detail link should not appear in the current pantry section
+ detail_url = reverse(
+  "core:pantry_item_detail",
+  args=[pantry_item.id]
+ )
+
+ assert detail_url.encode() not in response.content
