@@ -73,6 +73,24 @@
                                         </button>
                                     </form>
 
+
+                                     <button type="button" class="btn"
+                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+                                        Edit
+                                     </button>
+
+                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                                        <h3>Edit {{ product.catalog_item.name }}</h3>
+                                        <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
+                                            {% csrf_token %}
+                                            {{ product.edit_form.as_p }}
+                                            <button type="submit">Save</button>
+                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                                        </form>
+                                    </dialog>
+                                    
+                    
+
                                     <div class="container">
                                         {{ product.catalog_item.name }}
                                         <br/>
@@ -94,4 +112,12 @@
         </div>
     </div>
 </body>
+
+{% if open_edit_id %}
+ <script>
+        // Reopens the pop-up when a save failed so the errors are visible
+        document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
+    </script>
+    {% endif %}
+    
 </html>
