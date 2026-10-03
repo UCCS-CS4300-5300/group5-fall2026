@@ -30,7 +30,7 @@ def getOrCreateDefaults():
     # gate this path so that this clause only runs once. This is to prevent database collisions. 
     if User.objects.count() == 0:
         user = User.objects.create_user(username="user1", password = "password")
-        logging.debug("Creating user: " + user.username)
+        # logging.debug("Creating user: " + user.username)
 
         pantry = Pantry.objects.create(user=user, name = "Pantry1")
         populateDefaultCatalog()
@@ -101,8 +101,8 @@ def home(request):
     if request.method == "GET":
         [pantry, user, catalogItems] = getOrCreateDefaults()
 
-        # TODO: add ability to make this per user in objects query. 
-        pantryItems = PantryItem.objects.all()
+        # TODO: add ability to make this per user in objects query.
+
         return render(
             request,
             "core/home.html",
@@ -132,18 +132,14 @@ def add_pantry_item(request):
             item.save()
         return redirect("core:home")            
     else:
+        logging.debug("form invalid")
         #empty form for GET request
         form = PantryItemForm()
         return redirect("core:home")
 
 def delete_pantry_item(request, id):
     #any item can be deleted by id
-    logging.debug(id)
-    logging.debug(id)
-    logging.debug(id)
-    logging.debug(id)
     item = get_object_or_404(PantryItem, id=id)
-
     if request.method == "POST":
         item.delete()
     return redirect("core:home")
