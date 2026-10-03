@@ -1,5 +1,6 @@
 import logging
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from .models import PantryItem
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
@@ -83,7 +84,7 @@ def home(request):
     if request.method == "GET":
         [pantry, user] = getOrCreateDefaults()
 
-        pantryItems = PantryItem.objects.filter(pantry=pantry)
+        pantryItems = PantryItem.objects.filter(pantry=pantry,date_expired__gt=timezone.localdate())
         return render(
             request,
             "core/home.html",
@@ -116,3 +117,18 @@ def delete_pantry_item(request, id):
     if request.method == "POST":
         item.delete()
     return redirect("core:home")
+
+
+def pantry_item_detail(request, item_id):
+    """
+        Retrieve one pantry item by ID and display its details.
+    """
+    pantry_item = get_object_or_404(PantryItem, id=item_id)
+
+    return render(
+        request,
+        "core/pantry_item_detail.html",
+        {
+            "pantry_item": pantry_item
+        }
+    )

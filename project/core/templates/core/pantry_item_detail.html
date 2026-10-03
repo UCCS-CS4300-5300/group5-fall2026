@@ -1,0 +1,62 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pantry_item.catalog_item.name }} | Shelf Life</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
+</head>
+
+<body>
+    <div>
+        <header>
+            <nav class="kitchen-bg flex-container">
+                <div class="flex-upper-border">
+                    <h2>Pantry Item Details</h2>
+                </div>
+            </nav>
+        </header>
+
+        <div class="kitchen-bg pantry-box">
+
+            <h2>{{ pantry_item.catalog_item.name }}</h2>
+
+            <p>
+                <strong>Category:</strong>
+                {{ pantry_item.catalog_item.category }}
+            </p>
+
+            <p>
+                <strong>Quantity:</strong>
+                {{ pantry_item.quantity }}
+            </p>
+
+            <p>
+                <strong>Date Stored:</strong>
+                {{ pantry_item.date_stored }}
+            </p>
+
+            <p>
+                <strong>Expiration Date:</strong>
+                {{ pantry_item.date_expired }}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                {{ pantry_item.expiration_status }}
+            </p>
+
+            <p>
+                <a href="{% url 'core:home' %}">
+                    Back to Pantry
+                </a>
+            </p>
+
+        </div>
+    </div>
+</body>
+</html>

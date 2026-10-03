@@ -7,7 +7,7 @@
     <title>Shelf Life</title>
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+
     <!-- TODO: GIve Credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
 
@@ -28,7 +28,7 @@
                     </li>
                 </ul>
                 <div class="flex-upper-border">
-                    <h2 style="text-align: center;">Shelf Life Application: User: {{user.username}}</h2> 
+                    <h2 style="text-align: center;">Shelf Life Application: User: {{user.username}}</h2>
                 </div>
             </nav>
         </header>
@@ -42,9 +42,7 @@
                 <div class="flex-container">
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
                         {% csrf_token %}
-                            
-                            {{ form.as_p }} 
-                            
+                            {{ form.as_p }}
                             <button type="submit">Submit</button>
                     </form>
                 </div>
@@ -70,10 +68,17 @@
                                         <br/>
                                         {{ product.date_expired }}
                                         <br/>
+
+                                        <a href="{% url 'core:pantry_item_detail' product.id %}">
+                                            View Details
+                                        </a>
+
+                                        <br/>
+
                                         <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
                                         {% csrf_token %}
-                                        <button type="submit" 
-                                                class="btn btn-delete" 
+                                        <button type="submit"
+                                                class="btn btn-delete"
                                                 >
                                             Delete
                                         </button>
@@ -88,7 +93,6 @@
                         <!-- TODO: GIve Credit in about page -->
                         <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
                 </div>
-                
             </div>
         </div>
     </div>
