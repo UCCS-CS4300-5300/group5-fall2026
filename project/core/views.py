@@ -21,44 +21,26 @@ def getOrCreateDefaults():
         Makes inital models to allow user see on basic request.
         TODO: Remove / replace this placeholder with Add / edit logic. 
     """
+    user = User.objects.order_by("id").first()
+    if user is None:
+        user = User.objects.create_user(username="user1", password="password")
 
-    pantry_item = {}
-    pantry = {}
-    user = {}
-    catalog_item = {}
+    pantry = Pantry.objects.filter(user=user).first()
+    if pantry is None:
+        pantry = Pantry.objects.create(user=user, name="Pantry1")
 
-    # gate this path so that this clause only runs once. This is to prevent database collisions. 
-    if User.objects.count() == 0:
-        user = User.objects.create_user(username="user1", password = "password")
-        # logging.debug("Creating user: " + user.username)
-
-        pantry = Pantry.objects.create(user=user, name = "Pantry1")
+    if not GlobalCatalogItem.objects.exists():
         populateDefaultCatalog()
-        catalog_item = GlobalCatalogItem.objects.create(
-            name = "Apple",
-            category = "Fruit",
-            estimated_expiration_days = 7
-        )
+
+    if not PantryItem.objects.filter(pantry=pantry).exists():
         for item in GlobalCatalogItem.objects.all():
-            pantry_item = PantryItem.objects.create(
-                pantry = pantry,
-                catalog_item = item,
-                quantity = 5
+            PantryItem.objects.get_or_create(
+                pantry=pantry,
+                catalog_item=item,
+                defaults={"quantity": 5},
             )
-        
-        user.save()
-        pantry.save()
-        pantry_item.save()
-        catalog_item.save()
 
-    else:
-        user = User.objects.get(id=1)
-        pantry = Pantry.objects.get(id=1)
-        pantry_item = PantryItem.objects.get(id=1)
-        catalog_item = GlobalCatalogItem.objects.get(id=1)
-
-    # return Pantry
-    return [pantry, user, catalog_item]
+    return [pantry, user]
 
 def populateDefaultCatalog():
     """
@@ -99,43 +81,34 @@ def home(request):
         Home request. Handles the cases where we have an inital request for the user 
     """
     if request.method == "GET":
-        [pantry, user, catalogItems] = getOrCreateDefaults()
+        [pantry, user] = getOrCreateDefaults()
 
-        # TODO: add ability to make this per user in objects query.
-
+        pantryItems = PantryItem.objects.filter(pantry=pantry)
         return render(
             request,
             "core/home.html",
             {
                 "user" : user,
                 "pantry" : pantry,
-                "pantryItems" : PantryItem.objects.all(),
+                "pantryItems" : pantryItems,
                 "catalog" : GlobalCatalogItem.objects.all(),
                 "form" : PantryItemForm()
             }
-        )    
+        )
     return redirect("core:home")
+
 
 def add_pantry_item(request):
     # first existing pantry for now
-    # TODO pass Id for pantry back in post URL ? 
     if request.method == "POST":
         form = PantryItemForm(request.POST)
         if form.is_valid():
-
-            # pantry isn't set yet
             item = form.save(commit=False)
-            pantry = Pantry.objects.get(name=item.pantry)
-
-            # attach item to pantry
-            item.pantry = pantry
+            item.pantry = form.cleaned_data["pantry"]
             item.save()
-        return redirect("core:home")            
-    else:
-        logging.debug("form invalid")
-        #empty form for GET request
-        form = PantryItemForm()
         return redirect("core:home")
+
+    return redirect("core:home")
 
 def delete_pantry_item(request, id):
     #any item can be deleted by id
