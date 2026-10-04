@@ -12,7 +12,7 @@ def make_item(days_until_expiry):
     return PantryItem(
         pantry=pantry,
         catalog_item=catalog,
-        date_expired=timezone.now().date() + timedelta(days=days_until_expiry),
+        date_expired=timezone.localdate() + timedelta(days=days_until_expiry),
     )
 
 
