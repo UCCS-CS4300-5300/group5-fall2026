@@ -39,7 +39,7 @@ jobs:
           popd > /dev/null 2>&1
   
        # Setup python system
-      - name: setup Python pre-reqs
+      - name: Setup Python prerequisites
         run: |
           pushd $MAIN_FOLDER > /dev/null 2>&1
             # need to feed the prompt yes... :)
@@ -54,3 +54,23 @@ jobs:
           pushd $MAIN_FOLDER > /dev/null 2>&1
             pytest --log-cli-level=DEBUG -o log_file=app.log 
           popd > /dev/null 2>&1
+
+      # Setup python system
+      - name: Test the server to ensure it runs
+        run: |  
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            # Arrange
+            echo "python manage.py runserver 0.0.0.0:8000"
+
+            # Act
+            # Run server in background
+            python manage.py runserver 0.0.0.0:8000 &
+
+            # wait for system to come up
+            sleep 5
+
+            # Assert
+            echo " curl 127.0.0.1:8000/"
+            curl 127.0.0.1:8000/
+          popd > /dev/null 2>&1
+
