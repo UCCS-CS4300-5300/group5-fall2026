@@ -25,6 +25,10 @@ USE_TZ=True
 STATIC_URL="static/"
 DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"
 
+# Shelf-Life app settings
+
+# Days before the expiration date when an item is flagged "Expiring Soon"
+EXPIRING_SOON_DAYS = 3
 STATICFILES_DIRS = [
     # BASE_DIR / "static",
     BASE_DIR / "core/static",

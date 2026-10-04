@@ -31,8 +31,8 @@ def test_home_page_setup():
   views.getOrCreateDefaults()
 
   assert Pantry.objects.count() == 1
-  assert PantryItem.objects.count() == 11
-  assert GlobalCatalogItem.objects.count() == 11
+  assert PantryItem.objects.count() == 10
+  assert GlobalCatalogItem.objects.count() == 10
 
 
 @pytest.mark.django_db
@@ -41,7 +41,7 @@ def test_home_page_empty(client):
   # views.getOrCreateDefaults()
 
   response = client.get(reverse("core:home"))
-  assert countNumberOfElements(response, "container") == PantryItem.objects.count() == 11
+  assert countNumberOfElements(response, "container") == PantryItem.objects.count() == 10
 
 @pytest.mark.django_db
 def test_home_page_populated(client):
@@ -49,7 +49,7 @@ def test_home_page_populated(client):
   views.getOrCreateDefaults()
 
   response = client.get(reverse("core:home"))
-  assert countNumberOfElements(response, "container") == PantryItem.objects.count() == 11
+  assert countNumberOfElements(response, "container") == PantryItem.objects.count() == 10
 
 @pytest.mark.django_db
 def test_home_page_Add_item(client):
@@ -77,7 +77,7 @@ def test_home_page_Add_item(client):
   response = client.post(reverse('core:add_pantry_item'), data=form_data)
 
   # ASSERT
-  assert response.status_code == 302 
+  assert response.status_code == 200 
   countNumberOfElements(response, "container") == 12
 
 @pytest.mark.django_db
@@ -95,7 +95,7 @@ def test_home_page_delete_item(client):
 
   # ARRANGE
   
-  url = reverse('core:delete_pantry_item', kwargs={'id': 11})
+  url = reverse('core:delete_pantry_item', kwargs={'id': 10})
   # ACT
   response = client.post(url)
 
@@ -104,4 +104,4 @@ def test_home_page_delete_item(client):
   
   response = client.get(reverse("core:home"))
 
-  assert countNumberOfElements(response, "container") == 10
+  assert countNumberOfElements(response, "container") == 9

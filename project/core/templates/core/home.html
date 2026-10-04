@@ -66,12 +66,14 @@
                                         <br/>
                                         {{ product.quantity }}
                                         <br/>
-                                        {{ product.date_expired }}
+                                        {{ product.expiration_status }}
                                         <br/>
-
+                                        
+                                        {% if product.expiration_status != 'Expired' %}
                                         <a href="{% url 'core:pantry_item_detail' product.id %}">
                                             View Details
                                         </a>
+                                        {% endif %}
 
                                         <br/>
 
@@ -91,7 +93,7 @@
                             {% endfor %}
 
                         <!-- TODO: GIve Credit in about page -->
-                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
+                        <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
                 </div>
             </div>
         </div>

@@ -82,26 +82,21 @@ def home(request):
         Home request. Handles the cases where we have an inital request for the user 
     """
     # Better implementation of the pantry user defaults
-    pantry, user = getOrCreateDefaults()
-    
-    pantryItems = PantryItem.objects.filter(pantry=pantry)
-
-    #if request.method == "GET":
-    #    [pantry, user] = getOrCreateDefaults()
-        #pantryItems = PantryItem.objects.filter(pantry=pantry,date_expired__gt=timezone.localdate())
-        #return redirect("core:home")
-
+    # if request.method == "GET":
+    pantry, user = getOrCreateDefaults()    
+    pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
     return render(
         request,
         "core/home.html",
         {
-            "user": user,
-            "pantry": pantry,
-            "pantryItems": pantryItems,
-            "catalog": GlobalCatalogItem.objects.all(),
-            "form": PantryItemForm()
+            "user" : user,
+            "pantry" : pantry,
+            "pantryItems" : pantryItems,
+            "catalog" : GlobalCatalogItem.objects.all(),
+            "form" : PantryItemForm()
         }
     )
+    return redirect("core:home")
 
 
 def add_pantry_item(request):
