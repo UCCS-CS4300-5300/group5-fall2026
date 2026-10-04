@@ -166,8 +166,8 @@ Body Style
 
 .circle {
     display: flex;
-    width: 100px;
-    height: 100px;
+    width: 130px;
+    height: 130px;
     background-color: #3498db;
     /* Makes the square circular */
     border-radius: 50%; 

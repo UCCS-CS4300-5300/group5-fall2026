@@ -40,17 +40,13 @@
                     <h2>Pantry Organizer</h2>
                 </div>
                 <div class="flex-container">
-                    <div class="kitchen-bg pantry-box">
-
-                        {% for item in catalog %}
-                            <div class="circle">
-                                {{ item.name }}
-                            </div>
-                        {% empty %}
-                            <!-- When the array is empty -->
-                            <h1>No products found.</h1>
-                        {% endfor %}
-                    </div>
+                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
+                        {% csrf_token %}
+                            
+                            {{ form.as_p }} 
+                            
+                            <button type="submit">Submit</button>
+                    </form>
                 </div>
             </div>
 
@@ -67,13 +63,21 @@
                             <!-- Loop through the array of Pantry Items -->
                             {% for product in pantryItems %}
                                 <div class="circle">
-                                    
                                     <div class="container">
                                         {{ product.catalog_item.name }}
                                         <br/>
                                         {{ product.quantity }}
                                         <br/>
-                                        {{ product.date_stored }}
+                                        {{ product.date_expired }}
+                                        <br/>
+                                        <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="btn btn-delete" 
+                                                >
+                                            Delete
+                                        </button>
+                                    </form>
                                     </div>
                                 </div>
                             {% empty %}
@@ -84,6 +88,7 @@
                         <!-- TODO: GIve Credit in about page -->
                         <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
                 </div>
+                
             </div>
         </div>
     </div>
