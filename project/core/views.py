@@ -1,6 +1,6 @@
 import logging
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import PantryItem
+from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
@@ -21,6 +21,7 @@ def getOrCreateDefaults():
         Makes inital models to allow user see on basic request.
         TODO: Remove / replace this placeholder with Add / edit logic. 
     """
+
     user = User.objects.order_by("id").first()
     if user is None:
         user = User.objects.create_user(username="user1", password="password")
@@ -48,7 +49,7 @@ def populateDefaultCatalog():
         TODO: consider making this come from a csv file of:
             name, category, Estimated Expiration ? 
     """
-    fruit = [
+    fruits = [
         "Apples",
         "Bananas",
         "Oranges",
@@ -61,11 +62,11 @@ def populateDefaultCatalog():
         "Cherries",
     ]
 
-    for fruit in fruit:
-        GlobalCatalogItem.objects.create(
+    for fruit in fruits:
+        GlobalCatalogItem.objects.get_or_create(
             name = fruit,
             category = "Fruit",
-            estimated_expiration_days = 7
+            defaults={"estimated_expiration_days": 7}
         )
 
 # TODO: Add in the createOrAdd logic here...
@@ -80,39 +81,81 @@ def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user 
     """
-    if request.method == "GET":
-        [pantry, user] = getOrCreateDefaults()
-
-        pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
-        return render(
-            request,
-            "core/home.html",
-            {
-                "user" : user,
-                "pantry" : pantry,
-                "pantryItems" : pantryItems,
-                "catalog" : GlobalCatalogItem.objects.all(),
-                "form" : PantryItemForm()
-            }
-        )
+    # Better implementation of the pantry user defaults
+    # if request.method == "GET":
+    pantry, user = getOrCreateDefaults()    
+    pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
+    return render(
+        request,
+        "core/home.html",
+        {
+            "user" : user,
+            "pantry" : pantry,
+            "pantryItems" : pantryItems,
+            "catalog" : GlobalCatalogItem.objects.all(),
+            "form" : PantryItemForm()
+        }
+    )
     return redirect("core:home")
 
 
 def add_pantry_item(request):
+    """
+    This function will make it possible to add items into the user's storage layout.
+    """
+
+    pantry, user = getOrCreateDefaults()
+
     # first existing pantry for now
     if request.method == "POST":
         form = PantryItemForm(request.POST)
-        if form.is_valid():
-            item = form.save(commit=False)
-            item.pantry = form.cleaned_data["pantry"]
-            item.save()
-        return redirect("core:home")
 
-    return redirect("core:home")
+        if form.is_valid():
+            item = form.save(commit=False) # Instance variable
+            item.pantry = pantry
+            item.save()
+            return redirect("core:home")
+
+    else:
+        form = PantryItemForm()
+
+    # Re-render the layout containing errors in case of failure
+    pantryItems = PantryItem.objects.filter(pantry=pantry)
+    return render(
+        request,
+        "core/home.html",
+        {
+            "user": user,
+            "pantry": pantry,
+            "pantryItems": pantryItems,
+            "catalog": GlobalCatalogItem.objects.all(),
+            "form": form
+        }
+    )
+
 
 def delete_pantry_item(request, id):
-    #any item can be deleted by id
+    """
+    Delete an active Item using an ID
+    """
+
     item = get_object_or_404(PantryItem, id=id)
     if request.method == "POST":
         item.delete()
     return redirect("core:home")
+
+
+def pantry_item_detail(request, item_id):
+    """
+        Retrieve one pantry item by ID and display its details.
+    """
+
+    pantry_item = get_object_or_404(PantryItem, id=item_id)
+
+    return render(
+        request,
+        "core/pantry_item_detail.html",
+        {
+            "pantry_item": pantry_item
+        }
+    )

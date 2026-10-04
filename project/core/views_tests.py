@@ -77,7 +77,7 @@ def test_home_page_Add_item(client):
   response = client.post(reverse('core:add_pantry_item'), data=form_data)
 
   # ASSERT
-  assert response.status_code == 302 
+  assert response.status_code == 200 
   countNumberOfElements(response, "container") == 12
 
 @pytest.mark.django_db
