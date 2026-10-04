@@ -1,0 +1,177 @@
+/* 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Navbar Style 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.navbar {
+    border-radius: 15px; /* Curves all 4 corners equally */
+    border: 2px solid #333;
+
+}
+/* Reset & Main Navbar Layout */
+.nav-links {
+    list-style: none;
+    display: flex;
+    background-color: #333;
+    padding: 0;
+    margin: 0;
+    border-radius: 15px; /* Curves all 4 corners equally */
+}
+
+.nav-links a {
+    display: block;
+    color: white;
+    padding: 15px 20px;
+    text-decoration: none;
+    border-radius: 15px; /* Curves all 4 corners equally */
+}
+
+.nav-links a:hover {
+    background-color: #333;
+}
+
+/* ─── THE DROPDOWN LOGIC ─── */
+
+/* 1. Parent must be relative */
+.dropdown {
+    position: relative;
+}
+
+/* 2. Dropdown menu must be absolute, hidden by default */
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* Positions it exactly at the bottom of the parent */
+    left: 0;
+    min-width: 160px;
+    background-color: #333;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    
+    /* Hidden states */
+    display: none; 
+}
+
+/* 3. Submenu links display as block to stack vertically */
+.dropdown-menu li a {
+    padding: 12px 16px;
+}
+
+/* 4. Reveal the menu when hovering over the parent li */
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.kitchen-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+    background-repeat: repeat;
+    /* background-color: #8B5A2B;  */
+    background-color: #c19a6b;
+}
+
+/* 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Body Style 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+/* Ensures the container fills the entire viewport height */
+.split-container {
+    display: flex;
+    
+    min-width: 100vw;
+    min-height: 100vh;
+    height: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+}
+
+/* 1/4 Column (25% width) */
+.left-column {
+    flex: 1; 
+    background-color: lightskyblue; 
+    padding: 20px;
+    border: 2px solid #333;
+    border-radius: 15px; /* Curves corners */   
+}
+
+/* 3/4 Column (75% width) */
+.right-column {
+    flex: 3; 
+    padding: 20px;
+    border: 2px solid #333;
+    border-radius: 15px; /* Curves corners */
+    height: auto;
+}
+
+.pantry-box {
+    /* Defines this div as a flexbox container */
+    display: flex; 
+    flex-wrap: wrap; 
+    /* Adds empty space between items inside this div */
+    gap: 15px;               
+    /* Adds empty space (buffer) around the inner items */
+    padding: 20px;           
+
+    flex: 1 1 250px;       
+
+    /* Fallback constraint to ensure content doesn't break */
+    min-height: 300px;    
+    max-width: 550px;
+    background-color: lightblue;
+    border: 2px solid #333;
+    /* Curves all 4 corners equally */
+    border-radius: 15px; 
+
+}
+
+.flex-container {
+    /* Aligns children in a row by default */
+    display: flex; 
+    padding: 20px;
+    gap: 20px;
+    border: 2px solid #333;
+    /* Curves all 4 corners equally */
+    border-radius: 15px; 
+}
+
+.flex-upper-border {
+    display: flex; 
+    flex-direction: row;
+    padding: 5px;
+
+    width: 100%;
+    max-height: 60px;
+
+    border: 2px solid #333;
+    border-radius: 15px; 
+}
+
+/* Collapse into a column when screen width is 600px or less */
+@media screen and (max-width: 600px) {
+    /* Stacks items vertically on collapse */
+    .flex-container {
+        flex-direction: column; 
+    }
+    
+    /* TODO: handle the full form on vertical collapse for objects....  */
+    /* Completely hides the left column on collapse */
+    .left-column {
+        display: none;       
+    }
+}
+
+.circle {
+    display: flex;
+    width: 130px;
+    height: 130px;
+    background-color: #3498db;
+    /* Makes the square circular */
+    border-radius: 50%; 
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}

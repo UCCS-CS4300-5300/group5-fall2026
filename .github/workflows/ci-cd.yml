@@ -1,0 +1,56 @@
+name: UCCS-CS4300-5300 Group 5 Ci-Cd
+
+# Define global environment variables here
+env:
+  MAIN_FOLDER: "project"
+  API_URL: "https://example.com"
+
+# 1. When should this run?
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+#   types:
+#     pull_request:
+#       - opened
+#       - synchronize 
+#       - reopened
+#       - edited
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Uses a free Linux computer provided by GitHub
+
+    steps:
+      # Step 1: Copy the project code onto the GitHub computer
+      - name: Get project code
+        uses: actions/checkout@v4
+  
+      # Install prerequisites
+      - name: Install Prerequisites
+        run: |
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            echo "Installing Requirements:\n"
+            for i in `cat requirements.txt`; do 
+              echo "$i"
+            done
+            pip install -r requirements.txt
+          popd > /dev/null 2>&1
+  
+       # Setup python system
+      - name: setup Python pre-reqs
+        run: |
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            # need to feed the prompt yes... :)
+            yes yes | python manage.py flush
+            python manage.py makemigrations
+            python manage.py migrate
+          popd > /dev/null 2>&1
+
+      # Run the Unit tests
+      - name: Unit Tests
+        run: |
+          pushd $MAIN_FOLDER > /dev/null 2>&1
+            pytest --log-cli-level=DEBUG -o log_file=app.log 
+          popd > /dev/null 2>&1

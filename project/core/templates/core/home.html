@@ -1,1 +1,96 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Project Starter</title></head><body><small>CS 4300 / 5300</small><h1>Your project starts here.</h1><p>Trace this generic feature, then evolve it into your inherited product.</p>{% for item in items %}<h2>{{ item.title }}</h2><p>{{ item.description }}</p>{% empty %}<p>No starter items yet. Replace this with your first vertical slice.</p>{% endfor %}</body></html>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shelf Life</title>
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- TODO: GIve Credit in about page -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
+
+</head>
+<body>
+    <div>
+        <header>
+            <nav class="kitchen-bg flex-container">
+                <ul class="nav-links">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-trigger">Menu ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Pantry</a></li>
+                            <li><a href="#">Shopping List</a></li>
+                            <li><a href="#">Ai assisted Chef</a></li>
+                            <li><a href="#">About</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="flex-upper-border">
+                    <h2 style="text-align: center;">Shelf Life Application: User: {{user.username}}</h2> 
+                </div>
+            </nav>
+        </header>
+        <!-- ────────────────────── Body for HTML page ────────────────────── -->
+        <div class="split-container">
+            <!-- 1/4 Column -->
+            <div class="left-column">
+                <div class="flex-upper-border">
+                    <h2>Pantry Organizer</h2>
+                </div>
+                <div class="flex-container">
+                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
+                        {% csrf_token %}
+                            
+                            {{ form.as_p }} 
+                            
+                            <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3/4 Column -->
+            <div class="kitchen-bg right-column">
+                <div class="flex-upper-border">
+                    <h2>Main Pantry</h2>
+                </div>
+                <div class="flex-container">
+                    <div class="kitchen-bg pantry-box">
+                        <div class="flex-upper-border">
+                            <h2>Pantry: {{ pantry.name }}</h2>
+                        </div>
+                            <!-- Loop through the array of Pantry Items -->
+                            {% for product in pantryItems %}
+                                <div class="circle">
+                                    <div class="container">
+                                        {{ product.catalog_item.name }}
+                                        <br/>
+                                        {{ product.quantity }}
+                                        <br/>
+                                        {{ product.date_expired }}
+                                        <br/>
+                                        <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="btn btn-delete" 
+                                                >
+                                            Delete
+                                        </button>
+                                    </form>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <!-- When the array is empty -->
+                                <h1>No products found.</h1>
+                            {% endfor %}
+
+                        <!-- TODO: GIve Credit in about page -->
+                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</body>
+</html>
