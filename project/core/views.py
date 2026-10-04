@@ -83,7 +83,7 @@ def home(request):
     if request.method == "GET":
         [pantry, user] = getOrCreateDefaults()
 
-        pantryItems = PantryItem.objects.filter(pantry=pantry)
+        pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
         return render(
             request,
             "core/home.html",
