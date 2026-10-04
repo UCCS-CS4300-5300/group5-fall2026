@@ -70,9 +70,10 @@
                                         <br/>
 
                                         {% if product.expiration_status != 'Expired' %}
-                                        <a href="{% url 'core:pantry_item_detail' product.id %}">
+                                        <button type="button" class="btn"
+                                            onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
                                             View Details
-                                        </a>
+                                        </button>
                                         {% endif %}
 
                                         <br/>
