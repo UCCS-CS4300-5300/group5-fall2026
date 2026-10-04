@@ -1,6 +1,6 @@
 import logging
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import PantryItem
+from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
@@ -22,43 +22,26 @@ def getOrCreateDefaults():
         TODO: Remove / replace this placeholder with Add / edit logic. 
     """
 
-    pantry_item = {}
-    pantry = {}
-    user = {}
-    catalog_item = {}
+    user = User.objects.order_by("id").first()
+    if user is None:
+        user = User.objects.create_user(username="user1", password="password")
 
-    # gate this path so that this clause only runs once. This is to prevent database collisions. 
-    if User.objects.count() == 0:
-        user = User.objects.create_user(username="user1", password = "password")
-        logging.debug("Creating user: " + user.username)
+    pantry = Pantry.objects.filter(user=user).first()
+    if pantry is None:
+        pantry = Pantry.objects.create(user=user, name="Pantry1")
 
-        pantry = Pantry.objects.create(user=user, name = "Pantry1")
+    if not GlobalCatalogItem.objects.exists():
         populateDefaultCatalog()
-        catalog_item = GlobalCatalogItem.objects.create(
-            name = "Apple",
-            category = "Fruit",
-            estimated_expiration_days = 7
-        )
+
+    if not PantryItem.objects.filter(pantry=pantry).exists():
         for item in GlobalCatalogItem.objects.all():
-            pantry_item = PantryItem.objects.create(
-                pantry = pantry,
-                catalog_item = item,
-                quantity = 5
+            PantryItem.objects.get_or_create(
+                pantry=pantry,
+                catalog_item=item,
+                defaults={"quantity": 5},
             )
-        
-        user.save()
-        pantry.save()
-        pantry_item.save()
-        catalog_item.save()
 
-    else:
-        user = User.objects.get(id=1)
-        pantry = Pantry.objects.get(id=1)
-        pantry_item = PantryItem.objects.get(id=1)
-        catalog_item = GlobalCatalogItem.objects.get(id=1)
-
-    # return Pantry
-    return [pantry, user, catalog_item]
+    return [pantry, user]
 
 def populateDefaultCatalog():
     """
@@ -66,7 +49,7 @@ def populateDefaultCatalog():
         TODO: consider making this come from a csv file of:
             name, category, Estimated Expiration ? 
     """
-    fruit = [
+    fruits = [
         "Apples",
         "Bananas",
         "Oranges",
@@ -79,11 +62,11 @@ def populateDefaultCatalog():
         "Cherries",
     ]
 
-    for fruit in fruit:
-        GlobalCatalogItem.objects.create(
+    for fruit in fruits:
+        GlobalCatalogItem.objects.get_or_create(
             name = fruit,
             category = "Fruit",
-            estimated_expiration_days = 7
+            defaults={"estimated_expiration_days": 7}
         )
 
 # TODO: Add in the createOrAdd logic here...
@@ -102,16 +85,19 @@ def home(request):
         return render(request, "core/home.html", build_home_context())
     return redirect("core:home")
 
-def build_home_context(invalid_form=None, invalid_id=None):
+
+def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
     """
         Builds the home page data. Each pantry item gets its own edit form
         for its pop-up. If an edit failed, that item gets the form with the
-        errors and its pop-up opens again.
+        errors and its pop-up opens again. If an add failed, the add form
+        keeps its errors.
     """
-    [pantry, user, catalogItems] = getOrCreateDefaults()
+    pantry, user = getOrCreateDefaults()
 
-    # TODO: add ability to make this per user in objects query. 
-    pantryItems = list(PantryItem.objects.all())
+    pantryItems = list(
+        PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
+    )
     for item in pantryItems:
         if item.id == invalid_id:
             item.edit_form = invalid_form
@@ -123,45 +109,48 @@ def build_home_context(invalid_form=None, invalid_id=None):
         "pantry" : pantry,
         "pantryItems" : pantryItems,
         "catalog" : GlobalCatalogItem.objects.all(),
-        "form" : PantryItemForm(),
+        "form" : add_form or PantryItemForm(),
         "open_edit_id" : invalid_id,
     }
-    return redirect("core:home")
+
 
 def add_pantry_item(request):
-    # first existing pantry for now
-    # TODO pass Id for pantry back in post URL ? 
+    """
+    This function will make it possible to add items into the user's storage layout.
+    """
+
+    pantry, user = getOrCreateDefaults()
+
     if request.method == "POST":
         form = PantryItemForm(request.POST)
+
         if form.is_valid():
-
-            # pantry isn't set yet
-            item = form.save(commit=False)
-            pantry = Pantry.objects.get(name=item.pantry)
-
-            # attach item to pantry
+            item = form.save(commit=False) # Instance variable
             item.pantry = pantry
             item.save()
-        return redirect("core:home")            
-    else:
-        #empty form for GET request
-        form = PantryItemForm()
-        return redirect("core:home")
+            return redirect("core:home")
+
+        # Re-render the layout containing errors in case of failure
+        return render(request, "core/home.html", build_home_context(add_form=form))
+
+    return redirect("core:home")
+
 
 def delete_pantry_item(request, id):
-    #any item can be deleted by id
-    logging.debug(id)
-    logging.debug(id)
-    logging.debug(id)
-    logging.debug(id)
-    item = get_object_or_404(PantryItem, id=id)
+    """
+    Delete an active Item using an ID
+    """
 
+    item = get_object_or_404(PantryItem, id=id)
     if request.method == "POST":
         item.delete()
     return redirect("core:home")
 
+
 def edit_pantry_item(request, id):
-    # Saves changes from an item's edit pop-up
+    """
+    Saves changes from an item's edit pop-up
+    """
     item = get_object_or_404(PantryItem, id=id)
 
     if request.method == "POST":
@@ -174,3 +163,19 @@ def edit_pantry_item(request, id):
         return render(request, "core/home.html", build_home_context(form, id))
 
     return redirect("core:home")
+
+
+def pantry_item_detail(request, item_id):
+    """
+        Retrieve one pantry item by ID and display its details.
+    """
+
+    pantry_item = get_object_or_404(PantryItem, id=item_id)
+
+    return render(
+        request,
+        "core/pantry_item_detail.html",
+        {
+            "pantry_item": pantry_item
+        }
+    )
