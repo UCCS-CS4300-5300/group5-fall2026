@@ -81,22 +81,37 @@ def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user 
     """
-    # Better implementation of the pantry user defaults
-    # if request.method == "GET":
-    pantry, user = getOrCreateDefaults()    
-    pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
-    return render(
-        request,
-        "core/home.html",
-        {
-            "user" : user,
-            "pantry" : pantry,
-            "pantryItems" : pantryItems,
-            "catalog" : GlobalCatalogItem.objects.all(),
-            "form" : PantryItemForm()
-        }
-    )
+    if request.method == "GET":
+        return render(request, "core/home.html", build_home_context())
     return redirect("core:home")
+
+
+def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
+    """
+        Builds the home page data. Each pantry item gets its own edit form
+        for its pop-up. If an edit failed, that item gets the form with the
+        errors and its pop-up opens again. If an add failed, the add form
+        keeps its errors.
+    """
+    pantry, user = getOrCreateDefaults()
+
+    pantryItems = list(
+        PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
+    )
+    for item in pantryItems:
+        if item.id == invalid_id:
+            item.edit_form = invalid_form
+        else:
+            item.edit_form = PantryItemForm(instance=item, auto_id=f"edit{item.id}_%s")
+
+    return {
+        "user" : user,
+        "pantry" : pantry,
+        "pantryItems" : pantryItems,
+        "catalog" : GlobalCatalogItem.objects.all(),
+        "form" : add_form or PantryItemForm(),
+        "open_edit_id" : invalid_id,
+    }
 
 
 def add_pantry_item(request):
@@ -106,7 +121,6 @@ def add_pantry_item(request):
 
     pantry, user = getOrCreateDefaults()
 
-    # first existing pantry for now
     if request.method == "POST":
         form = PantryItemForm(request.POST)
 
@@ -116,22 +130,10 @@ def add_pantry_item(request):
             item.save()
             return redirect("core:home")
 
-    else:
-        form = PantryItemForm()
+        # Re-render the layout containing errors in case of failure
+        return render(request, "core/home.html", build_home_context(add_form=form))
 
-    # Re-render the layout containing errors in case of failure
-    pantryItems = PantryItem.objects.filter(pantry=pantry)
-    return render(
-        request,
-        "core/home.html",
-        {
-            "user": user,
-            "pantry": pantry,
-            "pantryItems": pantryItems,
-            "catalog": GlobalCatalogItem.objects.all(),
-            "form": form
-        }
-    )
+    return redirect("core:home")
 
 
 def delete_pantry_item(request, id):
@@ -142,6 +144,24 @@ def delete_pantry_item(request, id):
     item = get_object_or_404(PantryItem, id=id)
     if request.method == "POST":
         item.delete()
+    return redirect("core:home")
+
+
+def edit_pantry_item(request, id):
+    """
+    Saves changes from an item's edit pop-up
+    """
+    item = get_object_or_404(PantryItem, id=id)
+
+    if request.method == "POST":
+        form = PantryItemForm(request.POST, instance=item, auto_id=f"edit{id}_%s")
+        if form.is_valid():
+            form.save()
+            return redirect("core:home")
+
+        # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
+        return render(request, "core/home.html", build_home_context(form, id))
+
     return redirect("core:home")
 
 
