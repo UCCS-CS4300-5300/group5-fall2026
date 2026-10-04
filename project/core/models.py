@@ -1,7 +1,19 @@
+import logging
 from django.db import models
 from django.contrib.auth.models import User # Django built-in user model
 from django.utils import timezone # Useful for date tracking
 from datetime import timedelta
+from django.conf import settings 
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(module)s (Line %(lineno)d): %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("app.log", mode='w'),  # overwrites the file
+        logging.StreamHandler()                    # Outputs to console
+    ]
+)
 
 
 # Shared list of global item catalog
@@ -49,13 +61,16 @@ class PantryItem(models.Model):
    def expiration_status(self): 
       # This function will help calculate the status of the expiration
       today = timezone.localdate() # made it localdate for more accurate date representation
+      
+      logging.debug("________")
+      
+      logging.debug("(self.date_expired - today).days: \t" + str((self.date_expired - today).days))
+      logging.debug("settings.EXPIRING_SOON_DAYS: \t" + str(settings.EXPIRING_SOON_DAYS))
 
-      # Expired if more than the date it expired
       if today >= self.date_expired: #Fixed
          return "Expired"
       
-      # For letting the user know if its 3 days before expiring (subject to change)
-      elif 0 < (self.date_expired - today).days <= 3:
+      elif 0 < (self.date_expired - today).days <= settings.EXPIRING_SOON_DAYS:
          return "Expiring Soon"
       
       # Otherwise it is categorized as fresh for simplicity
