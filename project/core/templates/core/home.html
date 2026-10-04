@@ -68,7 +68,7 @@
                                         <br/>
                                         {{ product.quantity }}
                                         <br/>
-                                        {{ product.date_expired }}
+                                        {{ product.expiration_status }}
                                         <br/>
                                         <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
                                         {% csrf_token %}
@@ -86,7 +86,7 @@
                             {% endfor %}
 
                         <!-- TODO: GIve Credit in about page -->
-                        <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo">
+                        <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
                 </div>
                 
             </div>
