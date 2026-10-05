@@ -39,7 +39,7 @@ jobs:
           popd > /dev/null 2>&1
   
        # Setup python system
-      - name: Setup Python prerequisites
+      - name: Setup Python Prerequisites
         run: |
           pushd $MAIN_FOLDER > /dev/null 2>&1
             # need to feed the prompt yes... :)
@@ -56,7 +56,7 @@ jobs:
           popd > /dev/null 2>&1
 
       # Setup python system
-      - name: Test the server to ensure it runs
+      - name: Test the Server to Ensure it Runs
         run: |  
           pushd $MAIN_FOLDER > /dev/null 2>&1
             # Arrange
