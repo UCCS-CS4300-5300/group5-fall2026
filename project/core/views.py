@@ -93,20 +93,35 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
         errors and its pop-up opens again. If an add failed, the add form
         keeps its errors.
     """
+
     pantry, user = getOrCreateDefaults()
 
-    pantryItems = list(
-        PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
-    )
+    pantryItems = PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
+
+    shelves_items = []
+    fridge_items = []
+    freezer_items = []
+
     for item in pantryItems:
         if item.id == invalid_id:
             item.edit_form = invalid_form
         else:
             item.edit_form = PantryItemForm(instance=item, auto_id=f"edit{item.id}_%s")
 
+        # Routing the item into the corresponding container
+        if item.location == "SHELVES":
+            shelves_items.append(item)
+        elif item.location == "FRIDGE":
+            fridge_items.append(item)
+        elif item.location == "FREEZER":
+            freezer_items.append(item)
+
     return {
         "user" : user,
         "pantry" : pantry,
+        "shelves_items": shelves_items,
+        "fridge_items": fridge_items,
+        "freezer_items":freezer_items,
         "pantryItems" : pantryItems,
         "catalog" : GlobalCatalogItem.objects.all(),
         "form" : add_form or PantryItemForm(),
@@ -163,6 +178,14 @@ def edit_pantry_item(request, id):
         return render(request, "core/home.html", build_home_context(form, id))
 
     return redirect("core:home")
+
+def test_pantry_view(request):
+    """
+    Use this to test the pantry items while the main template is being worked
+    on by another person
+    """
+
+    return render(request, "core/test_pantry.html",build_home_context())
 
 
 def pantry_item_detail(request, item_id):

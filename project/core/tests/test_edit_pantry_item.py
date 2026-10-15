@@ -2,7 +2,7 @@ import datetime
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from core.models import GlobalCatalogItem, Pantry, PantryItem
 
 ORIGINAL_DATE = datetime.date(2026, 10, 10)
 

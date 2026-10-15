@@ -3,7 +3,7 @@ import logging
 from django.urls import reverse
 #from .models import StarterItem
 from django.contrib.auth.models import User
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from core.models import GlobalCatalogItem, Pantry, PantryItem
 from django.db import IntegrityError
 from django.utils import timezone
 from datetime import timedelta

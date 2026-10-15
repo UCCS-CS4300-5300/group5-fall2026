@@ -8,6 +8,7 @@ urlpatterns=[
     path('add_pantry_item/', views.add_pantry_item, name='add_pantry_item'),
     path('delete_pantry_item/<int:id>/', views.delete_pantry_item, name='delete_pantry_item'),
     path('edit_pantry_item/<int:id>/', views.edit_pantry_item, name='edit_pantry_item'),
+    path('test-pantry/', views.test_pantry_view, name="test_pantry"),
 
     # Show the details for one pantry item.
     path(
