@@ -107,23 +107,52 @@
             </div>
 
             <!-- Column 3: Freezer and Fridge-->
-             <div class="right-column scrollbox">
-                <div class="flex-upper-border">
-                    <h2>Freezer/Fridge Container</h2>
+            <div class="right-column scrollbox">
+                <div class="storage-panel">
+                    <div class="flex-upper-border">
+                        <h2>Freezer Container</h2>
+                    </div>
+
+                    <div class="flex-container grid-lane">
+                        {% for product in freezer_items %}
+                            <div class="container">
+                                {{ product.catalog_item.name }}
+                                <br/>
+                                {{ product.quantity }}
+                                <br/>
+                                {{ product.expiration_status }}
+                            </div>
+                        {% empty %}
+                            <p>No freezer products found.</p>
+                        {% endfor %}
+                    </div>
                 </div>
 
-                <!--Fridge and Freezer item logic here-->
-                <div class="flex-container grid-lane">
-                    <p style="padding: 20px; color: #888;">Freezer and fridge item logic here</p>
+                <div class="storage-panel">
+                    <div class="flex-upper-border">
+                        <h2>Fridge Container</h2>
+                    </div>
+
+                    <div class="flex-container grid-lane">
+                        {% for product in fridge_items %}
+                            <div class="container">
+                                {{ product.catalog_item.name }}
+                                <br/>
+                                {{ product.quantity }}
+                                <br/>
+                                {{ product.expiration_status }}
+                            </div>
+                        {% empty %}
+                            <p>No fridge products found.</p>
+                        {% endfor %}
+                    </div>
                 </div>
+            </div>
 
 
             <!-- TODO: Give Credit in about page -->
             <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
 
-             </div>
-        </div>
-    </div>
 
     {% if open_edit_id %}
     <script>
