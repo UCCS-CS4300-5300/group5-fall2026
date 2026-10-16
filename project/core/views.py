@@ -1,10 +1,14 @@
 import logging
+from django.db.models import Case, IntegerField, Q, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.urls import reverse
+from urllib.parse import quote
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
-
+ 
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s [%(levelname)s] %(module)s (Line %(lineno)d): %(message)s',
@@ -14,79 +18,82 @@ logging.basicConfig(
         logging.StreamHandler()                    # Outputs to console
     ]
 )
-
+ 
 def getOrCreateDefaults():
     """
-        Sample method to populate models to template on /home request. 
-        Makes inital models to allow user see on basic request.
-        TODO: Remove / replace this placeholder with Add / edit logic. 
+        Make sure there is a user and a pantry to work with on a /home request.
+        TODO: replace with a real login when the multi-user story lands.
+ 
+        The pantry starts EMPTY on purpose. It used to be seeded with one
+        PantryItem per catalog entry, which was fine for the ten hardcoded
+        fruits and is not fine for the 661 USDA foods -- the first page
+        request would create 661 pantry items. Users add their own now.
     """
-
+ 
     user = User.objects.order_by("id").first()
     if user is None:
         user = User.objects.create_user(username="user1", password="password")
-
+ 
     pantry = Pantry.objects.filter(user=user).first()
     if pantry is None:
         pantry = Pantry.objects.create(user=user, name="Pantry1")
-
-    if not GlobalCatalogItem.objects.exists():
-        populateDefaultCatalog()
-
-    if not PantryItem.objects.filter(pantry=pantry).exists():
-        for item in GlobalCatalogItem.objects.all():
-            PantryItem.objects.get_or_create(
-                pantry=pantry,
-                catalog_item=item,
-                defaults={"quantity": 5},
-            )
-
+ 
     return [pantry, user]
-
-def populateDefaultCatalog():
-    """
-        Handle the basic creation of default catalog .
-        TODO: consider making this come from a csv file of:
-            name, category, Estimated Expiration ? 
-    """
-    fruits = [
-        "Apples",
-        "Bananas",
-        "Oranges",
-        "Grapes",
-        "Strawberries",
-        "Watermelons",
-        "Mangoes",
-        "Pineapples",
-        "Pears",
-        "Cherries",
-    ]
-
-    for fruit in fruits:
-        GlobalCatalogItem.objects.get_or_create(
-            name = fruit,
-            category = "Fruit",
-            defaults={"estimated_expiration_days": 7}
-        )
-
-# TODO: Add in the createOrAdd logic here...
-#       This should be a method to assist the user on a different form. 
-# TODO: create addOrRetrieval methods for the various objects. 
-# Should handle the scenario where an item is added and moved to the user pantry without existing first   
+ 
+# The catalog is loaded by the USDA FoodKeeper data migration, not at
+# request time, so populateDefaultCatalog() is gone.
+ 
 # TODO: handle the inital splash page as a user login / create request
-# TODO: create Mock user for this situation ? 
 # TODO Migrate this to a class
-
+ 
+def search_catalog(query, limit=25):
+    """
+        Find catalog foods matching every word in `query`, best match first.
+ 
+        Matched word by word rather than as a substring: FoodKeeper stores
+        "Beef, ground", so name__icontains="ground beef" finds nothing.
+ 
+        Ranking matters as much as matching. "Pasta, dry" and "Canned goods"
+        both match "pasta" -- the second only because its hidden keyword
+        list happens to contain the word. Name matches rank first so the
+        obvious answer is the one at the top.
+    """
+    if not query or not query.strip():
+        return GlobalCatalogItem.objects.none()
+ 
+    words = query.split()
+    results = GlobalCatalogItem.objects.all()
+    for word in words:
+        results = results.filter(
+            Q(name__icontains=word)
+            | Q(name_subtitle__icontains=word)
+            | Q(keywords__icontains=word)
+        )
+ 
+    results = results.annotate(
+        rank=Case(
+            When(name__iexact=query, then=0),          # "Honey"
+            When(name__istartswith=words[0], then=1),  # "Pasta, dry"
+            When(name__icontains=words[0], then=2),    # "Cooked pasta"
+            When(name_subtitle__icontains=words[0], then=3),
+            default=4,                                 # keyword-only match
+            output_field=IntegerField(),
+        )
+    ).order_by("rank", "name", "name_subtitle")
+ 
+    return results[:limit]
+ 
+ 
 def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user 
     """
     if request.method == "GET":
-        return render(request, "core/home.html", build_home_context())
+        return render(request, "core/home.html", build_home_context(request=request))
     return redirect("core:home")
-
-
-def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
+ 
+ 
+def build_home_context(invalid_form=None, invalid_id=None, add_form=None, request=None):
     """
         Builds the home page data. Each pantry item gets its own edit form
         for its pop-up. If an edit failed, that item gets the form with the
@@ -94,84 +101,110 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
         keeps its errors.
     """
     pantry, user = getOrCreateDefaults()
-
+ 
     pantryItems = list(
-        PantryItem.objects.filter(pantry=pantry).order_by("date_expired")
+        PantryItem.objects.select_related("catalog_item")
+                          .filter(pantry=pantry)
+                          .order_by("date_expired")
     )
     for item in pantryItems:
         if item.id == invalid_id:
             item.edit_form = invalid_form
         else:
             item.edit_form = PantryItemForm(instance=item, auto_id=f"edit{item.id}_%s")
-
+ 
+    query = request.GET.get("q", "") if request else ""
+ 
     return {
         "user" : user,
         "pantry" : pantry,
         "pantryItems" : pantryItems,
-        "catalog" : GlobalCatalogItem.objects.all(),
         "form" : add_form or PantryItemForm(),
         "open_edit_id" : invalid_id,
+        "query" : query,
+        "searchResults" : search_catalog(query),
+        "searched" : bool(query.strip()),
     }
-
-
+ 
+ 
 def add_pantry_item(request):
     """
     This function will make it possible to add items into the user's storage layout.
     """
-
+ 
     pantry, user = getOrCreateDefaults()
-
+ 
     if request.method == "POST":
         form = PantryItemForm(request.POST)
-
+ 
         if form.is_valid():
             item = form.save(commit=False) # Instance variable
             item.pantry = pantry
             item.save()
             return redirect("core:home")
-
+ 
         # Re-render the layout containing errors in case of failure
         return render(request, "core/home.html", build_home_context(add_form=form))
-
+ 
     return redirect("core:home")
-
-
+ 
+ 
+@require_POST
+def add_from_catalog(request, item_id):
+    """
+    Add one catalog food to the pantry in a single click.
+ 
+    No dates are given, so PantryItem.save() fills in the expiration date
+    from the USDA shelf life for that food.
+    """
+    pantry, user = getOrCreateDefaults()
+    catalog_item = get_object_or_404(GlobalCatalogItem, id=item_id)
+ 
+    PantryItem.objects.create(pantry=pantry, catalog_item=catalog_item)
+ 
+    # Keep the search on screen so several items can be added in a row
+    query = request.POST.get("q", "")
+    if query:
+        return redirect(f"{reverse('core:home')}?q={quote(query)}")
+    return redirect("core:home")
+ 
+ 
 def delete_pantry_item(request, id):
     """
     Delete an active Item using an ID
     """
-
+ 
     item = get_object_or_404(PantryItem, id=id)
     if request.method == "POST":
         item.delete()
     return redirect("core:home")
-
-
+ 
+ 
 def edit_pantry_item(request, id):
     """
     Saves changes from an item's edit pop-up
     """
     item = get_object_or_404(PantryItem, id=id)
-
+ 
     if request.method == "POST":
         form = PantryItemForm(request.POST, instance=item, auto_id=f"edit{id}_%s")
         if form.is_valid():
             form.save()
             return redirect("core:home")
-
+ 
         # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
         return render(request, "core/home.html", build_home_context(form, id))
-
+ 
     return redirect("core:home")
-
-
+ 
+ 
 def pantry_item_detail(request, item_id):
     """
         Retrieve one pantry item by ID and display its details.
     """
-
+ 
     pantry_item = get_object_or_404(PantryItem, id=item_id)
-
+ 
     return render(
         request,
         "core/pantry_item_detail.html",

@@ -1,5 +1,5 @@
 {% load static %}
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +7,10 @@
     <title>Shelf Life</title>
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+ 
     <!-- TODO: GIve Credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
-
+ 
 </head>
 <body>
     <div>
@@ -39,6 +39,48 @@
                 <div class="flex-upper-border">
                     <h2>Pantry Organizer</h2>
                 </div>
+ 
+                <!-- ── Search the USDA food catalog ── -->
+                <div class="flex-container">
+                    <form action="{% url 'core:home' %}" method="GET" role="search">
+                        <label for="q">Search foods</label>
+                        <input type="search" id="q" name="q" value="{{ query }}"
+                               placeholder="milk, ground beef, cereal">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+ 
+                {% if searched %}
+                    <div class="flex-container">
+                        {% if searchResults %}
+                            <ul class="catalog-results">
+                                {% for food in searchResults %}
+                                    <li>
+                                        <strong>{{ food.name }}</strong>
+                                        {% if food.name_subtitle %}
+                                            <br/><small>{{ food.name_subtitle }}</small>
+                                        {% endif %}
+                                        <br/><small>{{ food.category }}</small>
+ 
+                                        <form action="{% url 'core:add_from_catalog' food.id %}"
+                                              method="POST" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="q" value="{{ query }}">
+                                            <button type="submit" class="btn">Add</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No foods match &ldquo;{{ query }}&rdquo;. Use the form below to add it yourself.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+ 
+                <!-- ── Add with your own dates and quantity ── -->
+                <div class="flex-upper-border">
+                    <h3>Add with details</h3>
+                </div>
                 <div class="flex-container">
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
                         {% csrf_token %}
@@ -47,7 +89,7 @@
                     </form>
                 </div>
             </div>
-
+ 
             <!-- 3/4 Column -->
             <div class="kitchen-bg right-column">
                 <div class="flex-upper-border">
@@ -68,21 +110,21 @@
                                         <br/>
                                         {{ product.expiration_status }}
                                         <br/>
-
+ 
                                         {% if product.expiration_status != 'Expired' %}
                                         <button type="button" class="btn"
                                             onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
                                             View Details
                                         </button>
                                         {% endif %}
-
+ 
                                         <br/>
-
+ 
                                         <button type="button" class="btn"
                                             onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
                                             Edit
                                         </button>
-
+ 
                                         <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
                                             {% csrf_token %}
                                             <button type="submit"
@@ -91,7 +133,7 @@
                                                 Delete
                                             </button>
                                         </form>
-
+ 
                                         <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
                                             <h3>Edit {{ product.catalog_item.name }}</h3>
                                             <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
@@ -103,11 +145,12 @@
                                         </dialog>
                                     </div>
                                 </div>
-                            {% empty %}
+                            {% endfor %}
+                            {% if not pantryItems %}
                                 <!-- When the array is empty -->
                                 <h1>No products found.</h1>
-                            {% endfor %}
-
+                            {% endif %}
+ 
                         <!-- TODO: GIve Credit in about page -->
                         <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
                     </div>
@@ -115,7 +158,7 @@
             </div>
         </div>
     </div>
-
+ 
     {% if open_edit_id %}
     <script>
         // Reopens the pop-up when a save failed so the errors are visible
