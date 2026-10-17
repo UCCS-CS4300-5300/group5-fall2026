@@ -1,0 +1,24 @@
+<!-- This is a file to test the backend items without touching the main html yet-->
+
+<h1>Backend Verification Page</h1>
+
+<h3>Shelves List Check:</h3>
+<ul>
+    {% for item in shelves_items %}
+        <li>{{item.catalog_item.name}}(Qty: {{item.quantity}})</li>
+    {% endfor %}
+</ul>
+
+<h3>Fridge List Check:</h3>
+<ul>
+    {% for item in fridge_items %}
+        <li>{{item.catalog_item.name}}</li>
+    {% endfor %}
+</ul>
+
+<h3> Freezer List Check:</h3>
+<ul>
+    {% for item in freezer_items %}
+        <li>{{item.catalog_item.name}} (Qty: {{item.quantity}})</li>
+    {% endfor %}
+</ul>

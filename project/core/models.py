@@ -56,6 +56,19 @@ class PantryItem(models.Model):
    date_stored = models.DateField(default=timezone.localdate)
    date_expired = models.DateField(blank=True, null=True) # fields inside make it posible to accept empty inputs
 
+   # Storage locations variables
+   STORAGE_LOCATIONS = [
+      ("SHELVES", "Shelves Container"),
+      ("FRIDGE", "Fridge"),
+      ("FREEZER", "Freezer")
+   ]
+
+   location = models.CharField(
+      max_length = 10,
+      choices = STORAGE_LOCATIONS,
+      default = "SHELVES"
+   )
+
    # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?  
 
    @property
