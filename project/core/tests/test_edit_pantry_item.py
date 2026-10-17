@@ -25,6 +25,7 @@ def form_data(item, **changes):
         "quantity": item.quantity,
         "date_stored": item.date_stored.isoformat(),
         "date_expired": item.date_expired.isoformat(),
+        "location": item.location
     }
     data.update(changes)
     return data
