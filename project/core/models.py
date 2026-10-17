@@ -58,7 +58,7 @@ class PantryItem(models.Model):
 
    # Storage locations variables
    STORAGE_LOCATIONS = [
-      ("SHELVES", "Shelves Container"),
+      ("SHELVES", "Shelves"),
       ("FRIDGE", "Fridge"),
       ("FREEZER", "Freezer")
    ]

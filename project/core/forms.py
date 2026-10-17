@@ -13,7 +13,8 @@ class PantryItemForm(forms.ModelForm):
         widgets = {
             "quantity": forms.NumberInput(attrs={"min": 1, "class":"form-control"}),
             "date_stored": forms.DateInput(attrs={"type": "date", "class":"form-control"}),
-            "date_expired": forms.DateInput(attrs={"type":"date","class":"form-control"})
+            "date_expired": forms.DateInput(attrs={"type":"date","class":"form-control"}),
+            "location": forms.Select(attrs={"class":"form-control"})
         }
 
 def __init__(self, *args, **kwargs):

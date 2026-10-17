@@ -195,7 +195,7 @@ Body Style
     display: flex;
     width: 130px;
     height: 130px;
-    background-color: #3498db;
+    background-color: #1ea9e0;
     /* Makes the square circular */
     border-radius: 50%; 
     flex-shrink: 0;
