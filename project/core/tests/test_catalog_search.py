@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
-from .models import GlobalCatalogItem, PantryItem
-from .views import search_catalog, getOrCreateDefaults
+from core.models import GlobalCatalogItem, PantryItem
+from core.views import search_catalog, getOrCreateDefaults
 
 
 # --- Searching the catalog ---
@@ -50,14 +50,45 @@ def test_results_appear_on_the_page(client):
 
 @pytest.mark.django_db
 def test_adding_from_catalog_sets_a_usda_date(client):
+    # The search result carries a location, and the date follows from it.
+    # Raw chicken has no pantry figure, so adding it to the shelves would
+    # correctly produce no date -- see the test below.
     chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
 
-    response = client.post(reverse("core:add_from_catalog", args=[chicken.id]))
+    response = client.post(
+        reverse("core:add_from_catalog", args=[chicken.id]),
+        {"location": "FRIDGE"},
+    )
 
     assert response.status_code == 302
     item = PantryItem.objects.get()
     assert item.catalog_item == chicken
+    assert item.location == "FRIDGE"
     assert (item.date_expired - item.date_stored).days == 2
+
+
+@pytest.mark.django_db
+def test_adding_defaults_to_the_shelves(client):
+    # No location posted -- the item still saves rather than erroring.
+    cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
+
+    client.post(reverse("core:add_from_catalog", args=[cereal.id]))
+
+    assert PantryItem.objects.get().location == "SHELVES"
+
+
+@pytest.mark.django_db
+def test_a_bogus_location_falls_back_to_the_shelves(client):
+    # A posted value is not trusted against the choices field. Saving
+    # "KITCHEN" would match no shelf-life row and lose the date silently.
+    cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
+
+    client.post(
+        reverse("core:add_from_catalog", args=[cereal.id]),
+        {"location": "KITCHEN"},
+    )
+
+    assert PantryItem.objects.get().location == "SHELVES"
 
 
 @pytest.mark.django_db

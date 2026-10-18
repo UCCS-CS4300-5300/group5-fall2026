@@ -2,7 +2,7 @@ import pytest
 import logging
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from core.models import GlobalCatalogItem, Pantry, PantryItem
 from django.db import IntegrityError
 from django.utils import timezone
 from datetime import timedelta
@@ -88,13 +88,35 @@ def test_item_passed():
 @pytest.mark.django_db
 def test_expiry_is_calculated_from_usda_data():
  # An item added with no expiration date gets one from the USDA shelf life
+ # for the place it was put. Raw chicken has no pantry figure at all, so
+ # the location is not optional detail here -- on the shelves it would
+ # correctly get no date.
  user = User.objects.create_user(username="cook", password="password")
  pantry = Pantry.objects.create(user=user, name="Pantry1")
  chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
  
- item = PantryItem.objects.create(pantry=pantry, catalog_item=chicken)
+ item = PantryItem.objects.create(
+  pantry=pantry, catalog_item=chicken, location="FRIDGE")
  
  assert (item.date_expired - item.date_stored).days == 2
+ 
+ 
+@pytest.mark.django_db
+def test_location_changes_the_expiry():
+ # The same food in two places gets two different dates. If anyone breaks
+ # LOCATION_TO_STORAGE, filter(storage="FRIDGE") matches nothing and every
+ # item silently saves with no date -- this is what catches that.
+ user = User.objects.create_user(username="cook2", password="password")
+ pantry = Pantry.objects.create(user=user, name="Pantry1")
+ chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
+ 
+ fridge = PantryItem.objects.create(
+  pantry=pantry, catalog_item=chicken, location="FRIDGE")
+ freezer = PantryItem.objects.create(
+  pantry=pantry, catalog_item=chicken, location="FREEZER")
+ 
+ assert (fridge.date_expired - fridge.date_stored).days == 2
+ assert (freezer.date_expired - freezer.date_stored).days == 360
  
  
 @pytest.mark.django_db

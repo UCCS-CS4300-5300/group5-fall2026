@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test import TransactionTestCase
 from core.models import Pantry, PantryItem, GlobalCatalogItem
-from . import views
+from core import views
  
 logging.basicConfig(
     level=logging.DEBUG,
@@ -25,15 +25,17 @@ def countNumberOfElements(response, element):
   return len(matches)
  
  
-def addOneItem(pantry, name="Apples"):
+def addOneItem(pantry, name="Apples", location="SHELVES"):
   """
   Put one item in the pantry. The pantry no longer seeds itself, so tests
-  that need an item have to create one.
+  that need an item have to create one. Defaults to the shelves, which is
+  where the add form puts things unless told otherwise.
   """
   catalog_item = GlobalCatalogItem.objects.filter(name=name).first()
   if catalog_item is None:
     catalog_item = GlobalCatalogItem.objects.create(name=name, category="Fruit")
-  return PantryItem.objects.create(pantry=pantry, catalog_item=catalog_item, quantity=5)
+  return PantryItem.objects.create(
+    pantry=pantry, catalog_item=catalog_item, quantity=5, location=location)
  
  
 @pytest.mark.django_db
@@ -52,13 +54,15 @@ def test_home_page_setup():
  
 @pytest.mark.django_db
 def test_home_page_empty(client):
-  # A new pantry is empty and the page says so
+  # A new pantry is empty and each of the three containers says so
   response = client.get(reverse("core:home"))
  
   assert response.status_code == 200
   assert countNumberOfElements(response, "container") == 0
   assert PantryItem.objects.count() == 0
-  assert b"No products found" in response.content
+  assert b"No shelf products found" in response.content
+  assert b"No fridge products found" in response.content
+  assert b"No freezer products found" in response.content
  
  
 @pytest.mark.django_db
@@ -76,6 +80,21 @@ def test_home_page_populated(client):
  
  
 @pytest.mark.django_db
+def test_items_appear_in_their_own_container(client):
+  # Each item renders under the container it was stored in, not all in one
+  pantry, user = views.getOrCreateDefaults()
+  addOneItem(pantry, name="Apples", location="SHELVES")
+  addOneItem(pantry, name="Bananas", location="FRIDGE")
+ 
+  response = client.get(reverse("core:home"))
+  context = response.context
+ 
+  assert [i.catalog_item.name for i in context["shelves_items"]] == ["Apples"]
+  assert [i.catalog_item.name for i in context["fridge_items"]] == ["Bananas"]
+  assert context["freezer_items"] == []
+ 
+ 
+@pytest.mark.django_db
 def test_home_page_Add_item(client):
   # ARRANGE
   pantry, user = views.getOrCreateDefaults()
@@ -83,11 +102,13 @@ def test_home_page_Add_item(client):
   if catalog_item is None:
     catalog_item = GlobalCatalogItem.objects.create(name="Apples", category="Fruit")
  
+  # location is a required field on the form now
   form_data = {
     "catalog_item": catalog_item.id,
     "quantity": 20,
     "date_stored": "2026-10-09",
     "date_expired": "2026-10-16",
+    "location": "SHELVES",
   }
  
   # ACT
@@ -100,6 +121,7 @@ def test_home_page_Add_item(client):
   item = PantryItem.objects.first()
   assert item.quantity == 20
   assert item.catalog_item == catalog_item
+  assert item.location == "SHELVES"
  
   response = client.get(reverse("core:home"))
   assert countNumberOfElements(response, "container") == 1

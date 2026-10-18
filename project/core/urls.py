@@ -12,6 +12,8 @@ urlpatterns=[
     # Add one catalog food to the pantry in a single click, from a search result.
     path('add_from_catalog/<int:item_id>/', views.add_from_catalog, name='add_from_catalog'),
  
+    path('test-pantry/', views.test_pantry_view, name="test_pantry"),
+ 
     # Show the details for one pantry item.
     path(
         'items/<int:item_id>/',

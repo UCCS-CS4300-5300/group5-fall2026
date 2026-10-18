@@ -1,5 +1,5 @@
 {% load static %}
- 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +7,10 @@
     <title>Shelf Life</title>
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
- 
+
     <!-- TODO: GIve Credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
- 
+
 </head>
 <body>
     <div>
@@ -34,12 +34,13 @@
         </header>
         <!-- ────────────────────── Body for HTML page ────────────────────── -->
         <div class="split-container">
-            <!-- 1/4 Column -->
+            <!-- Column 1: Left side bar (pantry organizer) -->
+             <!-- Made changes to how the menu works-->
             <div class="left-column">
-                <div class="flex-upper-border">
+                <div class="flex-upped-border">
                     <h2>Pantry Organizer</h2>
                 </div>
- 
+
                 <!-- ── Search the USDA food catalog ── -->
                 <div class="flex-container">
                     <form action="{% url 'core:home' %}" method="GET" role="search">
@@ -49,7 +50,7 @@
                         <button type="submit">Search</button>
                     </form>
                 </div>
- 
+
                 {% if searched %}
                     <div class="flex-container">
                         {% if searchResults %}
@@ -61,11 +62,21 @@
                                             <br/><small>{{ food.name_subtitle }}</small>
                                         {% endif %}
                                         <br/><small>{{ food.category }}</small>
- 
+
                                         <form action="{% url 'core:add_from_catalog' food.id %}"
                                               method="POST" style="display:inline;">
                                             {% csrf_token %}
                                             <input type="hidden" name="q" value="{{ query }}">
+
+                                            <!-- Where it goes decides which USDA figure is used:
+                                                 the same chicken is 2 days in the fridge, 360 frozen. -->
+                                            <label for="loc-{{ food.id }}" class="visually-hidden">Store in</label>
+                                            <select name="location" id="loc-{{ food.id }}">
+                                                <option value="SHELVES">Shelves</option>
+                                                <option value="FRIDGE">Fridge</option>
+                                                <option value="FREEZER">Freezer</option>
+                                            </select>
+
                                             <button type="submit" class="btn">Add</button>
                                         </form>
                                     </li>
@@ -76,89 +87,193 @@
                         {% endif %}
                     </div>
                 {% endif %}
- 
+
                 <!-- ── Add with your own dates and quantity ── -->
                 <div class="flex-upper-border">
                     <h3>Add with details</h3>
                 </div>
                 <div class="flex-container">
+                    <p class="menu-subheading">Add Item</p>
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
                         {% csrf_token %}
-                            {{ form.as_p }}
-                            <button type="submit">Submit</button>
+                        {{ form.as_p }}
+                        <button type="submit">Submit</button>
                     </form>
                 </div>
             </div>
- 
-            <!-- 3/4 Column -->
-            <div class="kitchen-bg right-column">
+
+            <!-- Column 2: Shelves Container-->
+            <!-- Made changes to how we see the shelves section-->
+            <div class="middle-column scroll-box">
                 <div class="flex-upper-border">
-                    <h2>Main Pantry</h2>
+                    <h2>Shelves</h2>
                 </div>
-                <div class="flex-container">
-                    <div class="kitchen-bg pantry-box">
-                        <div class="flex-upper-border">
-                            <h2>Pantry: {{ pantry.name }}</h2>
+
+                <!-- Main shelf item logic-->
+                <div class="flex-container grid-lane">
+                    {% for product in shelves_items %}
+                        <div class="item-circle">
+                            <div class="container">
+                                {{ product.catalog_item.name }}
+                                <br/>
+                                {{ product.quantity }}
+                                <br/>
+                                {{ product.expiration_status }}
+                                <br/>
+
+                                {% if product.expiration_status != 'Expired' %}
+                                <button type="button" class="btn"
+                                    onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
+                                    View Details
+                                </button>
+                                {% endif %}
+                                <br/>
+
+                                <button type="button" class="btn"
+                                    onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+                                Edit
+                                </button>
+
+                                <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                        Delete
+                                    </button>
+                                </form>
+
+                                <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                                    <h3>Edit {{product.catalog_item.name}}</h3>
+                                    <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
+                                        {% csrf_token %}
+                                        {{ product.edit_form.as_p }}
+                                        <button type="submit">Save</button>
+                                        <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                                    </form>
+                                </dialog>
+                            </div>
                         </div>
-                            <!-- Loop through the array of Pantry Items -->
-                            {% for product in pantryItems %}
-                                <div class="circle">
-                                    <div class="container">
-                                        {{ product.catalog_item.name }}
-                                        <br/>
-                                        {{ product.quantity }}
-                                        <br/>
-                                        {{ product.expiration_status }}
-                                        <br/>
- 
-                                        {% if product.expiration_status != 'Expired' %}
+                    {% empty %}
+                        <h1>No shelf products found.</h1>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Column 3: Freezer and Fridge-->
+            <div class="right-column scrollbox">
+                <div class="storage-panel">
+                    <div class="flex-upper-border">
+                        <h2>Freezer</h2>
+                    </div>
+
+                    <div class="flex-container grid-lane">
+                        {% for product in freezer_items %}
+                            <div class="item-circle">
+                                <div class="container">
+                                    {{ product.catalog_item.name }}
+                                    <br/>
+                                    {{ product.quantity }}
+                                    <br/>
+                                    {{ product.expiration_status }}
+                                    <br/>
+
+                                    {% if product.expiration_status != 'Expired' %}
                                         <button type="button" class="btn"
                                             onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
                                             View Details
                                         </button>
-                                        {% endif %}
- 
-                                        <br/>
- 
-                                        <button type="button" class="btn"
-                                            onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-                                            Edit
+                                    {% endif %}
+                                    <br/>
+
+                                    <button type="button" class="btn"
+                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+                                        Edit
+                                    </button>
+
+                                    <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                            Delete
                                         </button>
- 
-                                        <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                    </form>
+
+                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                                        <h3>Edit {{ product.catalog_item.name }}</h3>
+                                        <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
                                             {% csrf_token %}
-                                            <button type="submit"
-                                                    class="btn btn-delete"
-                                                    onclick="return confirm('Are you sure you want to delete this item?');">
-                                                Delete
-                                            </button>
+                                            {{ product.edit_form.as_p }}
+                                            <button type="submit">Save</button>
+                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
                                         </form>
- 
-                                        <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                                            <h3>Edit {{ product.catalog_item.name }}</h3>
-                                            <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
-                                                {% csrf_token %}
-                                                {{ product.edit_form.as_p }}
-                                                <button type="submit">Save</button>
-                                                <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
-                                            </form>
-                                        </dialog>
-                                    </div>
+                                    </dialog>
                                 </div>
-                            {% endfor %}
-                            {% if not pantryItems %}
-                                <!-- When the array is empty -->
-                                <h1>No products found.</h1>
-                            {% endif %}
- 
-                        <!-- TODO: GIve Credit in about page -->
-                        <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
+                            </div>
+                        {% empty %}
+                            <p>No freezer products found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="storage-panel">
+                    <div class="flex-upper-border">
+                        <h2>Fridge</h2>
+                    </div>
+
+                    <div class="flex-container grid-lane">
+                        {% for product in fridge_items %}
+                            <div class="item-circle">
+                                <div class="container">
+                                    {{ product.catalog_item.name }}
+                                    <br/>
+                                    {{ product.quantity }}
+                                    <br/>
+                                    {{ product.expiration_status }}
+                                    <br/>
+
+                                    {% if product.expiration_status != 'Expired' %}
+                                        <button type="button" class="btn"
+                                            onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
+                                            View Details
+                                        </button>
+                                    {% endif %}
+                                    <br/>
+
+                                    <button type="button" class="btn"
+                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+                                        Edit
+                                    </button>
+
+                                    <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                            Delete
+                                        </button>
+                                    </form>
+
+                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                                        <h3>Edit {{ product.catalog_item.name }}</h3>
+                                        <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
+                                            {% csrf_token %}
+                                            {{ product.edit_form.as_p }}
+                                            <button type="submit">Save</button>
+                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                                        </form>
+                                    </dialog>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No fridge products found.</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+
+
+            <!-- TODO: Give Credit in about page -->
+            <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
+
         </div>
     </div>
- 
+
     {% if open_edit_id %}
     <script>
         // Reopens the pop-up when a save failed so the errors are visible
