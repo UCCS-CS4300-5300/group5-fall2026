@@ -4,6 +4,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -202,3 +205,21 @@ def pantry_item_detail(request, item_id):
             "pantry_item": pantry_item
         }
     )
+
+@csrf_protect
+def submit_drag_drop(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON payload sent by Fetch API
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            target_zone = data.get('target_zone')
+            
+            # --- Database Logic Here ---
+            
+            return JsonResponse({'status': 'success', 'message': 'Item updated!'})
+            
+        except (ValueError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)

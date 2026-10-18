@@ -16,4 +16,5 @@ urlpatterns=[
         views.pantry_item_detail,
         name='pantry_item_detail'
     ),
+    path('submit-drag-drop/', views.submit_drag_drop, name='submit_drag_drop'),
 ]

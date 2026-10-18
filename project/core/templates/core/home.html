@@ -48,6 +48,10 @@
                         <button type="submit">Submit</button>
                     </form>
                 </div>
+                <div class="flex-container">
+                    <div class="kitchen-bg pantry-box">
+                    </div>
+                </div>
             </div>
 
             <!-- Column 2: Shelves Container-->
@@ -56,48 +60,49 @@
                 <div class="flex-upper-border">
                     <h2>Shelves</h2>
                 </div>
-
                 <!-- Main shelf item logic-->
                 <div class="flex-container grid-lane">
                     {% for product in shelves_items %}
-                        <div class="item-circle">
-                            <div class="container">
-                                {{ product.catalog_item.name }}
-                                <br/>
-                                {{ product.quantity }}
-                                <br/>
-                                {{ product.expiration_status }}
-                                <br/>
+                        <div id={{ product.catalog_item.name }} class="draggable-card" draggable="true">
+                            <div class="item-circle">
+                                <div class="container">
+                                    {{ product.catalog_item.name }}
+                                    <br/>
+                                    {{ product.quantity }}
+                                    <br/>
+                                    {{ product.expiration_status }}
+                                    <br/>
 
-                                {% if product.expiration_status != 'Expired' %}
-                                <button type="button" class="btn"
-                                    onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
-                                    View Details
-                                </button>
-                                {% endif %}
-                                <br/>
-
-                                <button type="button" class="btn" 
-                                    onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-                                Edit
-                                </button>
-                                
-                                <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                        Delete
+                                    {% if product.expiration_status != 'Expired' %}
+                                    <button type="button" class="btn"
+                                        onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
+                                        View Details
                                     </button>
-                                </form>
+                                    {% endif %}
+                                    <br/>
 
-                                <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                                    <h3>Edit {{product.catalog_item.name}}</h3>
-                                    <form action="{% url 'core:edit_pantry_item' product.id}" method="POST">
+                                    <button type="button" class="btn" 
+                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+                                    Edit
+                                    </button>
+                                    
+                                    <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
                                         {% csrf_token %}
-                                        {{ product.edit_form.as_p }}
-                                        <button type="submit">Save</button>
-                                        <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                                            Delete
+                                        </button>
                                     </form>
-                                </dialog>
+
+                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                                        <h3>Edit {{product.catalog_item.name}}</h3>
+                                        <form action="{% url 'core:edit_pantry_item' product.id}" method="POST">
+                                            {% csrf_token %}
+                                            {{ product.edit_form.as_p }}
+                                            <button type="submit">Save</button>
+                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                                        </form>
+                                    </dialog>
+                                </div>
                             </div>
                         </div>
                     {% empty %}
@@ -160,7 +165,6 @@
                         {% endfor %}
                     </div>
                 </div>
-
                 <div class="storage-panel">
                     <div class="flex-upper-border">
                         <h2>Fridge</h2>
@@ -226,5 +230,103 @@
         document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
     </script>
     {% endif %}
+
+<!-- CSRF Token required by Django for POST requests -->
+{% csrf_token %}
+
+<div class="container">
+    <!-- Draggable Item -->
+    <div id="item-42" class="draggable-card" draggable="true">
+        Drag Me (ID: 42)
+    </div>
+
+    <!-- Drop Zone (The target form/container) -->
+    <div id="drop-zone" class="target-zone">
+        Drop here to submit
+    </div>
+</div>
+
+<script>
+
+function getParentWithClassListName(element, targetName) {
+  let current = element.parentElement;
+  console.log("   Checking ...   ")
+  while (current) {
+    console.log(current)
+    if (current.classList.contains(targetName)) {
+      console.log("Found")
+      return current;
+    }
+    current = current.parentElement;
+  }
+  console.log("NOT Found! ")
+  return null;
+}
+
+function addDropZoneListeners(dropZone) {
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    
+    const elementId = e.dataTransfer.getData('text/plain');
+    // console.log(e.dataTransfer)
+    
+    // Grab Django's CSRF token from the DOM
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('/submit-drag-drop/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Required by Django for security
+        'X-CSRFToken': csrfToken 
+      },
+    body: JSON.stringify({
+      item_id: elementId,
+      target_zone: 'drop-zone'
+    })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.status)
+    
+      if (data.status === 'success') {
+        const droppedElement = document.getElementById(elementId);
+        dropZone.appendChild(droppedElement);
+      } else {
+        alert('Error saving data');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+
+  });
+}
+
+// Attach one listener to the parent element or document
+document.addEventListener('mousedown', (event) => {
+    draggableCard = getParentWithClassListName(event.target, 'draggable-card') 
+  if (draggableCard != null) {
+    console.log('Element clicked via delegation:', draggableCard);
+  
+    draggableCard.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', e.target.id);
+    });
+  }
+});
+
+document.querySelectorAll('.grid-lane').forEach(dropZone => {
+  addDropZoneListeners(dropZone)
+});
+
+document.querySelectorAll('.pantry-box').forEach(dropZone => {
+  addDropZoneListeners(dropZone)
+});
+
+</script>
+
 </body>
 </html>
+
