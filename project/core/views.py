@@ -217,6 +217,16 @@ def submit_drag_drop(request):
             
             # --- Database Logic Here ---
             
+            # May need to implement ID here? Not sure
+
+            # # Routing the item into the corresponding container
+            # if item.location == "SHELVES":
+            #     shelves_items.append(item)
+            # elif item.location == "FRIDGE":
+            #     fridge_items.append(item)
+            # elif item.location == "FREEZER":
+            #     freezer_items.append(item)
+
             return JsonResponse({'status': 'success', 'message': 'Item updated!'})
             
         except (ValueError, KeyError):
