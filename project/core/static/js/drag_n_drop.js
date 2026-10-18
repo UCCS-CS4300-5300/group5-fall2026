@@ -1,4 +1,4 @@
-
+// get Parent Element With Class List Name if it exists
 function getParentWithClassListName(element, targetName) {
   let current = element.parentElement;
   console.log("   Checking ...   ")
@@ -14,20 +14,23 @@ function getParentWithClassListName(element, targetName) {
   return null;
 }
 
+// Add drop Zone Listener. 
 function addDropZoneListeners(dropZone) {
+  // Add event listener for the drag over to prevent default behaviors
   dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
   });
 
+  // Add event listener for the drop action
   dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     
     const elementId = e.dataTransfer.getData('text/plain');
-    // console.log(e.dataTransfer)
     
     // Grab Django's CSRF token from the DOM
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // Submit the fetch action (POST) to then move and update the data
     fetch('/submit-drag-drop/', {
       method: 'POST',
       headers: {
@@ -52,11 +55,11 @@ function addDropZoneListeners(dropZone) {
       }
     })
     .catch(error => console.error('Error:', error));
-
   });
 }
 
-// Attach one listener to the parent element or document
+
+// Attach one listener to the parent element or document looking for a food item
 document.addEventListener('mousedown', (event) => {
     draggableCard = getParentWithClassListName(event.target, 'draggable-card') 
   if (draggableCard != null) {
@@ -68,10 +71,12 @@ document.addEventListener('mousedown', (event) => {
   }
 });
 
+// Attach listener for the drop via the css class
 document.querySelectorAll('.grid-lane').forEach(dropZone => {
   addDropZoneListeners(dropZone)
 });
 
+// Attach listener for the drop via the css class
 document.querySelectorAll('.pantry-box').forEach(dropZone => {
   addDropZoneListeners(dropZone)
 });
