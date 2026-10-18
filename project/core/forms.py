@@ -8,12 +8,13 @@ class PantryItemForm(forms.ModelForm):
 
         # TODO add pantry names for the visible pantry
         # TODO add ability for an item not in the catalog.
-        fields = ["catalog_item", "quantity","date_stored","date_expired"]
+        fields = ["catalog_item", "quantity","date_stored","date_expired", "location"]
 
         widgets = {
             "quantity": forms.NumberInput(attrs={"min": 1, "class":"form-control"}),
             "date_stored": forms.DateInput(attrs={"type": "date", "class":"form-control"}),
-            "date_expired": forms.DateInput(attrs={"type":"date","class":"form-control"})
+            "date_expired": forms.DateInput(attrs={"type":"date","class":"form-control"}),
+            "location": forms.Select(attrs={"class":"form-control"})
         }
 
 def __init__(self, *args, **kwargs):

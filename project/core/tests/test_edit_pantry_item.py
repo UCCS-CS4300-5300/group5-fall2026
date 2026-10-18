@@ -2,7 +2,7 @@ import datetime
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from core.models import GlobalCatalogItem, Pantry, PantryItem
 
 ORIGINAL_DATE = datetime.date(2026, 10, 10)
 
@@ -25,6 +25,7 @@ def form_data(item, **changes):
         "quantity": item.quantity,
         "date_stored": item.date_stored.isoformat(),
         "date_expired": item.date_expired.isoformat(),
+        "location": item.location
     }
     data.update(changes)
     return data

@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test import TransactionTestCase
 from core.models import Pantry, PantryItem, GlobalCatalogItem
-from . import views
+from core import views
 
 logging.basicConfig(
     level=logging.DEBUG,

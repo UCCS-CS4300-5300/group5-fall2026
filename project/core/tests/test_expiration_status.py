@@ -2,7 +2,7 @@ import pytest
 from datetime import timedelta
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from core.models import GlobalCatalogItem, Pantry, PantryItem
 
 
 def make_item(days_until_expiry):
