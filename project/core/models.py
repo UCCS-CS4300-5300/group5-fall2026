@@ -82,11 +82,6 @@ class PantryItem(models.Model):
 
       today = timezone.localdate() # made it localdate for more accurate date representation
       
-      logging.debug("________")
-
-      logging.debug("(self.date_expired - today).days: \t" + str((self.date_expired - today).days))
-      logging.debug("settings.EXPIRING_SOON_DAYS: \t" + str(settings.EXPIRING_SOON_DAYS))
-
       if today >= self.date_expired: #Fixed
          return "Expired"
       

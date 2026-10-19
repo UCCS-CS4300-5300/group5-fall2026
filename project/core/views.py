@@ -212,23 +212,19 @@ def submit_drag_drop(request):
         try:
             # Parse the JSON payload sent by Fetch API
             data = json.loads(request.body)
-            item_id = data.get('item_id')
+            raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-            
-            # --- Database Logic Here ---
-            
-            # May need to implement ID here? Not sure
-
-            # # Routing the item into the corresponding container
-            # if item.location == "SHELVES":
-            #     shelves_items.append(item)
-            # elif item.location == "FRIDGE":
-            #     fridge_items.append(item)
-            # elif item.location == "FREEZER":
-            #     freezer_items.append(item)
+                        
+            logging.debug(target_zone)
+            if target_zone:
+                item = PantryItem.objects.get(id=raw_id)
+                if item:
+                    logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
+                    item.location = target_zone;
+                    item.save()
 
             return JsonResponse({'status': 'success', 'message': 'Item updated!'})
-            
+        
         except (ValueError, KeyError):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
             

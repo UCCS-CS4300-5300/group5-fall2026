@@ -1,0 +1,44 @@
+<!--            Pantry item template            -->
+
+<div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true"  >
+    <div class="item-circle">
+        <div class="container">
+            {{ product.catalog_item.name }}
+            <br/>
+            {{ product.quantity }}
+            <br/>
+            {{ product.expiration_status }}
+            <br/>
+
+            {% if product.expiration_status != 'Expired' %}
+                <button type="button" class="btn"
+                    onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
+                    View Details
+                </button>
+            {% endif %}
+            <br/>
+
+            <button type="button" class="btn" 
+                onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
+            Edit
+            </button>
+            
+            <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                    Delete
+                </button>
+            </form>
+
+            <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
+                <h3>Edit {{product.catalog_item.name}}</h3>
+                <form action="{% url 'core:edit_pantry_item' product.id}" method="POST">
+                    {% csrf_token %}
+                    {{ product.edit_form.as_p }}
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                </form>
+            </dialog>
+        </div>
+    </div>
+</div>
