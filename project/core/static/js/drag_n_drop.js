@@ -17,8 +17,24 @@ function addDropZoneListeners(dropZone, zoneName) {
     e.preventDefault();
   });
 
+  dropZone.addEventListener("dragenter", (e) => {
+    e.preventDefault();
+    if (e.target.classList.contains("dropzone")) {
+      e.target.classList.add("dragover");
+    }
+  });
+
+  dropZone.addEventListener("dragleave", (e) => {
+    if (e.target.classList.contains("dropzone")) {
+      e.target.classList.remove("dragover");
+    }
+  });
+
   // Add event listener for the drop action
   dropZone.addEventListener('drop', (e) => {
+    if (e.target.classList.contains("dropzone")) {
+      e.target.classList.remove("dragover");
+    }
     e.preventDefault();
     
     const elementId = e.dataTransfer.getData('text/plain');

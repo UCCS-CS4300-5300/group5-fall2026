@@ -48,7 +48,7 @@
                     </form>
                 </div>
                 <div class="flex-container">
-                    <div id="BAG" class="kitchen-bg pantry-box">
+                    <div id="BAG" class="kitchen-bg pantry-box dropzone">
                         {% for product in bag_items %}
                             {% load custom_elements %}
                             <!-- Renders the pantryItem custom component -->
@@ -65,7 +65,7 @@
                     <h2>Shelves</h2>
                 </div>
                 <!-- Main shelf item logic-->
-                <div id="SHELF" class="flex-container grid-lane">
+                <div id="SHELF" class="flex-container grid-lane dropzone">
                     {% for product in shelves_items %}
                         {% load custom_elements %}
                         <!-- Renders the pantryItem custom component -->
@@ -81,7 +81,7 @@
                         <h2>Freezer</h2>
                     </div>
 
-                    <div id="FREEZER" class="flex-container grid-lane">
+                    <div id="FREEZER" class="flex-container grid-lane dropzone">
                         {% for product in freezer_items %}
                             {% load custom_elements %}
                             <!-- Renders the pantryItem custom component -->
@@ -94,7 +94,7 @@
                         <h2>Fridge</h2>
                     </div>
 
-                    <div id="FRIDGE" class="flex-container grid-lane">
+                    <div id="FRIDGE" class="flex-container grid-lane dropzone">
                         {% for product in fridge_items %}
                             {% load custom_elements %}
                             <!-- Renders the pantryItem custom component -->
