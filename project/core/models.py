@@ -60,7 +60,8 @@ class PantryItem(models.Model):
    STORAGE_LOCATIONS = [
       ("SHELVES", "Shelves"),
       ("FRIDGE", "Fridge"),
-      ("FREEZER", "Freezer")
+      ("FREEZER", "Freezer"),
+      ("BAG", "Bag"),
    ]
 
    location = models.CharField(

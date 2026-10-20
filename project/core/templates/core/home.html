@@ -48,7 +48,12 @@
                     </form>
                 </div>
                 <div class="flex-container">
-                    <div class="kitchen-bg pantry-box">
+                    <div id="BAG" class="kitchen-bg pantry-box">
+                        {% for product in bag_items %}
+                            {% load custom_elements %}
+                            <!-- Renders the pantryItem custom component -->
+                            {% render_pantry_item product %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>

@@ -104,6 +104,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
     shelves_items = []
     fridge_items = []
     freezer_items = []
+    bag_items = []
 
     for item in pantryItems:
         if item.id == invalid_id:
@@ -118,6 +119,9 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
             fridge_items.append(item)
         elif item.location == "FREEZER":
             freezer_items.append(item)
+        elif item.location == "BAG":
+            bag_items.append(item)
+
 
     return {
         "user" : user,
@@ -125,6 +129,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
         "shelves_items": shelves_items,
         "fridge_items": fridge_items,
         "freezer_items":freezer_items,
+        "bag_items": bag_items,
         "pantryItems" : pantryItems,
         "catalog" : GlobalCatalogItem.objects.all(),
         "form" : add_form or PantryItemForm(),
