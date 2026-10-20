@@ -69,12 +69,28 @@
                                 {{ product.expiration_status }}
                                 <br/>
 
-                                {% if product.expiration_status != 'Expired' %}
+                                <!-- Open the details popup for this item -->
                                 <button type="button" class="btn"
-                                    onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
+                                    onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
                                     View Details
                                 </button>
-                                {% endif %}
+
+                                <!-- Each item gets its own popup using the product id -->
+                                <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
+                                    <h3>{{ product.catalog_item.name }}</h3>
+
+                                    <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
+                                    <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+                                    <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
+                                    <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
+                                    <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
+                                    <p><strong>Status:</strong> {{ product.expiration_status }}</p>
+
+                                    <!-- Close the popup and stay on the pantry page -->
+                                    <button type="button" onclick="this.closest('dialog').close()">
+                                        Close
+                                    </button>
+                                </dialog>
                                 <br/>
 
                                 <button type="button" class="btn" 
@@ -124,12 +140,28 @@
                                     {{ product.expiration_status }}
                                     <br/>
 
-                                    {% if product.expiration_status != 'Expired' %}
-                                        <button type="button" class="btn"
-                                            onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
-                                            View Details
+                                    <!-- Open the details popup for this freezer item -->
+                                    <button type="button" class="btn"
+                                        onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
+                                        View Details
+                                    </button>
+
+                                    <!-- Popup for the freezer item's info -->
+                                    <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
+                                        <h3>{{ product.catalog_item.name }}</h3>
+
+                                        <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
+                                        <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+                                        <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
+                                        <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
+                                        <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
+                                        <p><strong>Status:</strong> {{ product.expiration_status }}</p>
+
+                                        <!-- Close the popup without leaving the pantry page -->
+                                        <button type="button" onclick="this.closest('dialog').close()">
+                                            Close
                                         </button>
-                                    {% endif %}
+                                    </dialog>
                                     <br/>
 
                                     <button type="button" class="btn"
@@ -177,12 +209,28 @@
                                     {{ product.expiration_status }}
                                     <br/>
 
-                                    {% if product.expiration_status != 'Expired' %}
-                                        <button type="button" class="btn"
-                                            onclick="window.location.href='{% url 'core:pantry_item_detail' product.id %}'">
-                                            View Details
+                                    <!-- Open the details popup for this fridge item -->
+                                    <button type="button" class="btn"
+                                        onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
+                                        View Details
+                                    </button>
+
+                                    <!-- Popup for the fridge item's info -->
+                                    <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
+                                        <h3>{{ product.catalog_item.name }}</h3>
+
+                                        <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
+                                        <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+                                        <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
+                                        <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
+                                        <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
+                                        <p><strong>Status:</strong> {{ product.expiration_status }}</p>
+
+                                        <!-- Close the popup without leaving the pantry page -->
+                                        <button type="button" onclick="this.closest('dialog').close()">
+                                            Close
                                         </button>
-                                    {% endif %}
+                                    </dialog>
                                     <br/>
 
                                     <button type="button" class="btn"
