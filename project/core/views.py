@@ -113,7 +113,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None):
             item.edit_form = PantryItemForm(instance=item, auto_id=f"edit{item.id}_%s")
 
         # Routing the item into the corresponding container
-        if item.location == "SHELVES":
+        if item.location == "SHELF":
             shelves_items.append(item)
         elif item.location == "FRIDGE":
             fridge_items.append(item)

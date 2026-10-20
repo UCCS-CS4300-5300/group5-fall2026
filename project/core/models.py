@@ -58,7 +58,7 @@ class PantryItem(models.Model):
 
    # Storage locations variables
    STORAGE_LOCATIONS = [
-      ("SHELVES", "Shelves"),
+      ("SHELF", "Shelf"),
       ("FRIDGE", "Fridge"),
       ("FREEZER", "Freezer"),
       ("BAG", "Bag"),
@@ -67,7 +67,7 @@ class PantryItem(models.Model):
    location = models.CharField(
       max_length = 10,
       choices = STORAGE_LOCATIONS,
-      default = "SHELVES"
+      default = "SHELF"
    )
 
    # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?  
