@@ -6,6 +6,9 @@ Public domain (CC0). https://catalog.data.gov/dataset/fsis-foodkeeper-data
 Loads 661 foods across 25 categories, with 1347 shelf-life rows.
 
 Safe to run more than once: rows are matched on name + subtitle + category.
+
+Note: this migration is history. Editing it does nothing for anyone who has
+already applied it -- changing the data later needs a new migration.
 """
 
 import csv
@@ -14,6 +17,14 @@ from pathlib import Path
 from django.db import migrations
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
+
+# The CSVs are UTF-8 and must be opened as UTF-8 explicitly. Python's open()
+# defaults to the system locale encoding, which is cp1252 on Windows, and the
+# data contains characters cp1252 cannot decode -- the curly quotes in
+# '"Genuine" Maple syrup' and the accents in 'consomme'. Without this the
+# migration dies with UnicodeDecodeError on Windows while working fine on
+# Linux and macOS.
+ENCODING = "utf-8"
 
 
 def number(value):
@@ -27,7 +38,8 @@ def load(apps, schema_editor):
 
     # category id -> "Meat: Fresh"
     categories = {}
-    with (FIXTURES / "foodkeeper_categories.csv").open(newline="") as f:
+    with (FIXTURES / "foodkeeper_categories.csv").open(
+            newline="", encoding=ENCODING) as f:
         for row in csv.DictReader(f):
             label = row["name"]
             if row["subcategory"]:
@@ -35,7 +47,8 @@ def load(apps, schema_editor):
             categories[row["id"]] = label
 
     items = {}
-    with (FIXTURES / "foodkeeper_products.csv").open(newline="") as f:
+    with (FIXTURES / "foodkeeper_products.csv").open(
+            newline="", encoding=ENCODING) as f:
         for row in csv.DictReader(f):
             item, _ = CatalogItem.objects.get_or_create(
                 name=row["name"],
@@ -45,7 +58,8 @@ def load(apps, schema_editor):
             )
             items[row["id"]] = item
 
-    with (FIXTURES / "foodkeeper_shelf_life.csv").open(newline="") as f:
+    with (FIXTURES / "foodkeeper_shelf_life.csv").open(
+            newline="", encoding=ENCODING) as f:
         for row in csv.DictReader(f):
             ShelfLife.objects.update_or_create(
                 item=items[row["product_id"]],
@@ -69,7 +83,7 @@ def unload(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0002_alter_globalcatalogitem_options_and_more"),  # set to your makemigrations output
+        ("core", "0002_alter_globalcatalogitem_options_and_more"),
     ]
 
     operations = [
