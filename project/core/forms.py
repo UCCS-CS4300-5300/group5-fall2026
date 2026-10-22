@@ -3,7 +3,7 @@ from .models import PantryItem
 
 class PantryItemForm(forms.ModelForm):
 
-    class Meta:    
+    class Meta:
         model = PantryItem
 
         # TODO add pantry names for the visible pantry
@@ -17,12 +17,7 @@ class PantryItemForm(forms.ModelForm):
             "location": forms.Select(attrs={"class":"form-control"})
         }
 
-def __init__(self, *args, **kwargs):
-    """
-    This function will flag date fields as non-required at the form tier.
-    This will allow the calculation to be automatic and execute safely.
-    """
-    super().__init__(*args, **kwargs)
-    self.fields["date_expired"].required = False
-
+    def __init__(self, *args, **kwargs):
     
+        super().__init__(*args, **kwargs)
+        self.fields["date_expired"].required = False

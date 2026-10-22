@@ -34,4 +34,10 @@ STATICFILES_DIRS = [
     BASE_DIR / "core/static",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost:8000",
+    "https://*.app.github.dev",
+    "https://*.githubpreview.dev",
+]
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
