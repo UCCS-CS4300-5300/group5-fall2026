@@ -39,6 +39,58 @@
                 <div class="flex-upped-border">
                     <h2>Pantry Organizer</h2>
                 </div>
+
+                <!-- ── Search the USDA food catalog ── -->
+                <div class="flex-container">
+                    <form action="{% url 'core:home' %}" method="GET" role="search">
+                        <label for="q">Search foods</label>
+                        <input type="search" id="q" name="q" value="{{ query }}"
+                               placeholder="milk, ground beef, cereal">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                {% if searched %}
+                    <div class="flex-container">
+                        {% if searchResults %}
+                            <ul class="catalog-results">
+                                {% for food in searchResults %}
+                                    <li>
+                                        <strong>{{ food.name }}</strong>
+                                        {% if food.name_subtitle %}
+                                            <br/><small>{{ food.name_subtitle }}</small>
+                                        {% endif %}
+                                        <br/><small>{{ food.category }}</small>
+
+                                        <form action="{% url 'core:add_from_catalog' food.id %}"
+                                              method="POST" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="q" value="{{ query }}">
+
+                                            <!-- Where it goes decides which USDA figure is used:
+                                                 the same chicken is 2 days in the fridge, 360 frozen. -->
+                                            <label for="loc-{{ food.id }}" class="visually-hidden">Store in</label>
+                                            <select name="location" id="loc-{{ food.id }}">
+                                                <option value="SHELVES">Shelves</option>
+                                                <option value="FRIDGE">Fridge</option>
+                                                <option value="FREEZER">Freezer</option>
+                                            </select>
+
+                                            <button type="submit" class="btn">Add</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No foods match &ldquo;{{ query }}&rdquo;. Use the form below to add it yourself.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- ── Add with your own dates and quantity ── -->
+                <div class="flex-upper-border">
+                    <h3>Add with details</h3>
+                </div>
                 <div class="flex-container">
                     <p class="menu-subheading">Add Item</p>
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
@@ -103,6 +155,14 @@
                     </div>
                 </div>
             </div>
+
+
+            <!-- TODO: Give Credit in about page -->
+            <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
+
+        </div>
+    </div>
+
     {% if open_edit_id %}
     <script>
         // Reopens the pop-up when a save failed so the errors are visible

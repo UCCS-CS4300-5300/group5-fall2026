@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User # Django built-in user model
 from django.utils import timezone # Useful for date tracking
 from datetime import timedelta
-from django.conf import settings 
+from django.conf import settings
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -18,16 +18,115 @@ logging.basicConfig(
 
 # Shared list of global item catalog
 class GlobalCatalogItem(models.Model):
-   """ 
-   This is the shared list of all the items.
+   """
+   This is the shared list of all the items, loaded from USDA FoodKeeper.
    Below are going to be the fields of the items
    """
-   name = models.CharField(max_length=100, unique=True)
+
+   # NOT unique. FoodKeeper lists 20 kinds of Ham, 12 of Pork, 5 of Cheese.
+   # 193 of the 661 foods share a name with another entry, so unique=True
+   # would make the catalog impossible to load.
+   name = models.CharField(max_length=100)
+
+   # What tells the variants apart, e.g. "hard such as cheddar, swiss"
+   name_subtitle = models.CharField(max_length=200, blank=True)
+
+   # Comma-separated search terms from FoodKeeper, so "stew meat" finds the
+   # right entry. This is what makes catalog search usable.
+   keywords = models.TextField(blank=True)
+
+   # Still text, e.g. "Meat: Fresh". Longest value in the data is 33 chars.
    category = models.CharField(max_length=50)
-   estimated_expiration_days = models.PositiveSmallIntegerField(default=7)
+
+   class Meta:
+      # Category is part of the key: "Raw kabobs with vegetables" is listed
+      # under both Meat and Poultry, with different shelf lives.
+      unique_together = [("name", "name_subtitle", "category")]
+      ordering = ["name"]
 
    def __str__(self):
+      if self.name_subtitle:
+         return f"{self.name} ({self.name_subtitle})"
       return self.name
+
+   def shelf_life_days(self, storage=None, condition="purchase"):
+      """
+      How many days this food keeps in `storage`, or None when the USDA
+      gives no figure for it.
+
+      Normal path: PantryItem.save() passes a storage key translated from
+      the item's location, and the lookup stays inside that one place.
+      Chicken in the freezer gets 360 days, chicken in the fridge gets 2.
+      Within a location it falls back from the requested condition to
+      from-purchase, then to any condition, because FoodKeeper does not
+      fill in every combination.
+
+      USDA coverage is uneven, so a location with no figure returns None
+      and the item reads "Unknown" rather than borrowing a number from a
+      different location. A wrong date is worse than no date here.
+         refrigerate  480 of 661 foods
+         freeze       339 of 661
+         pantry       302 of 661
+
+      The no-storage path below is a safety net only. It fires if an item
+      somehow has a location outside STORAGE_LOCATIONS.
+      """
+      rows = self.shelf_lives.exclude(days_max=None)
+
+      places = [storage] if storage else ["refrigerate", "pantry", "freeze"]
+      for place in places:
+         here = rows.filter(storage=place)
+         match = here.filter(condition=condition).first() or here.first()
+         if match:
+            return match.days_max
+
+      return None
+
+
+class ShelfLife(models.Model):
+   """
+   How long one food keeps in one place, under one condition.
+
+   Chicken is 2 days in the fridge and 360 days in the freezer, so a single
+   number per food cannot express the real data.
+   """
+
+   STORAGE = [
+      ("pantry", "Pantry"),
+      ("refrigerate", "Fridge"),
+      ("freeze", "Freezer"),
+   ]
+   CONDITION = [
+      ("unopened", "Unopened"),
+      ("purchase", "From purchase"),
+      ("opened", "After opening"),
+      ("thawed", "After thawing"),
+   ]
+
+   item = models.ForeignKey(GlobalCatalogItem, on_delete=models.CASCADE,
+                            related_name="shelf_lives")
+   storage = models.CharField(max_length=20, choices=STORAGE)
+   condition = models.CharField(max_length=20, choices=CONDITION)
+
+   min_amount = models.PositiveSmallIntegerField(null=True, blank=True)
+   max_amount = models.PositiveSmallIntegerField(null=True, blank=True)
+
+   # FoodKeeper's own wording: Days, Weeks, Months, Years, but also
+   # "Indefinitely", "When Ripe", "Not Recommended", "Package use-by date".
+   metric = models.CharField(max_length=40, blank=True)
+
+   # max_amount converted to days. None when metric is not a time span,
+   # which is 127 of the 1347 rows.
+   days_max = models.PositiveIntegerField(null=True, blank=True)
+
+   tips = models.TextField(blank=True)
+
+   class Meta:
+      unique_together = [("item", "storage", "condition")]
+
+   def __str__(self):
+      return f"{self.item.name} {self.get_storage_display()}: {self.metric}"
+
 
 class Pantry(models.Model):
    """
@@ -70,10 +169,20 @@ class PantryItem(models.Model):
       default = "SHELF"
    )
 
-   # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?  
+   # Our UI labels to FoodKeeper's own storage keys. The two sets of names
+   # were written independently and do not match. Without this translation
+   # filter(storage="FRIDGE") matches zero rows, shelf_life_days returns
+   # None, and every item silently saves with no expiration date.
+   LOCATION_TO_STORAGE = {
+      "SHELVES": "pantry",
+      "FRIDGE":  "refrigerate",
+      "FREEZER": "freeze",
+   }
+
+   # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?
 
    @property
-   def expiration_status(self): 
+   def expiration_status(self):
       """
       This function will help calculate the status of the expiration
       """
@@ -85,22 +194,34 @@ class PantryItem(models.Model):
       
       if today >= self.date_expired: #Fixed
          return "Expired"
-      
+
       elif 0 < (self.date_expired - today).days <= settings.EXPIRING_SOON_DAYS:
          return "Expiring Soon"
 
       # Otherwise it is categorized as fresh for simplicity
       return "Fresh"
-   
+
 
    def save(self, *args, **kwargs):
       """
-      This will make it possible to automatically compute expiration dates based on
-      standard shelf-life if the fields are left empty.
+      This will make it possible to automatically compute expiration dates
+      based on USDA shelf-life data if the fields are left empty.
       """
 
       if not self.date_expired and self.catalog_item:
-         self.date_expired = self.date_stored + timedelta(days=self.catalog_item.estimated_expiration_days)
+         # Where the user put it, translated into FoodKeeper's own wording.
+         # The lookup then stays inside that one location: the same chicken
+         # is 2 days in the fridge and 360 in the freezer.
+         storage = self.LOCATION_TO_STORAGE.get(self.location)
+         days = self.catalog_item.shelf_life_days(storage)
+
+         # USDA has no figure for every food in every location (no pantry
+         # row for lettuce, no fridge row for cereal), and 14 foods have no
+         # figure anywhere. Those keep an empty date and expiration_status
+         # returns "Unknown", rather than borrowing a number from somewhere
+         # the food is not actually stored.
+         if days:
+            self.date_expired = self.date_stored + timedelta(days=days)
 
       super().save(*args, **kwargs) #saves the item into the database
 
