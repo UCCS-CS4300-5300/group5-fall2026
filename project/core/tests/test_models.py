@@ -221,14 +221,9 @@ def test_current_pantry_item_displayed_on_home_page(client):
  # The current item should appear on the pantry page
  assert response.status_code == 200
  assert b"Banana" in response.content
- 
- # The page should include a link to the item's detail page
- detail_url = reverse(
-  "core:pantry_item_detail",
-  args=[pantry_item.id]
- )
- 
- assert detail_url.encode() in response.content
+
+ # The item should have its own View Details popup on the home page
+ assert f"details-dialog-{pantry_item.id}".encode() in response.content
  assert b"View Details" in response.content
  
  
@@ -260,11 +255,8 @@ def test_expired_pantry_item_not_displayed_as_current(client):
  response = client.get(reverse("core:home"))
  
  assert response.status_code == 200
- 
- # The expired item should not have a detail link in the current pantry
- detail_url = reverse(
-  "core:pantry_item_detail",
-  args=[pantry_item.id]
- )
- 
- assert detail_url.encode() not in response.content
+
+ # Expired items should still have a View Details popup
+ assert f"details-dialog-{pantry_item.id}".encode() in response.content
+ assert b"Old Milk" in response.content
+ assert b"Expired" in response.content
