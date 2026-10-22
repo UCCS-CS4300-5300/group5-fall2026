@@ -82,20 +82,12 @@ document.addEventListener('mousedown', (event) => {
 });
 
 // Attach listener for the drop via the css class
-document.querySelectorAll('.grid-lane').forEach(dropZone => {
-  addDropZoneListeners(dropZone)
-});
-
-// Attach listener for the drop via the css class
-document.querySelectorAll('.pantry-box').forEach(dropZone => {
-  addDropZoneListeners(dropZone)
-});
-
 const elements = document.querySelectorAll('.grid-lane');
 elements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
 });
 
+// Attach listener for the drop via the css class
 const pantryElements = document.querySelectorAll('.pantry-box')
 pantryElements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)

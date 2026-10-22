@@ -149,7 +149,7 @@ def test_drag_drop_task_assignment_view(client):
 
     # Assert response status and database state
     assert response.status_code == 200
-    assert PantryItem.objects.get(id=item.id).location == "FRIDGE"
+    assert PantryItem.objects.get(id=pantryItem.id).location == "FRIDGE"
 
     # task.refresh_from_db()
     # assert task.assigned_to == employee
