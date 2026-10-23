@@ -28,7 +28,7 @@ def countNumberOfElements(response, element):
   return len(matches)
  
  
-def addOneItem(pantry, name="Apples", location="SHELVES"):
+def addOneItem(pantry, name="Apples", location="SHELF"):
   """
   Put one item in the pantry. The pantry no longer seeds itself, so tests
   that need an item have to create one. Defaults to the shelves, which is
@@ -63,10 +63,9 @@ def test_home_page_empty(client):
   assert response.status_code == 200
   assert countNumberOfElements(response, "container") == 0
   assert PantryItem.objects.count() == 0
-  assert b"No shelf products found" in response.content
-  assert b"No fridge products found" in response.content
-  assert b"No freezer products found" in response.content
- 
+  assert b"circle" not in response.content
+  assert b"pantry-item-" not in response.content
+  assert b"draggable-card" not in response.content
  
 @pytest.mark.django_db
 def test_home_page_populated(client):
@@ -86,7 +85,7 @@ def test_home_page_populated(client):
 def test_items_appear_in_their_own_container(client):
   # Each item renders under the container it was stored in, not all in one
   pantry, user = views.getOrCreateDefaults()
-  addOneItem(pantry, name="Apples", location="SHELVES")
+  addOneItem(pantry, name="Apples", location="SHELF")
   addOneItem(pantry, name="Bananas", location="FRIDGE")
  
   response = client.get(reverse("core:home"))
@@ -111,7 +110,7 @@ def test_home_page_Add_item(client):
     "quantity": 20,
     "date_stored": "2026-10-09",
     "date_expired": "2026-10-16",
-    "location": "SHELVES",
+    "location": "SHELF",
   }
  
   # ACT
@@ -124,7 +123,7 @@ def test_home_page_Add_item(client):
   item = PantryItem.objects.first()
   assert item.quantity == 20
   assert item.catalog_item == catalog_item
-  assert item.location == "SHELVES"
+  assert item.location == "SHELF"
  
   response = client.get(reverse("core:home"))
   assert countNumberOfElements(response, "container") == 1
@@ -162,7 +161,6 @@ def test_drag_drop_task_assignment_view(client):
     item, _ = GlobalCatalogItem.objects.get_or_create(
       name = "fruits",
       category = "Fruit",
-      defaults={"estimated_expiration_days": 7}
     )
     
     pantryItem, _ = PantryItem.objects.get_or_create(

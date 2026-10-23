@@ -174,7 +174,7 @@ class PantryItem(models.Model):
    # filter(storage="FRIDGE") matches zero rows, shelf_life_days returns
    # None, and every item silently saves with no expiration date.
    LOCATION_TO_STORAGE = {
-      "SHELVES": "pantry",
+      "SHELF": "pantry",
       "FRIDGE":  "refrigerate",
       "FREEZER": "freeze",
    }
