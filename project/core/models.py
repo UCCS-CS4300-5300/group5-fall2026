@@ -157,15 +157,16 @@ class PantryItem(models.Model):
 
    # Storage locations variables
    STORAGE_LOCATIONS = [
-      ("SHELVES", "Shelves"),
+      ("SHELF", "Shelf"),
       ("FRIDGE", "Fridge"),
-      ("FREEZER", "Freezer")
+      ("FREEZER", "Freezer"),
+      ("BAG", "Bag"),
    ]
 
    location = models.CharField(
       max_length = 10,
       choices = STORAGE_LOCATIONS,
-      default = "SHELVES"
+      default = "SHELF"
    )
 
    # Our UI labels to FoodKeeper's own storage keys. The two sets of names
@@ -173,7 +174,7 @@ class PantryItem(models.Model):
    # filter(storage="FRIDGE") matches zero rows, shelf_life_days returns
    # None, and every item silently saves with no expiration date.
    LOCATION_TO_STORAGE = {
-      "SHELVES": "pantry",
+      "SHELF": "pantry",
       "FRIDGE":  "refrigerate",
       "FREEZER": "freeze",
    }
@@ -190,12 +191,7 @@ class PantryItem(models.Model):
          return "Unknown"
 
       today = timezone.localdate() # made it localdate for more accurate date representation
-
-      logging.debug("________")
-
-      logging.debug("(self.date_expired - today).days: \t" + str((self.date_expired - today).days))
-      logging.debug("settings.EXPIRING_SOON_DAYS: \t" + str(settings.EXPIRING_SOON_DAYS))
-
+      
       if today >= self.date_expired: #Fixed
          return "Expired"
 

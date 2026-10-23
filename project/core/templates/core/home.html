@@ -8,9 +8,8 @@
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <!-- TODO: GIve Credit in about page -->
+    <!-- TODO: Give credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
-
 </head>
 <body>
     <div>
@@ -72,7 +71,7 @@
                                                  the same chicken is 2 days in the fridge, 360 frozen. -->
                                             <label for="loc-{{ food.id }}" class="visually-hidden">Store in</label>
                                             <select name="location" id="loc-{{ food.id }}">
-                                                <option value="SHELVES">Shelves</option>
+                                                <option value="SHELF">Shelf</option>
                                                 <option value="FRIDGE">Fridge</option>
                                                 <option value="FREEZER">Freezer</option>
                                             </select>
@@ -100,6 +99,15 @@
                         <button type="submit">Submit</button>
                     </form>
                 </div>
+                <div class="flex-container">
+                    <div id="BAG" class="kitchen-bg pantry-box dropzone">
+                        {% for product in bag_items %}
+                            {% load custom_elements %}
+                            <!-- Renders the pantryItem custom component -->
+                            {% render_pantry_item product %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
             <!-- Column 2: Shelves Container-->
@@ -108,68 +116,12 @@
                 <div class="flex-upper-border">
                     <h2>Shelves</h2>
                 </div>
-
                 <!-- Main shelf item logic-->
-                <div class="flex-container grid-lane">
+                <div id="SHELF" class="flex-container grid-lane dropzone">
                     {% for product in shelves_items %}
-                        <div class="item-circle">
-                            <div class="container">
-                                {{ product.catalog_item.name }}
-                                <br/>
-                                {{ product.quantity }}
-                                <br/>
-                                {{ product.expiration_status }}
-                                <br/>
-
-                                <!-- Open the details popup for this item -->
-                                <button type="button" class="btn"
-                                    onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
-                                    View Details
-                                </button>
-
-                                <!-- Each item gets its own popup using the product id -->
-                                <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
-                                    <h3>{{ product.catalog_item.name }}</h3>
-
-                                    <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
-                                    <p><strong>Quantity:</strong> {{ product.quantity }}</p>
-                                    <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
-                                    <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
-                                    <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
-                                    <p><strong>Status:</strong> {{ product.expiration_status }}</p>
-
-                                    <!-- Close the popup and stay on the pantry page -->
-                                    <button type="button" onclick="this.closest('dialog').close()">
-                                        Close
-                                    </button>
-                                </dialog>
-                                <br/>
-
-                                <button type="button" class="btn"
-                                    onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-                                Edit
-                                </button>
-
-                                <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                        Delete
-                                    </button>
-                                </form>
-
-                                <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                                    <h3>Edit {{product.catalog_item.name}}</h3>
-                                    <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
-                                        {% csrf_token %}
-                                        {{ product.edit_form.as_p }}
-                                        <button type="submit">Save</button>
-                                        <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
-                                    </form>
-                                </dialog>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <h1>No shelf products found.</h1>
+                        {% load custom_elements %}
+                        <!-- Renders the pantryItem custom component -->
+                        {% render_pantry_item product %}
                     {% endfor %}
                 </div>
             </div>
@@ -181,135 +133,24 @@
                         <h2>Freezer</h2>
                     </div>
 
-                    <div class="flex-container grid-lane">
+                    <div id="FREEZER" class="flex-container grid-lane dropzone">
                         {% for product in freezer_items %}
-                            <div class="item-circle">
-                                <div class="container">
-                                    {{ product.catalog_item.name }}
-                                    <br/>
-                                    {{ product.quantity }}
-                                    <br/>
-                                    {{ product.expiration_status }}
-                                    <br/>
-
-                                    <!-- Open the details popup for this freezer item -->
-                                    <button type="button" class="btn"
-                                        onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
-                                        View Details
-                                    </button>
-
-                                    <!-- Popup for the freezer item's info -->
-                                    <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
-                                        <h3>{{ product.catalog_item.name }}</h3>
-
-                                        <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
-                                        <p><strong>Quantity:</strong> {{ product.quantity }}</p>
-                                        <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
-                                        <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
-                                        <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
-                                        <p><strong>Status:</strong> {{ product.expiration_status }}</p>
-
-                                        <!-- Close the popup without leaving the pantry page -->
-                                        <button type="button" onclick="this.closest('dialog').close()">
-                                            Close
-                                        </button>
-                                    </dialog>
-                                    <br/>
-
-                                    <button type="button" class="btn"
-                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-                                        Edit
-                                    </button>
-
-                                    <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                            Delete
-                                        </button>
-                                    </form>
-
-                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                                        <h3>Edit {{ product.catalog_item.name }}</h3>
-                                        <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
-                                            {% csrf_token %}
-                                            {{ product.edit_form.as_p }}
-                                            <button type="submit">Save</button>
-                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
-                                        </form>
-                                    </dialog>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <p>No freezer products found.</p>
+                            {% load custom_elements %}
+                            <!-- Renders the pantryItem custom component -->
+                            {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
-
                 <div class="storage-panel">
                     <div class="flex-upper-border">
                         <h2>Fridge</h2>
                     </div>
 
-                    <div class="flex-container grid-lane">
+                    <div id="FRIDGE" class="flex-container grid-lane dropzone">
                         {% for product in fridge_items %}
-                            <div class="item-circle">
-                                <div class="container">
-                                    {{ product.catalog_item.name }}
-                                    <br/>
-                                    {{ product.quantity }}
-                                    <br/>
-                                    {{ product.expiration_status }}
-                                    <br/>
-
-                                    <!-- Open the details popup for this fridge item -->
-                                    <button type="button" class="btn"
-                                        onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
-                                        View Details
-                                    </button>
-
-                                    <!-- Popup for the fridge item's info -->
-                                    <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
-                                        <h3>{{ product.catalog_item.name }}</h3>
-
-                                        <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
-                                        <p><strong>Quantity:</strong> {{ product.quantity }}</p>
-                                        <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
-                                        <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
-                                        <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
-                                        <p><strong>Status:</strong> {{ product.expiration_status }}</p>
-
-                                        <!-- Close the popup without leaving the pantry page -->
-                                        <button type="button" onclick="this.closest('dialog').close()">
-                                            Close
-                                        </button>
-                                    </dialog>
-                                    <br/>
-
-                                    <button type="button" class="btn"
-                                        onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-                                        Edit
-                                    </button>
-
-                                    <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                            Delete
-                                        </button>
-                                    </form>
-
-                                    <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                                        <h3>Edit {{ product.catalog_item.name }}</h3>
-                                        <form action="{% url 'core:edit_pantry_item' product.id %}" method="POST">
-                                            {% csrf_token %}
-                                            {{ product.edit_form.as_p }}
-                                            <button type="submit">Save</button>
-                                            <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
-                                        </form>
-                                    </dialog>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <p>No fridge products found.</p>
+                            {% load custom_elements %}
+                            <!-- Renders the pantryItem custom component -->
+                            {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
@@ -328,5 +169,8 @@
         document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
     </script>
     {% endif %}
+
+    <script src="{% static 'js/drag_n_drop.js' %}"></script>
+
 </body>
 </html>

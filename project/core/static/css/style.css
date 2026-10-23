@@ -152,7 +152,6 @@ Body Style
     border: 2px solid #333;
     /* Curves all 4 corners equally */
     border-radius: 15px; 
-
 }
 
 .flex-container {
@@ -224,4 +223,21 @@ Edit Pop-up Style
 
 .edit-dialog .errorlist {
     color: #b00020;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Drop Zone styling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+.dropzone {
+  border: 2px solid #333;
+  padding: 20px;
+}
+
+.dropzone.dragover {
+  border-color: #09BC8A;
+  background-color: #e6f9f5;
 }

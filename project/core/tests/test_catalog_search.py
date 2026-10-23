@@ -74,7 +74,7 @@ def test_adding_defaults_to_the_shelves(client):
 
     client.post(reverse("core:add_from_catalog", args=[cereal.id]))
 
-    assert PantryItem.objects.get().location == "SHELVES"
+    assert PantryItem.objects.get().location == "SHELF"
 
 
 @pytest.mark.django_db
@@ -88,7 +88,7 @@ def test_a_bogus_location_falls_back_to_the_shelves(client):
         {"location": "KITCHEN"},
     )
 
-    assert PantryItem.objects.get().location == "SHELVES"
+    assert PantryItem.objects.get().location == "SHELF"
 
 
 @pytest.mark.django_db
