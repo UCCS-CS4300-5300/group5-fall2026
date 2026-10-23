@@ -15,6 +15,8 @@ Shared Design Variables
     --color-item: #1ea9e0;
     --color-error: #b00020;
     --color-focus: #005fcc;
+    --color-drag-border: #09bc8a;
+    --color-drag-background: #e6f9f5;
     --color-shadow: rgba(0, 0, 0, 0.2);
     --color-backdrop: rgba(0, 0, 0, 0.5);
 
@@ -107,7 +109,6 @@ Navbar Style
     border: 2px solid var(--color-border);
 }
 
-/* Reset & Main Navbar Layout */
 .nav-links {
     list-style: none;
     display: flex;
@@ -129,12 +130,10 @@ Navbar Style
     background-color: var(--color-nav);
 }
 
-/* Parent must be relative */
 .dropdown {
     position: relative;
 }
 
-/* Dropdown menu is hidden until it is opened */
 .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -146,14 +145,13 @@ Navbar Style
     margin: 0;
     box-shadow: 0 8px 16px var(--color-shadow);
     display: none;
+    z-index: 10;
 }
 
-/* Stack dropdown links vertically */
 .dropdown-menu li a {
     padding: var(--space-sm) var(--space-md);
 }
 
-/* Show dropdown with mouse or keyboard navigation */
 .dropdown:hover .dropdown-menu,
 .dropdown:focus-within .dropdown-menu {
     display: block;
@@ -171,7 +169,6 @@ Body Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-/* Ensures the container fills the entire viewport height */
 .split-container {
     display: flex;
     width: 100%;
@@ -328,11 +325,12 @@ Mobile Layout
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Edit Pop-up Style
+Pop-up Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-.edit-dialog {
+.edit-dialog,
+.details-dialog {
     width: min(90vw, 400px);
     padding: var(--space-lg);
     border: 2px solid var(--color-border);
@@ -340,11 +338,27 @@ Edit Pop-up Style
     text-align: left;
 }
 
-/* Dims the page behind the pop-up */
-.edit-dialog::backdrop {
+.edit-dialog::backdrop,
+.details-dialog::backdrop {
     background: var(--color-backdrop);
 }
 
 .edit-dialog .errorlist {
     color: var(--color-error);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Drop Zone Styling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.dropzone {
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
+}
+
+.dropzone.dragover {
+    border-color: var(--color-drag-border);
+    background-color: var(--color-drag-background);
 }

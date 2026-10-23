@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_elements %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +12,7 @@
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <!-- TODO: Give Credit in about page -->
+    <!-- TODO: Give credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
 </head>
 
@@ -91,13 +92,12 @@
 
                                             <input type="hidden" name="q" value="{{ query }}">
 
-                                            <!-- The location determines which USDA shelf-life value is used -->
                                             <label for="loc-{{ food.id }}" class="visually-hidden">
                                                 Store in
                                             </label>
 
                                             <select name="location" id="loc-{{ food.id }}">
-                                                <option value="SHELVES">Shelves</option>
+                                                <option value="SHELF">Shelf</option>
                                                 <option value="FRIDGE">Fridge</option>
                                                 <option value="FREEZER">Freezer</option>
                                             </select>
@@ -108,7 +108,10 @@
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p>No foods match &ldquo;{{ query }}&rdquo;. Use the form below to add it yourself.</p>
+                            <p>
+                                No foods match &ldquo;{{ query }}&rdquo;.
+                                Use the form below to add it yourself.
+                            </p>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -128,6 +131,15 @@
                         <button type="submit">Submit</button>
                     </form>
                 </div>
+
+                <!-- Bag drop zone -->
+                <div class="flex-container">
+                    <div id="BAG" class="kitchen-bg pantry-box dropzone">
+                        {% for product in bag_items %}
+                            {% render_pantry_item product %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
             <!-- Column 2: Shelves -->
@@ -136,11 +148,9 @@
                     <h2>Shelves</h2>
                 </div>
 
-                <div class="flex-container grid-lane">
+                <div id="SHELF" class="flex-container grid-lane dropzone">
                     {% for product in shelves_items %}
-                        {% include "core/partials/pantry_item.html" with product=product %}
-                    {% empty %}
-                        <h1>No shelf products found.</h1>
+                        {% render_pantry_item product %}
                     {% endfor %}
                 </div>
             </div>
@@ -154,11 +164,9 @@
                         <h2>Freezer</h2>
                     </div>
 
-                    <div class="flex-container grid-lane">
+                    <div id="FREEZER" class="flex-container grid-lane dropzone">
                         {% for product in freezer_items %}
-                            {% include "core/partials/pantry_item.html" with product=product %}
-                        {% empty %}
-                            <p>No freezer products found.</p>
+                            {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
@@ -169,11 +177,9 @@
                         <h2>Fridge</h2>
                     </div>
 
-                    <div class="flex-container grid-lane">
+                    <div id="FRIDGE" class="flex-container grid-lane dropzone">
                         {% for product in fridge_items %}
-                            {% include "core/partials/pantry_item.html" with product=product %}
-                        {% empty %}
-                            <p>No fridge products found.</p>
+                            {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
@@ -181,7 +187,7 @@
             </div>
         </div>
 
-        <!-- TODO: Give Credit in about page -->
+        <!-- TODO: Give credit in about page -->
         <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
     </div>
 
@@ -191,5 +197,7 @@
             document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
         </script>
     {% endif %}
+
+    <script src="{% static 'js/drag_n_drop.js' %}"></script>
 </body>
 </html>

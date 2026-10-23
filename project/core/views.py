@@ -8,6 +8,9 @@ from urllib.parse import quote
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -119,6 +122,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
     shelves_items = []
     fridge_items = []
     freezer_items = []
+    bag_items = []
 
     for item in pantryItems:
         if item.id == invalid_id:
@@ -127,12 +131,15 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
             item.edit_form = PantryItemForm(instance=item, auto_id=f"edit{item.id}_%s")
 
         # Routing the item into the corresponding container
-        if item.location == "SHELVES":
+        if item.location == "SHELF":
             shelves_items.append(item)
         elif item.location == "FRIDGE":
             fridge_items.append(item)
         elif item.location == "FREEZER":
             freezer_items.append(item)
+        elif item.location == "BAG":
+            bag_items.append(item)
+
 
     query = request.GET.get("q", "") if request else ""
 
@@ -142,6 +149,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         "shelves_items": shelves_items,
         "fridge_items": fridge_items,
         "freezer_items":freezer_items,
+        "bag_items": bag_items,
         "pantryItems" : pantryItems,
         "form" : add_form or PantryItemForm(),
         "open_edit_id" : invalid_id,
@@ -189,7 +197,7 @@ def add_from_catalog(request, item_id):
     # item would end up with no expiration date for no visible reason.
     location = request.POST.get("location", "SHELVES")
     if location not in dict(PantryItem.STORAGE_LOCATIONS):
-        location = "SHELVES"
+        location = "SHELF"
 
     PantryItem.objects.create(
         pantry=pantry, catalog_item=catalog_item, location=location)
@@ -253,3 +261,27 @@ def pantry_item_detail(request, item_id):
             "pantry_item": pantry_item
         }
     )
+
+@csrf_protect
+def submit_drag_drop(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON payload sent by Fetch API
+            data = json.loads(request.body)
+            raw_id = data.get('raw_id')
+            target_zone = data.get('target_zone')
+                        
+            logging.debug(target_zone)
+            if target_zone:
+                item = PantryItem.objects.get(id=raw_id)
+                if item:
+                    logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
+                    item.location = target_zone;
+                    item.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Item updated!'})
+        
+        except (ValueError, KeyError):
+            return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
