@@ -49,6 +49,75 @@
                     <h2>Pantry Organizer</h2>
                 </div>
 
+                <!-- Search the USDA food catalog -->
+                <div class="flex-container">
+                    <form action="{% url 'core:home' %}" method="GET" role="search">
+                        <label for="q">Search foods</label>
+
+                        <input
+                            type="search"
+                            id="q"
+                            name="q"
+                            value="{{ query }}"
+                            placeholder="milk, ground beef, cereal"
+                        >
+
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
+                {% if searched %}
+                    <div class="flex-container">
+                        {% if searchResults %}
+                            <ul class="catalog-results">
+                                {% for food in searchResults %}
+                                    <li>
+                                        <strong>{{ food.name }}</strong>
+
+                                        {% if food.name_subtitle %}
+                                            <br/>
+                                            <small>{{ food.name_subtitle }}</small>
+                                        {% endif %}
+
+                                        <br/>
+                                        <small>{{ food.category }}</small>
+
+                                        <form
+                                            action="{% url 'core:add_from_catalog' food.id %}"
+                                            method="POST"
+                                            class="inline-form"
+                                        >
+                                            {% csrf_token %}
+
+                                            <input type="hidden" name="q" value="{{ query }}">
+
+                                            <!-- The location determines which USDA shelf-life value is used -->
+                                            <label for="loc-{{ food.id }}" class="visually-hidden">
+                                                Store in
+                                            </label>
+
+                                            <select name="location" id="loc-{{ food.id }}">
+                                                <option value="SHELVES">Shelves</option>
+                                                <option value="FRIDGE">Fridge</option>
+                                                <option value="FREEZER">Freezer</option>
+                                            </select>
+
+                                            <button type="submit" class="btn">Add</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No foods match &ldquo;{{ query }}&rdquo;. Use the form below to add it yourself.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Add with your own details -->
+                <div class="flex-upper-border">
+                    <h3>Add with details</h3>
+                </div>
+
                 <div class="flex-container">
                     <p class="menu-subheading">Add Item</p>
 
@@ -105,7 +174,7 @@
                             {% include "core/partials/pantry_item.html" with product=product %}
                         {% empty %}
                             <p>No fridge products found.</p>
-                    {% endfor %}
+                        {% endfor %}
                     </div>
                 </div>
 
