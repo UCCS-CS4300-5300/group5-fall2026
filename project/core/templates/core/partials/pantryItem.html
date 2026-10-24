@@ -1,7 +1,12 @@
+{% load static custom_elements %}
+
 <!--            Pantry item template            -->
 
 <div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true"  >
     <div class="item-circle">
+        <img class="category-food-image"
+             src="{% static 'images/food-categories-images/' %}{{ product.catalog_item.category|food_category_image }}"
+             alt="{{ product.catalog_item.category }} food category">
         <div class="container">
             {{ product.catalog_item.name }}
             <br/>
