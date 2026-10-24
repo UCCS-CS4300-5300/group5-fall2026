@@ -1,126 +1,232 @@
-/* 
+/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Navbar Style 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Shared Design Variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+:root {
+    /* Colors */
+    --color-border: #333333;
+    --color-nav: #333333;
+    --color-nav-text: #ffffff;
+    --color-kitchen: #c19a6b;
+    --color-pantry: lightskyblue;
+    --color-panel: #f9f9f9;
+    --color-item: #1ea9e0;
+    --color-error: #b00020;
+    --color-focus: #005fcc;
+    --color-drag-border: #09bc8a;
+    --color-drag-background: #e6f9f5;
+    --color-shadow: rgba(0, 0, 0, 0.2);
+    --color-backdrop: rgba(0, 0, 0, 0.5);
+
+    /* Spacing */
+    --space-xs: 5px;
+    --space-sm: 10px;
+    --space-md: 15px;
+    --space-lg: 20px;
+
+    /* Font sizes */
+    --font-size-body: 1rem;
+    --font-size-heading: 1.25rem;
+    --font-size-title: 1.5rem;
+
+    /* Shared sizes */
+    --touch-target: 44px;
+    --radius-small: 8px;
+    --radius-large: 15px;
+
+    /* Pantry item sizes */
+    --item-size: 130px;
+    --item-size-mobile: 110px;
+
+    /* Storage area sizing */
+    --storage-max-height: 520px;
+    --storage-max-height-mobile: 420px;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Global Layout Reset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+body {
+    font-size: var(--font-size-body);
+    color: var(--color-border);
+}
+
+h1,
+h2,
+h3 {
+    font-size: var(--font-size-heading);
+}
+
+.app-title {
+    text-align: center;
+    font-size: var(--font-size-title);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Interactive Controls
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+button,
+input,
+select,
+textarea,
+.nav-links a {
+    min-height: var(--touch-target);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Navbar Style
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 .navbar {
-    border-radius: 15px; /* Curves all 4 corners equally */
-    border: 2px solid #333;
-
+    border-radius: var(--radius-large);
+    border: 2px solid var(--color-border);
 }
-/* Reset & Main Navbar Layout */
+
 .nav-links {
     list-style: none;
     display: flex;
-    background-color: #333;
+    background-color: var(--color-nav);
     padding: 0;
     margin: 0;
-    border-radius: 15px; /* Curves all 4 corners equally */
+    border-radius: var(--radius-large);
 }
 
 .nav-links a {
     display: block;
-    color: white;
-    padding: 15px 20px;
+    color: var(--color-nav-text);
+    padding: var(--space-md) var(--space-lg);
     text-decoration: none;
-    border-radius: 15px; /* Curves all 4 corners equally */
+    border-radius: var(--radius-large);
 }
 
 .nav-links a:hover {
-    background-color: #333;
+    background-color: var(--color-nav);
 }
 
-/* ─── THE DROPDOWN LOGIC ─── */
-
-/* 1. Parent must be relative */
 .dropdown {
     position: relative;
 }
 
-/* 2. Dropdown menu must be absolute, hidden by default */
 .dropdown-menu {
     position: absolute;
-    top: 100%; /* Positions it exactly at the bottom of the parent */
+    top: 100%;
     left: 0;
     min-width: 160px;
-    background-color: #333;
+    background-color: var(--color-nav);
     list-style: none;
     padding: 0;
     margin: 0;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-    
-    /* Hidden states */
-    display: none; 
+    box-shadow: 0 8px 16px var(--color-shadow);
+    display: none;
+    z-index: 10;
 }
 
-/* 3. Submenu links display as block to stack vertically */
 .dropdown-menu li a {
-    padding: 12px 16px;
+    padding: var(--space-sm) var(--space-md);
 }
 
-/* 4. Reveal the menu when hovering over the parent li */
-.dropdown:hover .dropdown-menu {
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
     display: block;
 }
 
 .kitchen-bg {
     background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
     background-repeat: repeat;
-    /* background-color: #8B5A2B;  */
-    background-color: #c19a6b;
+    background-color: var(--color-kitchen);
 }
 
-/* 
+/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Body Style 
+Body Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-/* Ensures the container fills the entire viewport height */
 .split-container {
     display: flex;
-    width: 100vw;
+    width: 100%;
     height: calc(100vh - 80px);
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .left-column {
-    flex: 0 0 25%; 
-    background-color: lightskyblue;  
-    padding: 20px;
-    border: 2px solid #333;
-    border-radius: 15px;   
-    box-sizing: border-box;
+    flex: 0 0 25%;
+    min-width: 0;
+    background-color: var(--color-pantry);
+    padding: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
 }
 
 .middle-column {
     flex: 0 0 37.5%;
-    padding: 20px;
-    border:2px solid #333;
-    border-radius: 15px;
-    box-sizing: border-box;
+    min-width: 0;
+    padding: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
 }
 
-.right-column{
+.right-column {
     flex: 0 0 37.5%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    box-sizing: border-box;
-}
-.storage-panel {
-    width: 100%;
-    border:1px solid #333;
-    border-radius: 8px;
-    background: #f9f9f9;
-    padding: 0 0 1rem 0;
+    gap: var(--space-md);
 }
 
-/*Scrolling functionality*/
-.scroll-box, .scrollbox {
+.storage-panel {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background: var(--color-panel);
+    padding: 0 0 var(--space-md) 0;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Scrolling and Storage Areas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.scroll-box,
+.scrollbox {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -128,52 +234,64 @@ Body Style
 }
 
 .grid-lane {
-    display:flex;
+    display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    padding: 15px;
+    align-content: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+
+    width: 100%;
+    max-height: var(--storage-max-height);
+
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .pantry-box {
-    /* Defines this div as a flexbox container */
-    display: flex; 
-    flex-wrap: wrap; 
-    /* Adds empty space between items inside this div */
-    gap: 15px;               
-    /* Adds empty space (buffer) around the inner items */
-    padding: 20px;           
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: var(--space-md);
 
-    flex: 1 1 250px;       
+    padding: var(--space-lg);
 
-    /* Fallback constraint to ensure content doesn't break */
-    min-height: 300px;    
-    max-width: 550px;
-    background-color: lightblue;
-    border: 2px solid #333;
-    /* Curves all 4 corners equally */
-    border-radius: 15px; 
+    flex: 1 1 250px;
+
+    min-height: 300px;
+    width: 100%;
+    max-width: 100%;
+    max-height: var(--storage-max-height);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background-color: var(--color-pantry);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
 }
 
 .flex-container {
-    /* Aligns children in a row by default */
-    display: flex; 
-    padding: 20px;
-    gap: 20px;
-    border: 2px solid #333;
-    /* Curves all 4 corners equally */
-    border-radius: 15px; 
+    display: flex;
+    padding: var(--space-lg);
+    gap: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
+}
+
+.inline-form {
+    display: inline;
 }
 
 .flex-upper-border {
-    display: flex; 
+    display: flex;
     flex-direction: row;
-    padding: 5px;
+    padding: var(--space-xs);
 
     width: 100%;
     max-height: 60px;
 
-    border: 2px solid #333;
-    border-radius: 15px; 
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
 }
 
 /* Collapse into a column when screen width is 600px or less */
@@ -207,52 +325,169 @@ Body Style
 
 .item-circle {
     display: flex;
-    width: 130px;
-    height: 130px;
-    background-color: #1ea9e0;
-    /* Makes the square circular */
-    border-radius: 50%; 
-    flex-shrink: 0;
+
+    width: var(--item-size);
+    height: var(--item-size);
+
+    min-width: var(--item-size);
+    min-height: var(--item-size);
+    max-width: var(--item-size);
+    max-height: var(--item-size);
+
+    flex: 0 0 var(--item-size);
+
+    background-color: var(--color-item);
+    border-radius: 50%;
+
     align-items: center;
     justify-content: center;
+    text-align: center;
+
+    overflow: visible;
 }
 
-/* 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Edit Pop-up Style 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-.edit-dialog {
-    width: min(90vw, 400px);
-    padding: 20px;
-    border: 2px solid #333;
-    border-radius: 15px;
-    text-align: left;
+.item-circle .container {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--space-xs);
 }
 
-/* Dims the page behind the pop-up */
-.edit-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.edit-dialog .errorlist {
-    color: #b00020;
+.status-label {
+    display: block;
 }
 
 /*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Drop Zone styling
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mobile Layout
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+@media screen and (max-width: 600px) {
+    .split-container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: calc(100vh - 80px);
+        overflow: visible;
+    }
+
+    .left-column,
+    .middle-column,
+    .right-column {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .scroll-box,
+    .scrollbox {
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Stack larger page sections vertically on mobile */
+    .flex-container {
+        flex-direction: column;
+    }
+
+    .storage-panel {
+        width: 100%;
+    }
+
+    /*
+    Keep the pantry item areas contained on mobile.
+    Items wrap within the container, and the container
+    becomes vertically scrollable when it fills up.
+    */
+    .grid-lane,
+    .pantry-box {
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        width: 100%;
+        max-width: 100%;
+        max-height: var(--storage-max-height-mobile);
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        justify-content: flex-start;
+        align-content: flex-start;
+    }
+
+    .pantry-box {
+        min-height: 200px;
+    }
+
+    /*
+    Keep the cards circular on mobile.
+    */
+    .item-circle {
+        width: var(--item-size-mobile);
+        height: var(--item-size-mobile);
+
+        min-width: var(--item-size-mobile);
+        min-height: var(--item-size-mobile);
+        max-width: var(--item-size-mobile);
+        max-height: var(--item-size-mobile);
+
+        flex: 0 0 var(--item-size-mobile);
+
+        font-size: 0.82rem;
+    }
+
+    /*
+    Use smaller controls inside the pantry circles on mobile
+    so they do not overlap nearby items.
+    */
+    .item-circle button {
+        min-height: 30px;
+        padding: 3px 6px;
+        font-size: 0.72rem;
+    }
+
+    .item-circle .container {
+        padding: 2px;
+        line-height: 1.05;
+    }
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pop-up Style
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.edit-dialog,
+.details-dialog {
+    width: min(90vw, 400px);
+    padding: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
+    text-align: left;
+}
+
+.edit-dialog::backdrop,
+.details-dialog::backdrop {
+    background: var(--color-backdrop);
+}
+
+.edit-dialog .errorlist {
+    color: var(--color-error);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Drop Zone Styling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
 
 .dropzone {
-  border: 2px solid #333;
-  padding: 20px;
+    border: 2px solid var(--color-border);
+    padding: var(--space-lg);
 }
 
 .dropzone.dragover {
-  border-color: #09BC8A;
-  background-color: #e6f9f5;
+    border-color: var(--color-drag-border);
+    background-color: var(--color-drag-background);
 }
