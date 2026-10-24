@@ -71,6 +71,24 @@ Navbar Style
     background-color: #c19a6b;
 }
 
+.shelves-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/lined-paper-2.png");
+    background-repeat: repeat;
+    background-color: #85612b;
+}
+
+.fridge-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+    background-repeat: repeat;
+    background-color: #ffffff
+}
+
+.freezer-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/hexellence.png");
+    background-repeat: repeat;
+    background-color: #f9f9f9
+}
+
 /* 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Body Style 
