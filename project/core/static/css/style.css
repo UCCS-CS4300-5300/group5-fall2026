@@ -35,6 +35,14 @@ Shared Design Variables
     --touch-target: 44px;
     --radius-small: 8px;
     --radius-large: 15px;
+
+    /* Pantry item sizes */
+    --item-size: 130px;
+    --item-size-mobile: 110px;
+
+    /* Storage area sizing */
+    --storage-max-height: 520px;
+    --storage-max-height-mobile: 420px;
 }
 
 /*
@@ -211,7 +219,12 @@ Body Style
     padding: 0 0 var(--space-md) 0;
 }
 
-/* Scrolling functionality */
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Scrolling and Storage Areas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 .scroll-box,
 .scrollbox {
     display: flex;
@@ -223,19 +236,35 @@ Body Style
 .grid-lane {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     gap: var(--space-md);
     padding: var(--space-md);
+
+    width: 100%;
+    max-height: var(--storage-max-height);
+
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .pantry-box {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     gap: var(--space-md);
+
     padding: var(--space-lg);
+
     flex: 1 1 250px;
+
     min-height: 300px;
     width: 100%;
     max-width: 100%;
+    max-height: var(--storage-max-height);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
     background-color: var(--color-pantry);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-large);
@@ -257,8 +286,10 @@ Body Style
     display: flex;
     flex-direction: row;
     padding: var(--space-xs);
+
     width: 100%;
     max-height: 60px;
+
     border: 2px solid var(--color-border);
     border-radius: var(--radius-large);
 }
@@ -305,16 +336,37 @@ Pantry Item Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+.draggable-card {
+    flex: 0 0 auto;
+}
+
 .item-circle {
     display: flex;
-    width: 130px;
-    min-height: 130px;
+
+    width: var(--item-size);
+    height: var(--item-size);
+
+    min-width: var(--item-size);
+    min-height: var(--item-size);
+    max-width: var(--item-size);
+    max-height: var(--item-size);
+
+    flex: 0 0 var(--item-size);
+
     background-color: var(--color-item);
     border-radius: 50%;
-    flex-shrink: 0;
+
     align-items: center;
     justify-content: center;
     text-align: center;
+
+    overflow: visible;
+}
+
+.item-circle .container {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--space-xs);
 }
 
 .status-label {
@@ -341,6 +393,7 @@ Mobile Layout
     .right-column {
         flex: 0 0 auto;
         width: 100%;
+        min-width: 0;
     }
 
     .scroll-box,
@@ -349,7 +402,7 @@ Mobile Layout
         overflow: visible;
     }
 
-    /* Stack sections vertically on smaller screens */
+    /* Stack larger page sections vertically on mobile */
     .flex-container {
         flex-direction: column;
     }
@@ -358,13 +411,61 @@ Mobile Layout
         width: 100%;
     }
 
+    /*
+    Keep the pantry item areas contained on mobile.
+    Items wrap within the container, and the container
+    becomes vertically scrollable when it fills up.
+    */
+    .grid-lane,
+    .pantry-box {
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        width: 100%;
+        max-width: 100%;
+        max-height: var(--storage-max-height-mobile);
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        justify-content: flex-start;
+        align-content: flex-start;
+    }
+
     .pantry-box {
         min-height: 200px;
     }
 
+    /*
+    Keep the cards circular on mobile.
+    */
     .item-circle {
-        width: 130px;
-        max-width: 100%;
+        width: var(--item-size-mobile);
+        height: var(--item-size-mobile);
+
+        min-width: var(--item-size-mobile);
+        min-height: var(--item-size-mobile);
+        max-width: var(--item-size-mobile);
+        max-height: var(--item-size-mobile);
+
+        flex: 0 0 var(--item-size-mobile);
+
+        font-size: 0.82rem;
+    }
+
+    /*
+    Use smaller controls inside the pantry circles on mobile
+    so they do not overlap nearby items.
+    */
+    .item-circle button {
+        min-height: 30px;
+        padding: 3px 6px;
+        font-size: 0.72rem;
+    }
+
+    .item-circle .container {
+        padding: 2px;
+        line-height: 1.05;
     }
 }
 
