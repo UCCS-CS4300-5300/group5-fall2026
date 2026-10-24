@@ -294,50 +294,33 @@ Scrolling and Storage Areas
     border-radius: var(--radius-large);
 }
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Responsive Form and Column Sizing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+/* Collapse into a column when screen width is 600px or less */
+@media screen and (max-width: 600px) {
+    /* Stacks items vertically on collapse */
+    .flex-container {
+        flex-direction: column; 
+    }
+    .split-container{
+        flex-direction:column;
+        width: 100%;
+        height: auto;
+        min-height: calc(100vh - 80px);
+        overflow: visible;
+    }
+    .middle-column,
+    .right-column{
+        flex: 0 0 auto;
+        width: 100%;
+    }
 
-form {
-    max-width: 100%;
-}
-
-input,
-select,
-textarea {
-    max-width: 100%;
-}
-
-.left-column form {
-    width: 100%;
-}
-
-.left-column input[type="search"],
-.left-column select {
-    width: 100%;
-}
-
-.catalog-results {
-    width: 100%;
-    max-width: 100%;
-    padding-left: var(--space-lg);
-}
-
-.catalog-results li {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Pantry Item Style
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-.draggable-card {
-    flex: 0 0 auto;
+    .scroll-box,
+    .scrollbox {
+        height: auto;
+        overflow: visible;
+    }
+ 
+    /* TODO: handle the full form on vertical collapse for objects....  */
+    /* Completely hides the left column on collapse */
 }
 
 .item-circle {
