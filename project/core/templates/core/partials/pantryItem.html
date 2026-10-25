@@ -3,7 +3,7 @@
 <!--            Pantry item template            -->
 
 <div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true">
-    <div class="item-circle">
+    <div class="item-circle {{ product.expiration_status|slugify }}">
         <img class="category-food-image"
              src="{% static 'images/food-categories-images/' %}{{ product.catalog_item.category|food_category_image }}"
              alt="{{ product.catalog_item.category }} food category">

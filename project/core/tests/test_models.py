@@ -260,3 +260,49 @@ def test_expired_pantry_item_not_displayed_as_current(client):
  assert f"details-dialog-{pantry_item.id}".encode() in response.content
  assert b"Old Milk" in response.content
  assert b"Expired" in response.content
+
+
+# Expiration Status Boundary testing
+@pytest.mark.django_db
+def test_expiration_status_boundaries():
+  user = User.objects.create_user(username="test", password = "password")
+  pantry = Pantry.objects.create(user=user, name="Status Test")
+  item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
+
+  today = timezone.localdate()
+
+  # FRESH ITEM
+  fresh_item = PantryItem.objects.create(pantry=pantry, catalog_item=item,date_expired=today+timedelta(days=4))
+  assert fresh_item.expiration_status == "Fresh"
+  # EXPIRING SOON (< 3 days)
+  expiring_soon_item = PantryItem.objects.create(pantry=pantry, catalog_item=item,date_expired=today+timedelta(days=3))
+  assert expiring_soon_item.expiration_status == "Expiring Soon"
+  # EXPIRED
+  expired_item = PantryItem.objects.create(pantry=pantry, catalog_item=item,date_expired=today-timedelta(days=1))
+  assert expired_item.expiration_status == "Expired"
+
+# We are going to test the edge of these expiration boundaries
+@pytest.mark.django_db
+def test_expiration_status_strict_boundaries():
+  user = User.objects.create_user(username="test", password = "password")
+  pantry = Pantry.objects.create(user=user, name="Status Test")
+  item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
+
+  today = timezone.localdate()
+
+  edge_expired_soon_item = PantryItem.objects.create(pantry=pantry, catalog_item=item,date_expired=today + timedelta(days=1))
+  assert edge_expired_soon_item.expiration_status == "Expiring Soon"
+
+  edge_expired_item =  PantryItem.objects.create(pantry=pantry, catalog_item=item,date_expired=today + timedelta(days=0))
+  assert edge_expired_item.expiration_status == "Expired"
+
+
+# This is for the unknown boundary in expiration status
+@pytest.mark.django_db
+def test_expiration_status_unknown_boundary():
+  user = User.objects.create_user(username="test", password = "password")
+  pantry = Pantry.objects.create(user=user, name="Status Test")
+  item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
+
+  unknown_item = PantryItem.objects.create(pantry=pantry, catalog_item = item, date_expired = None)
+  assert unknown_item.expiration_status == "Unknown"
