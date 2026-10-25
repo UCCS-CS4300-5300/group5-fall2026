@@ -6,11 +6,11 @@ Shared Design Variables
 
 :root {
     /* Colors */
-    --color-border: #333333;
+    --color-border: #e0e0e0;
     --color-nav: #333333;
     --color-nav-text: #ffffff;
     --color-kitchen: #c19a6b;
-    --color-pantry: lightskyblue;
+    --color-pantry: #fff;
     --color-panel: #f9f9f9;
     --color-item: #1ea9e0;
     --color-error: #b00020;
@@ -19,6 +19,9 @@ Shared Design Variables
     --color-drag-background: #e6f9f5;
     --color-shadow: rgba(0, 0, 0, 0.2);
     --color-backdrop: rgba(0, 0, 0, 0.5);
+    --color-button-dark: #2d2d2d;
+    --color-button-text: #fff;
+    --color-button-hover: #1a1a1a;
 
     /* Spacing */
     --space-xs: 5px;
@@ -69,7 +72,7 @@ body {
 
 body {
     font-size: var(--font-size-body);
-    color: var(--color-border);
+    color: var(--color-button-dark)
 }
 
 h1,
@@ -112,34 +115,54 @@ Navbar Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+header nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    padding: 0 var(--space-lg);
+    box-sizing: border-box;
+}
+
 .navbar {
     border-radius: var(--radius-large);
     border: 2px solid var(--color-border);
 }
 
 .nav-links {
-    list-style: none;
-    display: flex;
-    background-color: var(--color-nav);
-    padding: 0;
     margin: 0;
-    border-radius: var(--radius-large);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .nav-links a {
-    display: block;
+    display: inline-flex;
+    align-items: center;
     color: var(--color-nav-text);
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-sm) var(--space-md);
     text-decoration: none;
-    border-radius: var(--radius-large);
+    border-radius: var(--radius-small);
+    font-weight: 600;
+    transition: background-color 0.1s ease;
 }
 
 .nav-links a:hover {
-    background-color: var(--color-nav);
+    background-color: var(--color-button-hover);
 }
+
+.nav-links .dropdown-trigger {
+    background-color: var(--color-nav);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-small);
+}
+
 
 .dropdown {
     position: relative;
+    display: inline-block;
 }
 
 .dropdown-menu {
@@ -156,8 +179,26 @@ Navbar Style
     z-index: 10;
 }
 
+.dropdown-menu li {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
 .dropdown-menu li a {
-    padding: var(--space-sm) var(--space-md);
+    display: block;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-nav-text);
+    text-decoration: none;
+    border-radius: 0;
+    box-sizing: border-box;
+    transition: background-color 0.1 ease;
+}
+
+.dropdown-menu li a:hover {
+    background-color: var(--color-button-hover);
 }
 
 .dropdown:hover .dropdown-menu,
@@ -180,43 +221,188 @@ Body Style
 .split-container {
     display: flex;
     width: 100%;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 70px);
     margin: 0;
     padding: 0;
     overflow-x: hidden;
 }
 
+.left-column,
+.middle-column,
+.right-column {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+
+/*  --------- LEFT COLUMN ----------------*/
+
 .left-column {
-    flex: 0 0 25%;
-    min-width: 0;
+    flex: 0 0 30%;
+    min-width: 280px;
     background-color: var(--color-pantry);
     padding: var(--space-lg);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-large);
+    border: none;
+    border-right: 1px solid var(--color-border);
+    border-radius: 0;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
 }
 
-.middle-column {
-    flex: 0 0 37.5%;
-    min-width: 0;
-    padding: var(--space-lg);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-large);
-}
-
-.right-column {
-    flex: 0 0 37.5%;
-    min-width: 0;
+.left-column form {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
 }
 
+.left-column form p {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    width: 100%;
+}
+
+.left-column form label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-nav);
+    text-transform: capitalize;
+}
+
+.left-column form input,
+.left-column form select,
+.left-column form textarea {
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--touch-target);
+    padding: var(--space-sm);
+
+    font-size: var(--font-size-body);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.left-column form button,
+.left-column form button[type="submit"] {
+    width: 100%;
+    min-height: var(--touch-target);
+    padding: var(--space-sm) var(--space-md);
+    
+    font-size: var(--font-size-body);
+    font-weight: bold;
+
+    color: var(--color-button-text);
+    background-color: var(--color-button-dark);
+
+    border: none;
+    border-radius: var(--radius-small);
+    cursor: pointer;
+}
+
+/* Hover Color buttons */
+.left-column form button:hover,
+.left-column form button[type="submit"]:hover {
+    background-color: var(--color-button-hover);
+}
+
+/* Search item css logic */
+.left-column ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-lg) 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.left-column li{
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.left-column li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.left-column li span,
+.left-column li p,
+.left-column li small,
+.left-column li div {
+    font-size: 0.88rem;
+    color: #666666;
+    margin: 0 !important;
+    padding: 2px 0;
+    line-height: 1.2;
+}
+
+.left-column li strong,
+.left-column li b {
+    font-size: 1.05rem;
+    color: var(--color-button-dark);
+    margin-bottom: var(--space-xs) !important;
+    display: block;
+}
+
+.left-column li select {
+    margin-top: var(--space-sm) !important;
+    margin-bottom: var(--space-xs) !important;
+}
+
+.left-column li p:has(select),
+.left-column li p {
+    margin-bottom: 0;
+}
+
+.left-column li button,
+.left-column li input[type="submit"] {
+    margin-top: var(--space-xs);
+    background-color: var(--color-button-dark);
+}
+
+/*------------------------------------------*/
+
+.middle-column {
+    flex: 0 0 35%;
+    min-width: 0;
+    padding: var(--space-lg);
+    border:none;
+    border-right: 1px solid var(--color-border);
+    border-radius: 0;
+}
+
+.right-column {
+    flex: 0 0 35%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+}
+
 .storage-panel {
     width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-small);
     background: var(--color-panel);
     padding: 0 0 var(--space-md) 0;
+    overflow: hidden;
 }
 
 /*
@@ -240,8 +426,9 @@ Scrolling and Storage Areas
     gap: var(--space-md);
     padding: var(--space-md);
 
+    flex: 1 1 auto;
     width: 100%;
-    max-height: var(--storage-max-height);
+    max-height: none;
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -252,30 +439,66 @@ Scrolling and Storage Areas
     flex-wrap: wrap;
     align-content: flex-start;
     gap: var(--space-md);
-
     padding: var(--space-lg);
 
-    flex: 1 1 250px;
-
-    min-height: 300px;
+    flex: 1 1 auto;
     width: 100%;
     max-width: 100%;
-    max-height: var(--storage-max-height);
+    max-height: none;
 
     overflow-y: auto;
     overflow-x: hidden;
 
-    background-color: var(--color-pantry);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-large);
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
 }
 
-.flex-container {
+.left-column .pantry-box {
     display: flex;
-    padding: var(--space-lg);
-    gap: var(--space-lg);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-large);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    row-gap: 55px !important;
+    column-gap: var(--space-md);
+    padding: var(--space-lg) var(--space-sm) 60px var(--space-sm) !important;
+}
+
+.left-column .item-circle,
+.pantry-box .item-circle {
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+.left-column .flex-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: var(--space-md);
+    border:none;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.left-column .kitchen-bg:last-child,
+.left-column [id*="bag"],
+.left-column .pantry-box {
+    flex: 0 0 auto;
+    min-height: 220px;
+    margin-top: var(--space-lg);
+    border-radius: var(--radius-small);
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    overflow: visible;
+
 }
 
 .inline-form {
@@ -285,13 +508,16 @@ Scrolling and Storage Areas
 .flex-upper-border {
     display: flex;
     flex-direction: row;
-    padding: var(--space-xs);
+    align-items: center;
+    padding: 0 0 var(--space-sm) 0;
 
-    width: 100%;
+    width: 100;
     max-height: 60px;
 
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-large);
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background-color: transparent;
 }
 
 /* Collapse into a column when screen width is 600px or less */
