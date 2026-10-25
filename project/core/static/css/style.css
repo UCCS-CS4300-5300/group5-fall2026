@@ -212,7 +212,25 @@ header nav {
     background-color: var(--color-kitchen);
 }
 
-/*
+.shelves-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/lined-paper-2.png");
+    background-repeat: repeat;
+    background-color: #85612b;
+}
+
+.fridge-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+    background-repeat: repeat;
+    background-color: #ffffff
+}
+
+.freezer-bg {
+    background-image: url("https://www.transparenttextures.com/patterns/hexellence.png");
+    background-repeat: repeat;
+    background-color: #f9f9f9
+}
+
+/* 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Body Style
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -551,6 +569,32 @@ Scrolling and Storage Areas
 
 .item-circle {
     display: flex;
+    width: 130px;
+    height: 130px;
+    background-color: #ffffff;
+    /* Makes the square circular */
+    border-radius: 50%; 
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-food-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+.item-circle .container {
+    position: relative;
+    z-index: 1;
 
     width: var(--item-size);
     height: var(--item-size);
