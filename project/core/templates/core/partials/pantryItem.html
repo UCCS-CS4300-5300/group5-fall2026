@@ -2,7 +2,7 @@
 
 <!--            Pantry item template            -->
 
-<div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true"  >
+<div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true">
     <div class="item-circle">
         <img class="category-food-image"
              src="{% static 'images/food-categories-images/' %}{{ product.catalog_item.category|food_category_image }}"
@@ -10,18 +10,25 @@
         <div class="container">
             {{ product.catalog_item.name }}
             <br/>
+
             {{ product.quantity }}
             <br/>
-            {{ product.expiration_status }}
+
+            <span class="status-label">
+                {{ product.expiration_status }}
+            </span>
             <br/>
 
-            <!-- Open the details popup for this fridge item -->
-            <button type="button" class="btn"
-                onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()">
+            <!-- Open the details popup -->
+            <button
+                type="button"
+                class="btn"
+                onclick="document.getElementById('details-dialog-{{ product.id }}').showModal()"
+            >
                 View Details
             </button>
 
-            <!-- Popup for the fridge item's info -->
+            <!-- Details popup -->
             <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
                 <h3>{{ product.catalog_item.name }}</h3>
 
@@ -32,32 +39,53 @@
                 <p><strong>Expiration Date:</strong> {{ product.date_expired }}</p>
                 <p><strong>Status:</strong> {{ product.expiration_status }}</p>
 
-                <!-- Close the popup without leaving the pantry page -->
                 <button type="button" onclick="this.closest('dialog').close()">
                     Close
                 </button>
             </dialog>
+
             <br/>
 
-            <button type="button" class="btn" 
-                onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()">
-            Edit
+            <!-- Open the edit popup -->
+            <button
+                type="button"
+                class="btn"
+                onclick="document.getElementById('edit-dialog-{{ product.id }}').showModal()"
+            >
+                Edit
             </button>
-            
-            <form action="{% url 'core:delete_pantry_item' product.id %}" method="POST" style="display:inline;">
+
+            <!-- Delete item -->
+            <form
+                action="{% url 'core:delete_pantry_item' product.id %}"
+                method="POST"
+                class="inline-form"
+            >
                 {% csrf_token %}
-                <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                <button
+                    type="submit"
+                    class="btn btn-delete"
+                    onclick="return confirm('Are you sure you want to delete this item?');"
+                >
                     Delete
                 </button>
             </form>
 
+            <!-- Edit popup -->
             <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                <h3>Edit {{product.catalog_item.name}}</h3>
-                <form action="{% url 'core:edit_pantry_item' product.id}" method="POST">
+                <h3>Edit {{ product.catalog_item.name }}</h3>
+
+                <form
+                    action="{% url 'core:edit_pantry_item' product.id %}"
+                    method="POST"
+                >
                     {% csrf_token %}
                     {{ product.edit_form.as_p }}
+
                     <button type="submit">Save</button>
-                    <button type="button" onclick="this.closest('dialog').close()">Cancel</button>
+                    <button type="button" onclick="this.closest('dialog').close()">
+                        Cancel
+                    </button>
                 </form>
             </dialog>
         </div>

@@ -1,16 +1,21 @@
 {% load static %}
+{% load custom_elements %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Shelf Life</title>
+
     <!-- Link to CSS file -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     <!-- TODO: Give credit in about page -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon1.ico' %}">
 </head>
+
 <body>
     <div>
         <header>
@@ -18,6 +23,7 @@
                 <ul class="nav-links">
                     <li class="dropdown">
                         <a href="#" class="dropdown-trigger">Menu ▾</a>
+
                         <ul class="dropdown-menu">
                             <li><a href="#">Pantry</a></li>
                             <li><a href="#">Shopping List</a></li>
@@ -26,26 +32,37 @@
                         </ul>
                     </li>
                 </ul>
+
                 <div class="flex-upper-border">
-                    <h2 style="text-align: center;">Shelf Life Application: User: {{user.username}}</h2>
+                    <h2 class="app-title">
+                        Shelf Life Application: User: {{ user.username }}
+                    </h2>
                 </div>
             </nav>
         </header>
-        <!-- ────────────────────── Body for HTML page ────────────────────── -->
+
+        <!-- Body for HTML page -->
         <div class="split-container">
-            <!-- Column 1: Left side bar (pantry organizer) -->
-             <!-- Made changes to how the menu works-->
+
+            <!-- Column 1: Pantry Organizer -->
             <div class="left-column">
                 <div class="flex-upped-border">
                     <h2>Pantry Organizer</h2>
                 </div>
 
-                <!-- ── Search the USDA food catalog ── -->
+                <!-- Search the USDA food catalog -->
                 <div class="flex-container">
                     <form action="{% url 'core:home' %}" method="GET" role="search">
                         <label for="q">Search foods</label>
-                        <input type="search" id="q" name="q" value="{{ query }}"
-                               placeholder="milk, ground beef, cereal">
+
+                        <input
+                            type="search"
+                            id="q"
+                            name="q"
+                            value="{{ query }}"
+                            placeholder="milk, ground beef, cereal"
+                        >
+
                         <button type="submit">Search</button>
                     </form>
                 </div>
@@ -57,19 +74,28 @@
                                 {% for food in searchResults %}
                                     <li>
                                         <strong>{{ food.name }}</strong>
-                                        {% if food.name_subtitle %}
-                                            <br/><small>{{ food.name_subtitle }}</small>
-                                        {% endif %}
-                                        <br/><small>{{ food.category }}</small>
 
-                                        <form action="{% url 'core:add_from_catalog' food.id %}"
-                                              method="POST" style="display:inline;">
+                                        {% if food.name_subtitle %}
+                                            <br/>
+                                            <small>{{ food.name_subtitle }}</small>
+                                        {% endif %}
+
+                                        <br/>
+                                        <small>{{ food.category }}</small>
+
+                                        <form
+                                            action="{% url 'core:add_from_catalog' food.id %}"
+                                            method="POST"
+                                            class="inline-form"
+                                        >
                                             {% csrf_token %}
+
                                             <input type="hidden" name="q" value="{{ query }}">
 
-                                            <!-- Where it goes decides which USDA figure is used:
-                                                 the same chicken is 2 days in the fridge, 360 frozen. -->
-                                            <label for="loc-{{ food.id }}" class="visually-hidden">Store in</label>
+                                            <label for="loc-{{ food.id }}" class="visually-hidden">
+                                                Store in
+                                            </label>
+
                                             <select name="location" id="loc-{{ food.id }}">
                                                 <option value="SHELF">Shelf</option>
                                                 <option value="FRIDGE">Fridge</option>
@@ -82,36 +108,41 @@
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p>No foods match &ldquo;{{ query }}&rdquo;. Use the form below to add it yourself.</p>
+                            <p>
+                                No foods match &ldquo;{{ query }}&rdquo;.
+                                Use the form below to add it yourself.
+                            </p>
                         {% endif %}
                     </div>
                 {% endif %}
 
-                <!-- ── Add with your own dates and quantity ── -->
+                <!-- Add with your own details -->
                 <div class="flex-upper-border">
                     <h3>Add with details</h3>
                 </div>
+
                 <div class="flex-container">
                     <p class="menu-subheading">Add Item</p>
+
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}
+
                         <button type="submit">Submit</button>
                     </form>
                 </div>
+
+                <!-- Bag drop zone -->
                 <div class="flex-container">
                     <div id="BAG" class="kitchen-bg pantry-box dropzone">
                         {% for product in bag_items %}
-                            {% load custom_elements %}
-                            <!-- Renders the pantryItem custom component -->
                             {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
-            <!-- Column 2: Shelves Container-->
-            <!-- Made changes to how we see the shelves section-->
+            <!-- Column 2: Shelves -->
             <div class="middle-column scroll-box">
                 <div class="flex-upper-border">
                     <h2>Shelves</h2>
@@ -119,15 +150,15 @@
                 <!-- Main shelf item logic-->
                 <div id="SHELF" class="flex-container grid-lane dropzone shelves-bg">
                     {% for product in shelves_items %}
-                        {% load custom_elements %}
-                        <!-- Renders the pantryItem custom component -->
                         {% render_pantry_item product %}
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Column 3: Freezer and Fridge-->
+            <!-- Column 3: Freezer and Fridge -->
             <div class="right-column scrollbox">
+
+                <!-- Freezer -->
                 <div class="storage-panel">
                     <div class="flex-upper-border">
                         <h2>Freezer</h2>
@@ -135,12 +166,12 @@
 
                     <div id="FREEZER" class="flex-container grid-lane dropzone freezer-bg">
                         {% for product in freezer_items %}
-                            {% load custom_elements %}
-                            <!-- Renders the pantryItem custom component -->
                             {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
+
+                <!-- Fridge -->
                 <div class="storage-panel">
                     <div class="flex-upper-border">
                         <h2>Fridge</h2>
@@ -148,29 +179,25 @@
 
                     <div id="FRIDGE" class="flex-container grid-lane dropzone fridge-bg">
                         {% for product in fridge_items %}
-                            {% load custom_elements %}
-                            <!-- Renders the pantryItem custom component -->
                             {% render_pantry_item product %}
                         {% endfor %}
                     </div>
                 </div>
+
             </div>
-
-
-            <!-- TODO: Give Credit in about page -->
-            <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
-
         </div>
+
+        <!-- TODO: Give credit in about page -->
+        <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
     </div>
 
     {% if open_edit_id %}
-    <script>
-        // Reopens the pop-up when a save failed so the errors are visible
-        document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
-    </script>
+        <script>
+            // Reopens the pop-up when a save failed so the errors are visible
+            document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
+        </script>
     {% endif %}
 
     <script src="{% static 'js/drag_n_drop.js' %}"></script>
-
 </body>
 </html>
