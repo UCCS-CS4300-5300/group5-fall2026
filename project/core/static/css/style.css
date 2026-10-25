@@ -606,7 +606,7 @@ Scrolling and Storage Areas
 
     flex: 0 0 var(--item-size);
 
-    background-color: var(--color-item);
+    background-color: transparent;
     border-radius: 50%;
 
     align-items: center;

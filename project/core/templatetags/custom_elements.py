@@ -36,7 +36,7 @@ def food_category_image(category):
     return FOOD_CATEGORY_IMAGES.get(category, "unknown-food.png")
 
 
-@register.inclusion_tag('templates/core/partials/pantryItem.html')
+@register.inclusion_tag('core/partials/pantryItem.html')
 def render_pantry_item(pantryItem):
     # Json payload to pipe in to partial template
     return {
