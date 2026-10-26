@@ -271,13 +271,16 @@ def submit_drag_drop(request):
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
                         
-            logging.debug(target_zone)
             if target_zone:
                 item = PantryItem.objects.get(id=raw_id)
                 if item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
                     item.location = target_zone;
                     item.save()
+                else:
+                    raise(KeyError)
+            else:
+                raise(KeyError)
 
             return JsonResponse({'status': 'success', 'message': 'Item updated!'})
         

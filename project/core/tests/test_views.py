@@ -150,8 +150,6 @@ def test_home_page_delete_item(client):
   response = client.get(reverse("core:home"))
   assert countNumberOfElements(response, "container") == 0
 
-
-
 @pytest.mark.django_db
 def test_drag_drop_task_assignment_view(client):
     # Setup test data
@@ -190,3 +188,35 @@ def test_drag_drop_task_assignment_view(client):
     assert response.status_code == 200
     assert PantryItem.objects.get(id=pantryItem.id).location == "FRIDGE"
 
+@pytest.mark.django_db
+def test_drag_drop_task_assignment_view_fails_with_bad_data(client):
+    # Setup test data
+  
+    # Simulate the endpoint your JS calls on drop (e.g., /api/assign-task/)
+    url = reverse("core:submit_drag_drop")
+    payload = {
+      "something": 'else'
+    }
+
+    # Post as JSON or form data matching your JS implementation
+    response = client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    # Assert response status and database state
+    assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_drag_drop_task_assignment_view_fails_with_get(client):
+    # get url
+    url = reverse("core:submit_drag_drop")
+    
+    response = client.get(
+        url,
+        content_type="application/json"
+    )
+
+    # Assert response status
+    assert response.status_code == 405
