@@ -1,0 +1,50 @@
+## Sprint 2 test results and coverage
+
+Ran the full suite on `main` this evening:
+
+    cd project
+    python -m pytest --cov=core --cov-branch --cov-report=term-missing
+
+50 tests, all passing, 13 seconds. Coverage came back at **96%**.
+
+That numbers are not accurate though. It includes the test files themselves, and tests are always near
+100%. They're 429 of the 707
+statements being measured — about 61% of the total. Take them and the
+migrations out and the figure for code a user can break is **94%**.
+
+| | statements | missed | coverage |
+|---|---|---|---|
+| What pytest reports | 707 | 16 | 96% |
+| Application code only | 222 | 12 | 94% |
+| Test files | 429 | 2 | 99% |
+| Migrations | 56 | 2 | 97% |
+
+Of the twelve lines our app code misses, three are `__str__` methods on
+`ShelfLife`, `Pantry` and `PantryItem` — display helpers for the admin, not
+worth a test. The other nine are in one place. `views.py` is our weakest file at 88%, and the gaps are the branches
+that sort items into the Freezer and the Bag (our container tests only use
+Shelf and Fridge), the error handling inside the drag-and-drop view, and the
+old `test-pantry/` development route that's still live.
+
+### What this doesn't tell us
+
+Three things worth being honest about, and we've got real examples of each
+rather than textbook ones.
+
+Coverage doesn't look at templates at all. Earlier this sprint the edit
+form's `{% url %}` tag was missing its closing `%}`, so clicking Save
+did nothing. Every line of `views.py` involved was covered, and
+every edit test passed — because the tests POST straight to the view
+instead of rendering the page and checking the form points anywhere real.
+
+A covered line is a line that ran, not a line that's right.
+`PantryItem.save()` sits at 97%, but it only works out an expiration date
+when the field is empty, so dragging an item from the Fridge to the Freezer
+leaves the old date sitting there. The code runs, the test passes, the
+behaviour is wrong. That's filed separately.
+
+And the gaps aren't spread evenly. The uncovered branches in `views.py` are
+the drag-and-drop error handling and the Freezer/Bag routing — which is
+exactly where this sprint's open bugs turned out to be. Low coverage pointed
+at the right neighbourhood. It didn't find the bugs for us, and the high
+coverage everywhere else didn't stop them happening.
