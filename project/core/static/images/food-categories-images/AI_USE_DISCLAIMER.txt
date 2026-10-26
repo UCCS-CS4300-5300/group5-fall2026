@@ -1,0 +1,14 @@
+## AI-Assisted Image Assets
+
+The food-category icon illustrations were created with assistance from OpenAI ChatGPT (GPT image generation) on October 24, 2026. The prompts specified a consistent, blue, outlined vector style with transparent backgrounds for use in the application's food-category interface.
+
+The design was iteratively refined through prompts to establish a single-item icon style, monochromatic blue coloring, and category-specific illustrations with labels.
+
+- **Tool:** [OpenAI ChatGPT](https://chatgpt.com/)
+- **Date created:** October 24, 2026
+- **Purpose:** Food-category icon illustrations for the application UI
+- **Source:** Original AI-generated assets, refined through iterative prompting
+- **Format:** PNG
+- **Transparency:** Intended to support transparent backgrounds
+
+The category illustrations were based on the application's food-category taxonomy. AI-generated assets were reviewed and prepared for use in the application.
