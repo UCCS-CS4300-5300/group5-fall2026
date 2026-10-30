@@ -17,6 +17,7 @@
 </head>
 
 <body>
+    <script src="https://unpkg.com"></script>
     <div>
         <header>
             <nav class="kitchen-bg flex-container">
@@ -52,59 +53,26 @@
 
                 <!-- Search the USDA food catalog -->
                 <div class="flex-container">
-                    <form action="{% url 'core:home' %}" method="GET" role="search">
-                        <label for="q">Search foods</label>
-
-                        <input
-                            type="search"
-                            id="q"
-                            name="q"
-                            value="{{ query }}"
-                            placeholder="milk, ground beef, cereal"
-                        >
-
-                        <button type="submit">Search</button>
+                    <form id="search-form" action="{% url 'core:home' %}" method="GET" role="search">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            id="search-input" 
+                            value="{{ query | default:'' }}" 
+                            placeholder="Search..." 
+                            autocomplete="off" 
+                            autofocus
+                            onfocus="this.setSelectionRange(this.value.length, this.value.length);"
+                        />
                     </form>
                 </div>
 
                 {% if searched %}
-                    <div class="flex-container">
+                    <div class="flex-container" id="search-results">
                         {% if searchResults %}
                             <ul class="catalog-results">
                                 {% for food in searchResults %}
-                                    <li>
-                                        <strong>{{ food.name }}</strong>
-
-                                        {% if food.name_subtitle %}
-                                            <br/>
-                                            <small>{{ food.name_subtitle }}</small>
-                                        {% endif %}
-
-                                        <br/>
-                                        <small>{{ food.category }}</small>
-
-                                        <form
-                                            action="{% url 'core:add_from_catalog' food.id %}"
-                                            method="POST"
-                                            class="inline-form"
-                                        >
-                                            {% csrf_token %}
-
-                                            <input type="hidden" name="q" value="{{ query }}">
-
-                                            <label for="loc-{{ food.id }}" class="visually-hidden">
-                                                Store in
-                                            </label>
-
-                                            <select name="location" id="loc-{{ food.id }}">
-                                                <option value="SHELF">Shelf</option>
-                                                <option value="FRIDGE">Fridge</option>
-                                                <option value="FREEZER">Freezer</option>
-                                            </select>
-
-                                            <button type="submit" class="btn">Add</button>
-                                        </form>
-                                    </li>
+                                    {% render_catalog_item food %}
                                 {% endfor %}
                             </ul>
                         {% else %}

@@ -1,0 +1,15 @@
+{% load static custom_elements %}
+<div id="pantry-item-{{ catalog_item.id }}" class="draggable-card" draggable="true">
+    <div class="item-circle {{ product.expiration_status | slugify }}">
+        <img class="category-food-image"
+             src="{% static 'images/food-categories-images/' %}{{ catalog_item.category | food_category_image }}"
+             alt="{{ catalog_item.category }} food category">
+        <div class="container" style="color: orangered;">
+            <strong>{{ catalog_item.name }}</strong>
+            {% if catalog_item.name_subtitle %}
+                <br/><small>{{ catalog_item.name_subtitle }}</small>
+            {% endif %}
+            <br/><small>{{ food.category }}</small>
+        </div>
+    </div>
+</div>

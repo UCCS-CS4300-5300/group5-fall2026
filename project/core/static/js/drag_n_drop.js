@@ -32,13 +32,14 @@ function addDropZoneListeners(dropZone, zoneName) {
 
   // Add event listener for the drop action
   dropZone.addEventListener('drop', (e) => {
+
     if (e.target.classList.contains("dropzone")) {
       e.target.classList.remove("dragover");
     }
     e.preventDefault();
     
     const elementId = e.dataTransfer.getData('text/plain');
-    
+    console.log(elementId)    
     // Grab Django's CSRF token from the DOM
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -59,12 +60,21 @@ function addDropZoneListeners(dropZone, zoneName) {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.status === 'success') {
+      if (data.success === true) {
         const droppedElement = document.getElementById(elementId);
         dropZone.appendChild(droppedElement);
       } else {
         alert('Error saving data');
       }
+      if (data.redirect_url) {
+          // Option 1: Redirect immediately
+          window.location.href = data.redirect_url;
+          
+          // Option 2: Flash a message first, then redirect after 2 seconds
+          // alert(data.message);
+          // setTimeout(() => { window.location.href = data.redirect_url; }, 2000);
+      }
+
     })
     .catch(error => console.error('Error:', error));
   });
@@ -78,6 +88,8 @@ document.addEventListener('mousedown', (event) => {
     draggableCard.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', e.target.id);
     });
+  } else {
+    console.log("issue here")
   }
 });
 
@@ -91,4 +103,17 @@ elements.forEach(dropZone => {
 const pantryElements = document.querySelectorAll('.pantry-box')
 pantryElements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
+});
+
+
+// dynamic search for global pantry
+const searchInput = document.getElementById('search-input');
+const searchForm = document.getElementById('search-form');
+let timeout = null;
+
+searchInput.addEventListener('keyup', function () {
+  clearTimeout(timeout);
+  timeout = setTimeout(function () {
+    searchForm.submit();
+  }, 500);
 });
