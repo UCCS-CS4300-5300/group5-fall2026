@@ -270,13 +270,8 @@ def submit_drag_drop(request):
             data = json.loads(request.body)
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
+            query = data.get('query_string')
 
-            
-            logging.debug(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            logging.debug("target_zone:" + target_zone)
-            logging.debug("raw_id:" + raw_id)
-            logging.debug(GlobalCatalogItem.objects.count())
-            query = request.POST.get("q", "")
             if target_zone:
                 item = PantryItem.objects.filter(id=raw_id).first()
                 if item:
@@ -289,15 +284,11 @@ def submit_drag_drop(request):
                     # item = ShelfLife.objects.get(id=raw_id)
                     if item:
                         pantry, _ = getOrCreateDefaults()
-                        # catalog_item = get_object_or_404(GlobalCatalogItem, id=raw_id)
                     
                         # Never trust a posted value against a choices field. An unknown
                         # location would save happily and then match no shelf-life row, so the
                         # item would end up with no expiration date for no visible reason.
                         location = target_zone;
-                        # location = request.POST.get("location")
-                        # if location not in dict(PantryItem.STORAGE_LOCATIONS):
-                        #     location = "SHELF"
                     
                         pantryItem = PantryItem.objects.create(
                             pantry=pantry,
@@ -308,14 +299,11 @@ def submit_drag_drop(request):
             else:
                 raise(KeyError)
 
-
-            # return render(request, "core/home.html", build_home_context(form, id)) 
-            
             return JsonResponse({
                 'success': True,
                 'status': 'success', 
                 'message': 'Item updated!',
-                'redirect_url': reverse('core:home')
+                'redirect_url': f"{reverse('core:home')}{query}" # reverse('core:home')
             })
         
         except (ValueError, KeyError):
