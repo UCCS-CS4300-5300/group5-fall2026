@@ -1,4 +1,11 @@
 from pathlib import Path
+import dj_database_url
+import os
+from dotenv import load_dotenv
+
+# This looks for a .env file in the current directory and loads it
+load_dotenv() 
+
 BASE_DIR=Path(__file__).resolve().parent.parent
 SECRET_KEY="course-starter-development-key"
 DEBUG=True
@@ -12,7 +19,17 @@ INSTALLED_APPS=[
     "django.contrib.staticfiles",
     "core"
 ]
-MIDDLEWARE=["django.middleware.security.SecurityMiddleware","django.contrib.sessions.middleware.SessionMiddleware","django.middleware.common.CommonMiddleware","django.middleware.csrf.CsrfViewMiddleware","django.contrib.auth.middleware.AuthenticationMiddleware","django.contrib.messages.middleware.MessageMiddleware","django.middleware.clickjacking.XFrameOptionsMiddleware"]
+MIDDLEWARE=[
+    "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware"
+]
+
 ROOT_URLCONF="config.urls"
 TEMPLATES=[
     {
@@ -29,14 +46,42 @@ TEMPLATES=[
     }
 ]
 WSGI_APPLICATION="config.wsgi.application"
-DATABASES={"default":{"ENGINE":"django.db.backends.sqlite3","NAME":BASE_DIR/"db.sqlite3"}}
+
+DATABASES={
+    "default":{
+        "ENGINE":"django.db.backends.sqlite3",
+        "NAME":BASE_DIR/"db.sqlite3"
+        }
+    }
+if not DEBUG and os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(
+        os.environ["DATABASE_URL"], conn_max_age=0)}
+elif os.environ.get("RENDER"):
+    raise RuntimeError("DATABASE_URL is required on Render")
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 AUTH_PASSWORD_VALIDATORS=[]
 LANGUAGE_CODE="en-us"
 TIME_ZONE="America/Denver"
 USE_I18N=True
 USE_TZ=True
-STATIC_URL="static/"
 DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"
+
+STATIC_URL="static/"
+
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Shelf-Life app settings
 
@@ -54,3 +99,4 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+

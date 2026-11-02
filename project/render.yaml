@@ -1,0 +1,29 @@
+databases:
+  - name: mysitedb
+    plan: free
+    databaseName: mysite
+    user: mysite
+
+services:
+  - type: web
+    plan: free
+    name: shelf_life
+
+    repo: https://github.com/UCCS-CS4300-5300/group5-fall2026
+    branch: main
+    autoDeployTrigger: checksPass 
+
+    runtime: python
+    buildCommand: './build.sh'
+    startCommand: 'gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 1'
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mysitedb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DEBUG
+        value: false
