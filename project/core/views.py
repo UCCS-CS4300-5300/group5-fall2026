@@ -8,6 +8,7 @@ from urllib.parse import quote
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
+from .ai import match_to_catalog
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
@@ -60,6 +61,11 @@ def search_catalog(query, limit=25):
         both match "pasta" -- the second only because its hidden keyword
         list happens to contain the word. Name matches rank first so the
         obvious answer is the one at the top.
+
+        When none of that finds anything, falls back to asking a model which
+        catalog food the user meant. Only on zero results, deliberately: the
+        no-results case is the broken one, and an ordinary search should
+        never wait on an API call. See core/ai.py.
     """
     if not query or not query.strip():
         return GlobalCatalogItem.objects.none()
@@ -83,6 +89,14 @@ def search_catalog(query, limit=25):
             output_field=IntegerField(),
         )
     ).order_by("rank", "name", "name_subtitle")
+
+    if not results.exists():
+        # Literal search found nothing. Ask the model what they meant; it
+        # returns None when there is no key, no answer or no API, and the
+        # user sees the same empty result they would have seen anyway.
+        guess = match_to_catalog(query)
+        if guess:
+            return GlobalCatalogItem.objects.filter(id=guess.id)
 
     return results[:limit]
 
