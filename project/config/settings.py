@@ -8,7 +8,6 @@ load_dotenv()
 
 BASE_DIR=Path(__file__).resolve().parent.parent
 SECRET_KEY="course-starter-development-key"
-# DEBUG=True
 DEBUG = os.environ.get('DEBUG') == 'true'
 
 ALLOWED_HOSTS=["*"]
@@ -57,7 +56,7 @@ DATABASES={
     }
 
 
-if not DEBUG and os.environ.get("DATABASE_URL"):
+if os.environ.get("DATABASE_URL"):
     DATABASES = {
         "default": dj_database_url.parse(
         os.environ["DATABASE_URL"], conn_max_age=0)}
