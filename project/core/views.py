@@ -274,7 +274,9 @@ def submit_drag_drop(request):
 
             if target_zone:
                 item = PantryItem.objects.filter(id=raw_id).first()
-                if item:
+                if target_zone == "DELETE":
+                    item.delete();
+                elif item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
                     item.location = target_zone;
                     item.save()

@@ -101,6 +101,11 @@ pantryElements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
 });
 
+// Attach listener for the drop via the css class
+const pantryElements1 = document.querySelectorAll('.pantry-box-delete')
+pantryElements1.forEach(dropZone => {
+  addDropZoneListeners(dropZone, dropZone.id)
+});
 
 // dynamic search for global pantry
 const searchInput = document.getElementById('search-input');
