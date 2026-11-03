@@ -12,7 +12,8 @@ services:
     repo: https://github.com/UCCS-CS4300-5300/group5-fall2026
     branch: main
     autoDeployTrigger: checksPass 
-
+    rootDir: project
+     
     runtime: python
     buildCommand: './build.sh'
     startCommand: 'gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 1'
