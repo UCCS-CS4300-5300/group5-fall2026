@@ -1,4 +1,10 @@
-# Save as .github/workflows/quality.yml after adapting APP_PATH and setup below.
+jobs:
+  report:
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: evidence
+    permissions:
+      contents: read
+      id-token: write # Save as .github/workflows/quality.yml after adapting APP_PATH and setup below.
 name: Engineering quality
 on:
   pull_request:
