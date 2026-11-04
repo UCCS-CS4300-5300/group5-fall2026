@@ -270,8 +270,11 @@ def submit_drag_drop(request):
             data = json.loads(request.body)
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-                        
+
             if target_zone:
+                if target_zone not in dict(PantryItem.STORAGE_LOCATIONS):
+                    target_zone = "SHELF"
+
                 item = PantryItem.objects.get(id=raw_id)
                 if item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
@@ -283,8 +286,14 @@ def submit_drag_drop(request):
                 raise(KeyError)
 
             return JsonResponse({'status': 'success', 'message': 'Item updated!'})
-        
+
+        except PantryItem.DoesNotExist:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Item not found'},
+                status=404
+            )
+
         except (ValueError, KeyError):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
-            
+
     return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)

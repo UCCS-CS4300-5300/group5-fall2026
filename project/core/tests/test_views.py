@@ -220,3 +220,55 @@ def test_drag_drop_task_assignment_view_fails_with_get(client):
 
     # Assert response status
     assert response.status_code == 405
+
+@pytest.mark.django_db
+def test_drag_drop_returns_404_when_item_no_longer_exists(client):
+    url = reverse("core:submit_drag_drop")
+
+    payload = {
+        "raw_id": 999999,
+        "target_zone": "FRIDGE"
+    }
+
+    response = client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "status": "error",
+        "message": "Item not found"
+    }
+@pytest.mark.django_db
+def test_drag_drop_invalid_location_falls_back_to_shelf(client):
+    user = User.objects.create_user(username="user2", password="password")
+    pantry = Pantry.objects.create(user=user, name="Pantry2")
+    catalog_item, _ = GlobalCatalogItem.objects.get_or_create(
+        name="vegetables",
+        category="Vegetable",
+    )
+
+    pantry_item = PantryItem.objects.create(
+        pantry=pantry,
+        catalog_item=catalog_item,
+        location="FRIDGE"
+    )
+
+    url = reverse("core:submit_drag_drop")
+    payload = {
+        "raw_id": pantry_item.id,
+        "target_zone": "CABINET"
+    }
+
+    response = client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    pantry_item.refresh_from_db()
+
+    assert response.status_code == 200
+    assert pantry_item.location == "SHELF"
