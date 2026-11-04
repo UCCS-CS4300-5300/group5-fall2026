@@ -144,8 +144,17 @@ logging.basicConfig(
     ]
 )
 
+def getOrCreateDefaults():
+    """
+        Make sure there is a user and a pantry to work with on a /home request.
+        TODO: replace with a real login when the multi-user story lands.
 
-# Shared list of global item catalog (duplicate-code)
+        The pantry starts EMPTY on purpose. It used to be seeded with one
+        PantryItem per catalog entry, which was fine for the ten hardcoded
+        fruits and is not fine for the 661 USDA foods -- the first page
+        request would create 661 pantry items. Users add their own now.
+    """
+ (duplicate-code)
 
 ------------------------------------------------------------------
 Your code has been rated at 3.78/10 (previous run: 3.78/10, +0.00)
