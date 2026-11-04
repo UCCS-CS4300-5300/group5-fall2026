@@ -221,6 +221,7 @@ def test_drag_drop_task_assignment_view_fails_with_get(client):
     # Assert response status
     assert response.status_code == 405
 
+
 @pytest.mark.django_db
 def test_drag_drop_returns_404_when_item_no_longer_exists(client):
     url = reverse("core:submit_drag_drop")
@@ -241,6 +242,8 @@ def test_drag_drop_returns_404_when_item_no_longer_exists(client):
         "status": "error",
         "message": "Item not found"
     }
+
+
 @pytest.mark.django_db
 def test_drag_drop_invalid_location_falls_back_to_shelf(client):
     user = User.objects.create_user(username="user2", password="password")
@@ -272,3 +275,39 @@ def test_drag_drop_invalid_location_falls_back_to_shelf(client):
 
     assert response.status_code == 200
     assert pantry_item.location == "SHELF"
+
+
+@pytest.mark.django_db
+def test_drag_drop_recalculates_expiration_when_location_changes(client):
+    user = User.objects.create_user(username="cook3", password="password")
+    pantry = Pantry.objects.create(user=user, name="Pantry1")
+    chicken = GlobalCatalogItem.objects.get(
+        name="Chicken",
+        name_subtitle="whole"
+    )
+
+    pantry_item = PantryItem.objects.create(
+        pantry=pantry,
+        catalog_item=chicken,
+        location="FRIDGE"
+    )
+
+    assert (pantry_item.date_expired - pantry_item.date_stored).days == 2
+
+    url = reverse("core:submit_drag_drop")
+    payload = {
+        "raw_id": pantry_item.id,
+        "target_zone": "FREEZER"
+    }
+
+    response = client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    pantry_item.refresh_from_db()
+
+    assert response.status_code == 200
+    assert pantry_item.location == "FREEZER"
+    assert (pantry_item.date_expired - pantry_item.date_stored).days == 360

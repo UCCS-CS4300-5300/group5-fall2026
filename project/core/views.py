@@ -278,6 +278,9 @@ def submit_drag_drop(request):
                 item = PantryItem.objects.get(id=raw_id)
                 if item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
+                    if item.location != target_zone:
+                        item.date_expired = None
+
                     item.location = target_zone;
                     item.save()
                 else:
