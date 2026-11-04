@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.6.0
+django: version: 5.2.17, settings: config.quality_test_settings (from env)
+rootdir: /workspaces/group5-fall2026/project
+configfile: pytest.ini
+plugins: assume-2.4.3, cov-6.2.1, platformdirs-4.12.4, django-4.14.0
+collected 58 items
+
+core/tests/test_catalog_search.py .............                          [ 22%]
+core/tests/test_edit_pantry_item.py .....                                [ 31%]
+core/tests/test_expiration_status.py ...                                 [ 36%]
+core/tests/test_models.py ................                               [ 63%]
+core/tests/test_view_details_popup.py ..                                 [ 67%]
+core/tests/test_views.py .........                                       [ 82%]
+core/tests/test_category_images.py ..                                    [ 86%]
+sprint3-starter/tests/test_quality_report.py ........                    [100%]
+
+- generated xml file: /workspaces/group5-fall2026/project/quality-evidence/tests.xml -
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                                   Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------------
+core/__init__.py                           0      0      0      0   100%
+core/admin.py                              5      0      0      0   100%
+core/forms.py                             10      0      0      0   100%
+core/models.py                            77      3     16      0    97%   128, 142, 229
+core/templatetags/__init__.py              0      0      0      0   100%
+core/templatetags/custom_elements.py       9      0      0      0   100%
+core/urls.py                               4      0      0      0   100%
+core/views.py                            117      9     42      6    88%   96, 138-141, 179-181, 218->220, 247, 281
+----------------------------------------------------------------------------------
+TOTAL                                    222     12     58      6    92%
+Coverage JSON written to file quality-evidence/coverage.json
+============================= 58 passed in 31.09s ==============================
+
+Exit status: 0

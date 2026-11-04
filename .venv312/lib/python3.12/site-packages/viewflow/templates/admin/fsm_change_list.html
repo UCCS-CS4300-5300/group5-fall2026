@@ -1,0 +1,46 @@
+{% extends 'admin/change_list.html' %}
+{% load admin_list admin_urls i18n fsm %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    /* Keep the diagram thumbnail from blowing out the filter sidebar. */
+    #changelist-graph { width: 220px; max-width: 100%; }
+    /* The admin's `#changelist-filter a` rule (id specificity) otherwise
+       forces the closed-state export link visible; hide it in the thumbnail. */
+    #changelist-graph vf-modal-trigger:not(.vf-modal-trigger--open) .vf-modal-trigger__export { display: none; }
+    /* The Material Icons font/class isn't loaded in the admin, so the icon
+       ligature would render as the literal word "download" -- drop it. */
+    #changelist-graph .vf-modal-trigger__export .material-icons { display: none; }
+    /* Restore the button layout the admin's `#changelist-filter a` rule flattens. */
+    #changelist-graph vf-modal-trigger.vf-modal-trigger--open .vf-modal-trigger__export { display: inline-flex; }
+  </style>
+{% endblock %}
+
+{% block object-tools-items %}
+  {# django-reversion integration #}
+  {% if not is_popup and has_add_permission and has_change_permission %}
+    {% url opts|admin_urlname:'recoverlist' as recover_url %}
+    {% if recover_url %}
+      <li>
+        <a href="{{ recover_url }}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a>
+      </li>
+    {% endif %}
+  {% endif %}
+
+  {{ block.super }}
+{% endblock %}
+
+{% block filters %}
+  <div id="changelist-filter">
+    <h2>{% trans 'Graph' %}</h2>
+    <div id="changelist-graph">
+      {% include "viewflow/fsm/includes/flow_chart_modal.html" with flow_export_name=cl.opts.model_name|add:"-flow" %}
+    </div>
+    {% if cl.has_filters %}
+      <h2>{% trans 'Filter' %}</h2>
+      {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+    {% endif %}
+  </div>
+{% endblock %}
+
