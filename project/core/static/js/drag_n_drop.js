@@ -60,8 +60,7 @@ function addDropZoneListeners(dropZone, zoneName) {
     .then(response => response.json())
     .then(data => {
       if (data.status === 'success') {
-        const droppedElement = document.getElementById(elementId);
-        dropZone.appendChild(droppedElement);
+        window.location.reload();
       } else {
         alert('Error saving data');
       }
