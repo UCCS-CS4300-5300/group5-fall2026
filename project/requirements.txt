@@ -33,7 +33,7 @@ Pygments==2.21.0
 pytailwindcss==0.3.1
 pytest==8.3.5
 pytest-assume==2.4.3
-pytest-cov==7.1.0
+pytest-cov==6.2.1
 pytest-django==4.14.0
 python-dotenv==1.2.4
 PyYAML==6.0.3

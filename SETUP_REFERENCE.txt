@@ -1,0 +1,156 @@
+SPRINT 3 SETUP REFERENCE — consult the relevant section as needed
+
+LOCAL QUICK START (run from the unzipped sprint3-starter folder)
+Reuse your existing environment. Paths below assume .venv is in this folder;
+otherwise use the actual interpreter path, including an absolute path if needed.
+Reuse the configured Codespaces environment for the reporter and normal app work.
+For an optional isolated mutation-tool environment, follow MUTATION_CHECK.txt.
+Windows PowerShell:
+  .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+  .\.venv\Scripts\python.exe scripts/quality_report.py --offline-demo --evidence sample-evidence --output DEMO_REPORT.md
+macOS Terminal (also Linux with a project .venv):
+  ./.venv/bin/python -m unittest discover -s tests -v
+  ./.venv/bin/python scripts/quality_report.py --offline-demo --evidence sample-evidence --output DEMO_REPORT.md
+Codespaces with its existing configured Python environment:
+  python -m unittest discover -s tests -v
+  python scripts/quality_report.py --offline-demo --evidence sample-evidence --output DEMO_REPORT.md
+For Poetry/uv/Pipenv use the project's established run command instead of these
+venv paths. These examples need no environment activation or PowerShell policy
+changes. If no environment exists, follow your platform section in the guide.
+
+LOCAL APP VS RENDER
+Locally use the existing dependency install/test commands and manage.py runserver.
+In Codespaces use manage.py runserver 0.0.0.0:8000 and a private forwarded port.
+Keep local/CI databases separate from live Neon. Render alone runs bash build.sh
+and Gunicorn. Do not run those deployment commands in native Windows PowerShell.
+For pip projects, requirements-render.txt includes -r requirements.txt plus a
+compatible pinned Gunicorn; reuse an existing production file/group if present.
+Shared settings imports belong in shared dependencies. Preserve existing pins.
+The build.sh file uses LF line endings and Render installs the deployment set.
+Full platform-specific environment/seed and deployment instructions:
+https://docs.google.com/document/d/1kFwsMl1WJQqpgnCJZnlUDi_aafPUirSBpkRgkVCsAoI/edit
+
+DETAILED INTEGRATION STEPS
+
+1. Unzip, including the hidden .github directory. Inspect before merging into your
+   project; do not overwrite existing application tests or workflows blindly.
+2. Run locally from this folder using YOUR existing interpreter as above.
+   The generic python command below means that interpreter:
+   python -m unittest discover -s tests -v
+   python scripts/quality_report.py --offline-demo --evidence sample-evidence --output DEMO_REPORT.md
+   Expected: 8 tests pass; a Markdown report explicitly marked SYNTHETIC DEMO.
+   These commands do not contact any service or spend credits. SAMPLE_REPORT.md
+   shows the output shape. Never submit sample-evidence as application results.
+3. Merge the ZIP at repository root using TEAM_COMPATIBILITY.txt. Keep .github
+   at repository root; app commands run inside project/. Preserve existing files.
+4. quality.yml now defaults to Python 3.12 and core/ from project/, matching the
+   five audited main branches. Retain their pytest.ini (including tests.py discovery).
+   project/config/quality_test_settings.py supplies an isolated SQLite test DB.
+   Reporter mocks run separately at repository root; all app tests run in project/.
+   Team 3 must enable its JavaScript checks after repairing its lockfile/test path.
+5. At repository root install project/requirements.txt AND requirements-quality.txt
+   in one pip invocation, then pip check. Preserve later team pins/lockfiles.
+   The quality file supplies pinned coverage/Pylint/Django-plugin/Radon tools;
+   it does not replace app dependencies or require a requirements-dev.txt.
+   mutmut remains optional tooling for the one focused check, outside CI.
+   Pylint uses the Django plugin/settings. Ordinary findings remain evidence;
+   setup errors, test failures and missing migrations remain visible failures.
+6. Inspect the supplied reporter, prompt and mocked tests. Adapt evidence paths
+   and project context where needed; do not rewrite working code just to change it.
+   Run the supplied tests and add a test only for behavior you change. Check that
+   real application evidence appears correctly; synthetic fixtures are not proof.
+7. GitHub repository Settings > Secrets and variables > Actions > Variables >
+   New repository variable: COURSE_GATEWAY_URL =
+   https://sprint3-gateway-1071259812853.us-central1.run.app
+   This URL is not a secret. Do not create or request an OpenAI API key.
+8. Open a PR. Verify complete app tests AND reporter tests, coverage, Pylint and
+   both Radon reports appear in quality-evidence. A failing check must stay red.
+   Fix setup problems before merging. PRs use mocks, never live AI.
+9. Optionally set repository variable QUALITY_REVIEW_ISSUE_URL to an existing
+   human-evaluation issue URL. If omitted, link the report from that issue later.
+   Merge quality.yml to main. The push automatically runs evidence, then report
+   only if evidence passes. No Run workflow button or manual dispatch is needed.
+   Keep .github/workflows/quality.yml and do not attach a GitHub environment:
+   the gateway checks repository, workflow, main branch and push event identity.
+10. Download quality-evidence and engineering-quality-report from the same run.
+    Verify QUALITY_REPORT.md has that run's SHA and real measured results.
+    A failed evidence job skips the live report; repair it first. A report failure
+    stays red and preserves an unavailable report. Render waits for checks;
+    investigate service/quota errors without bypassing checks or retry loops.
+11. Complete the focused check in MUTATION_CHECK.txt before submission.
+    Keep it outside CI and the deployment gate. In the linked issue evaluate
+    ONE concern from the AI report OR your mutation results: evidence inspected, agree/disagree
+    and reason, then address/defer/dismiss. Example: 'Agree: cancellation branch
+    is uncovered in coverage.json. Add a test for cancelling an expired booking.'
+    If you change code, rerun CI and the report for the new final SHA.
+12. Verify matching commit IDs (SHAs) in the passing workflow, saved report
+    and Render deployment before tagging. If code changes, verify the new SHA.
+    Issue edits do not change code. From your existing project checkout:
+      git switch main
+      git pull --ff-only
+      git rev-parse HEAD
+      git tag -a sprint-3 VERIFIED_RELEASE_SHA -m "Sprint 3 graded release"
+      git push origin sprint-3
+    Replace VERIFIED_RELEASE_SHA with the exact verified commit ID. Do not
+    blindly tag a newer teammate merge. Never move the submitted tag.
+    Use the plain-language submission list in README.txt; creating a separate
+    release-evidence issue is optional.
+
+HOW THE LIVE REQUEST WORKS
+The client reads bounded evidence, requests a GitHub OIDC identity with the
+course origin as audience, and POSTs {"input":"..."} to origin/review using
+that identity as Bearer authorization. Successful JSON has text and model.
+The OpenAI credential stays in the instructor's gateway. Students do not use
+an OpenAI SDK, ChatGPT subscription, Cloud Run account, or Google credentials.
+The report job alone needs contents: read and id-token: write permissions.
+Live mode runs inside authorized Actions; locally use --offline-demo or mocks.
+One request, no retry loop. Max input 12,000 characters; output capped at 450
+model tokens. Develop using mocks; 20 requests/UTC day and 500 total per team
+through Jan 1, 2027. Expiry Jan 2 midnight Mountain. Failures after reservation
+can consume allowance. These limits do not limit ordinary CI or Render builds.
+
+TROUBLESHOOT WITHOUT REPEATED LIVE CALLS
+- Missing file/commit mismatch: inspect quality-evidence artifact and collector
+  paths; keep collect and report on the same github.sha. Do not reuse latest
+  artifacts from another run. Inspect failed evidence job before skipped report.
+- Missing OIDC environment variables locally: expected; use offline mode.
+  In Actions check id-token: write on report job and organization restrictions.
+- 400/413: nonempty JSON input string only; reduce bounded excerpts below limit.
+- 401: fresh OIDC token, correct audience, Bearer header; never log the token.
+- 403: verify groupN-fall2026, main, push event, quality.yml path, expiry,
+  and no environment declaration changing the identity subject.
+- 409: identity already used; no repeated request with the same token.
+- 429: shared team allowance; wait for next UTC day for daily cap. Lifetime cap
+  does not reset daily. Coordinate calls with teammates; do not loop retries.
+- 502/503 or timeout: preserve failure artifact. Verify local mocks and input,
+  then report persistent service trouble; do not repeatedly consume allowance.
+- Empty/invalid JSON/text: retain unavailable report; fail job; test this case.
+- Report missing: inspect generate step and always-run upload; output path must
+  match upload. Artifacts are not source commits; download before retention ends.
+- Render fails: inspect build/start logs. Check root, dependency versions, WSGI
+  module, PORT binding, allowed host, database and migrations. HTTP 400 often
+  means host configuration; form CSRF errors require correct trusted origin.
+  DEBUG must be parsed as a boolean, not bool('False'), which is True in Python.
+- Use Neon Free PostgreSQL with Render Free for the app through January 1, 2027.
+  Follow the course's exact setup, migration, persistence and usage instructions:
+  https://docs.google.com/document/d/1kFwsMl1WJQqpgnCJZnlUDi_aafPUirSBpkRgkVCsAoI/edit
+  Do not create Render's 30-day Postgres trial. Neon has no current trial expiry,
+  but free usage quotas apply. Keep CI on a disposable database. Local uploads
+  on Render remain ephemeral even when database rows persist in Neon.
+
+WHEN HELP REALLY IS NEEDED
+After checks above, send the failed run URL, commit, failing step, HTTP status,
+nonsecret error excerpt and checks already tried. Never send credentials/tokens.
+Only the instructor can fix gateway authorization/service quota or approve an
+unavailable hosting arrangement. Mock success is not proof of live gateway access.
+
+COURSE CONNECTION DETAILS
+Use your existing UCCS-CS4300-5300/groupN-fall2026 repository (N = 1–5), not
+an unrelated CI lab repository. The report job must remain in quality.yml.
+Do not attach a GitHub environment to that job: it changes the identity subject.
+The gateway fixes the model to gpt-4.1-mini; no student SDK or key is needed.
+Use coverage aggregate totals and bounded tool excerpts, retaining full artifacts.
+Daily allowance resets at midnight UTC (6 PM MDT / 5 PM MST). The allowance is
+shared by the team. Calls reserved before an upstream failure still count.
+PR mocks do not spend allowance; each successful main CI live report does.
+Contact the instructor before exhausting allowance if legitimate work needs more.
