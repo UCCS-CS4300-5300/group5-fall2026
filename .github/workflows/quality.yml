@@ -1,20 +1,17 @@
-jobs:
-  report:
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: evidence
-    permissions:
-      contents: read
-      id-token: write # Save as .github/workflows/quality.yml after adapting APP_PATH and setup below.
 name: Engineering quality
+
 on:
   pull_request:
   push:
     branches: [main]
+
 permissions:
   contents: read
 # REQUIRED: set to your project's existing tested Python version, not a new one.
+
 env:
   PROJECT_PYTHON_VERSION: "3.12"
+
 jobs:
   evidence:
     runs-on: ubuntu-24.04
@@ -54,6 +51,7 @@ jobs:
           name: quality-evidence
           path: project/quality-evidence/
           if-no-files-found: error
+          
   report:
     # Automatic after successful evidence on main; PRs never call live AI.
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
