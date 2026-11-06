@@ -44,8 +44,7 @@ jobs:
       #     npm run build
       - name: Collect real application evidence
         working-directory: project
-        run: |
-          python ../scripts/collect_quality.py "$APP_PATH"
+        run: python ../scripts/collect_quality.py "$APP_PATH"
 
       - uses: actions/upload-artifact@v4
         if: always()
