@@ -11,6 +11,7 @@ from .forms import PantryItemForm
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -21,27 +22,6 @@ logging.basicConfig(
         logging.StreamHandler()                    # Outputs to console
     ]
 )
-
-def getOrCreateDefaults():
-    """
-        Make sure there is a user and a pantry to work with on a /home request.
-        TODO: replace with a real login when the multi-user story lands.
-
-        The pantry starts EMPTY on purpose. It used to be seeded with one
-        PantryItem per catalog entry, which was fine for the ten hardcoded
-        fruits and is not fine for the 661 USDA foods -- the first page
-        request would create 661 pantry items. Users add their own now.
-    """
-
-    user = User.objects.order_by("id").first()
-    if user is None:
-        user = User.objects.create_user(username="user1", password="password")
-
-    pantry = Pantry.objects.filter(user=user).first()
-    if pantry is None:
-        pantry = Pantry.objects.create(user=user, name="Pantry1")
-
-    return [pantry, user]
 
 # The catalog is loaded by the USDA FoodKeeper data migration, not at
 # request time, so populateDefaultCatalog() is gone.
@@ -86,14 +66,26 @@ def search_catalog(query, limit=25):
 
     return results[:limit]
 
-
+@login_required
 def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user
     """
-    if request.method == "GET":
-        return render(request, "core/home.html", build_home_context(request=request))
-    return redirect("core:home")
+    if request.method != "GET":
+        return redirect("core:home")
+    return render(
+        request, 
+        "core/home.html", 
+        build_home_context(
+            request=request,
+            pantry=request.user.pantry,
+            invalid_form=None,
+            invalid_id=None,
+            add_form=None,
+            pantry=None,
+        ):
+        pantry = pantry or request.user.pantry
+        user = request.user    )
 
 
 def build_home_context(invalid_form=None, invalid_id=None, add_form=None, request=None):
@@ -158,7 +150,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         "searched" : bool(query.strip()),
     }
 
-
+@login_required
 def add_pantry_item(request):
     """
     This function will make it possible to add items into the user's storage layout.
@@ -182,6 +174,7 @@ def add_pantry_item(request):
 
 
 @require_POST
+@login_required
 def add_from_catalog(request, item_id):
     """
     Add one catalog food to the pantry in a single click.
@@ -208,7 +201,7 @@ def add_from_catalog(request, item_id):
         return redirect(f"{reverse('core:home')}?q={quote(query)}")
     return redirect("core:home")
 
-
+@login_required
 def delete_pantry_item(request, id):
     """
     Delete an active Item using an ID
@@ -219,7 +212,7 @@ def delete_pantry_item(request, id):
         item.delete()
     return redirect("core:home")
 
-
+@login_required
 def edit_pantry_item(request, id):
     """
     Saves changes from an item's edit pop-up
@@ -246,7 +239,7 @@ def test_pantry_view(request):
 
     return render(request, "core/test_pantry.html",build_home_context())
 
-
+@login_required
 def pantry_item_detail(request, item_id):
     """
         Retrieve one pantry item by ID and display its details.
@@ -263,6 +256,7 @@ def pantry_item_detail(request, item_id):
     )
 
 @csrf_protect
+@login_required
 def submit_drag_drop(request):
     if request.method == 'POST':
         try:
