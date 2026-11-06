@@ -45,6 +45,7 @@ jobs:
       - name: Collect real application evidence
         working-directory: project
         run: |
+          pwd
           export APP_PATH=`pwd`
           python ../scripts/collect_quality.py "$APP_PATH"
 
