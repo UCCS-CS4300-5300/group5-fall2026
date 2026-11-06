@@ -19,6 +19,8 @@ jobs:
       APP_PATH: core # Relative to project/; adapt if the application adds packages.
       DJANGO_SETTINGS_MODULE: config.quality_test_settings
     steps:
+      - name: setup envriomnment
+        run: python manage.py collectstatic --noinput
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           persist-credentials: false
