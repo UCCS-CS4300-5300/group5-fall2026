@@ -38,6 +38,14 @@
                         Shelf Life Application: User: {{ user.username }}
                     </h2>
                 </div>
+                {% if user.is_authenticated %}
+                    <form action="{% url 'logout' %}" method="post">
+                         {% csrf_token %}
+                        <button type="submit">Log out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Log in</a>
+                {% endif %}
             </nav>
         </header>
 

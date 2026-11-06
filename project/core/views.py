@@ -12,6 +12,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -66,6 +68,20 @@ def search_catalog(query, limit=25):
 
     return results[:limit]
 
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("core:home")
+    else:
+        form = UserCreationForm()
+
+    return render(request, "registration/signup.html", {"form": form})
+
+
 @login_required
 def home(request):
     """
@@ -73,22 +89,24 @@ def home(request):
     """
     if request.method != "GET":
         return redirect("core:home")
+
     return render(
-        request, 
-        "core/home.html", 
+        request,
+        "core/home.html",
         build_home_context(
             request=request,
             pantry=request.user.pantry,
-            invalid_form=None,
-            invalid_id=None,
-            add_form=None,
-            pantry=None,
-        ):
-        pantry = pantry or request.user.pantry
-        user = request.user    )
+        ),
+    )
 
 
-def build_home_context(invalid_form=None, invalid_id=None, add_form=None, request=None):
+def build_home_context(
+    invalid_form=None,
+    invalid_id=None,
+    add_form=None,
+    request=None,
+    pantry=None,
+):
     """
         Builds the home page data. Each pantry item gets its own edit form
         for its pop-up. If an edit failed, that item gets the form with the
@@ -99,7 +117,8 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         the template just loops over the list it needs.
     """
 
-    pantry, user = getOrCreateDefaults()
+    user = request.user if request else None
+    pantry = pantry or (user.pantry if user and user.is_authenticated else None)
 
     # select_related avoids one extra query per item for the catalog name,
     # which matters now that a pantry can hold a lot of rows. list() makes
@@ -156,7 +175,7 @@ def add_pantry_item(request):
     This function will make it possible to add items into the user's storage layout.
     """
 
-    pantry, user = getOrCreateDefaults()
+    pantry = request.user.pantry
 
     if request.method == "POST":
         form = PantryItemForm(request.POST)
@@ -168,7 +187,11 @@ def add_pantry_item(request):
             return redirect("core:home")
 
         # Re-render the layout containing errors in case of failure
-        return render(request, "core/home.html", build_home_context(add_form=form))
+        return render(
+            request,
+            "core/home.html",
+            build_home_context(request=request, pantry=pantry, add_form=form),
+        )
 
     return redirect("core:home")
 
@@ -182,7 +205,7 @@ def add_from_catalog(request, item_id):
     No dates are given, so PantryItem.save() fills in the expiration date
     from the USDA shelf life for that food, in whichever location it lands.
     """
-    pantry, user = getOrCreateDefaults()
+    pantry = request.user.pantry
     catalog_item = get_object_or_404(GlobalCatalogItem, id=item_id)
 
     # Never trust a posted value against a choices field. An unknown
@@ -201,15 +224,19 @@ def add_from_catalog(request, item_id):
         return redirect(f"{reverse('core:home')}?q={quote(query)}")
     return redirect("core:home")
 
+@require_POST
 @login_required
 def delete_pantry_item(request, id):
     """
     Delete an active Item using an ID
     """
 
-    item = get_object_or_404(PantryItem, id=id)
-    if request.method == "POST":
-        item.delete()
+    item = get_object_or_404(
+        PantryItem,
+        id=id,
+        pantry=request.user.pantry,
+    )
+    item.delete()
     return redirect("core:home")
 
 @login_required
@@ -217,7 +244,7 @@ def edit_pantry_item(request, id):
     """
     Saves changes from an item's edit pop-up
     """
-    item = get_object_or_404(PantryItem, id=id)
+    item = get_object_or_404(PantryItem, id=id, pantry=request.user.pantry)
 
     if request.method == "POST":
         form = PantryItemForm(request.POST, instance=item, auto_id=f"edit{id}_%s")
@@ -226,7 +253,13 @@ def edit_pantry_item(request, id):
             return redirect("core:home")
 
         # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
-        return render(request, "core/home.html", build_home_context(form, id))
+        return render(
+            request, "core/home.html", build_home_context(
+                request=request, 
+                invalid_form=form, 
+                invalid_id=id
+                )
+            )
 
     return redirect("core:home")
 
@@ -237,7 +270,11 @@ def test_pantry_view(request):
     on by another person
     """
 
-    return render(request, "core/test_pantry.html",build_home_context())
+    return render(
+        request,
+        "core/test_pantry.html",
+        build_home_context(request=request, pantry=request.user.pantry),
+    )
 
 @login_required
 def pantry_item_detail(request, item_id):
@@ -245,15 +282,24 @@ def pantry_item_detail(request, item_id):
         Retrieve one pantry item by ID and display its details.
     """
 
-    pantry_item = get_object_or_404(PantryItem, id=item_id)
+    pantry_item = get_object_or_404(PantryItem, id=item_id, pantry=request.user.pantry)
 
-    return render(
-        request,
-        "core/pantry_item_detail.html",
-        {
-            "pantry_item": pantry_item
-        }
-    )
+    if request.method == "POST":
+        form = PantryItemForm(request.POST, instance=pantry_item)
+        if form.is_valid():
+            form.save()
+            return redirect("core:pantry_item_detail", item_id=item_id)
+
+        # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
+        return render(
+            request,
+            "core/pantry_item_detail.html",
+            {
+                "pantry_item": pantry_item,
+                "form": form,
+            }
+        )
+    return redirect("core:home")
 
 @csrf_protect
 @login_required
@@ -266,7 +312,10 @@ def submit_drag_drop(request):
             target_zone = data.get('target_zone')
                         
             if target_zone:
-                item = PantryItem.objects.get(id=raw_id)
+                item = PantryItem.objects.get(
+                    id=raw_id,
+                    pantry=request.user.pantry,
+                )
                 if item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
                     item.location = target_zone;
@@ -278,7 +327,7 @@ def submit_drag_drop(request):
 
             return JsonResponse({'status': 'success', 'message': 'Item updated!'})
         
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, PantryItem.DoesNotExist):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)

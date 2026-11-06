@@ -73,6 +73,9 @@ STORAGES = {
 }
 
 AUTH_PASSWORD_VALIDATORS=[]
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "core:home"
+LOGOUT_REDIRECT_URL = "login"
 LANGUAGE_CODE="en-us"
 TIME_ZONE="America/Denver"
 USE_I18N=True
