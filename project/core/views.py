@@ -284,19 +284,41 @@ def submit_drag_drop(request):
             data = json.loads(request.body)
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-                        
+            query = data.get('query_string')
+
             if target_zone:
-                item = PantryItem.objects.get(id=raw_id)
+                item = PantryItem.objects.filter(id=raw_id).first()
                 if item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
                     item.location = target_zone;
                     item.save()
                 else:
-                    raise(KeyError)
+                    item = GlobalCatalogItem.objects.filter(id=raw_id).first()
+                    logging.debug(item)
+                    # item = ShelfLife.objects.get(id=raw_id)
+                    if item:
+                        pantry, _ = getOrCreateDefaults()
+                    
+                        # Never trust a posted value against a choices field. An unknown
+                        # location would save happily and then match no shelf-life row, so the
+                        # item would end up with no expiration date for no visible reason.
+                        location = target_zone;
+                    
+                        pantryItem = PantryItem.objects.create(
+                            pantry=pantry,
+                            catalog_item=item,
+                            location=location
+                        )
+                        pantryItem.save()
             else:
                 raise(KeyError)
 
-            return JsonResponse({'status': 'success', 'message': 'Item updated!'})
+            return JsonResponse({
+                'success': True,
+                'status': 'success', 
+                'message': 'Item updated!',
+                'redirect_url': f"{reverse('core:home')}{query}"
+            })
         
         except (ValueError, KeyError):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
