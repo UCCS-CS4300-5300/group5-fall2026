@@ -48,6 +48,7 @@ jobs:
             yes yes | python manage.py flush
             python manage.py makemigrations
             python manage.py migrate
+            python manage.py collectstatic --noinput
           popd > /dev/null 2>&1
 
       # Run the unit tests and collect statement + branch coverage
