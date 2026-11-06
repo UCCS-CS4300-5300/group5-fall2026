@@ -25,6 +25,9 @@ Shared Design Variables
     --color-fresh: #09bc8a;
     --color-expiring: #f4d03f;
     --color-expired: #e74c3c;
+    --color-status-label-text-fresh:#0c5a1d;
+    --color-status-label-text-expiring:#9a7207;
+    --color-status-label-text-expired:#8d2b20;
 
     /* Spacing */
     --space-xs: 5px;
@@ -36,6 +39,8 @@ Shared Design Variables
     --font-size-body: 1rem;
     --font-size-heading: 1.25rem;
     --font-size-title: 1.5rem;
+    --font-size-item-name: 1.1rem;
+    --font-size-expired-status:0.9rem;
 
     /* Shared sizes */
     --touch-target: 44px;
@@ -428,6 +433,89 @@ Body Style
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Item Ellipses menu Area
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.item-circle {
+    position: relative;
+}
+
+.item-menu-container {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 10;
+}
+
+.ellipses-btn {
+    width: 27px !important;
+    height: 27px !important;
+    background-color: var(--color-button-dark);
+    color: var(--color-button-text);
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+.ellipses-btn:hover {
+    background-color: var(--color-button-hover);
+    transform: scale(1.05);
+}
+
+.item-submenu {
+    display: none;
+    position: absolute;
+    top: 32px;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    box-shadow: 0 6px 16px var(--color-shadow);
+    padding: 4px 0;
+    width: 120px;
+    z-index: 20;
+    text-align: left;
+}
+
+.item-submenu.show {
+    display: block;
+}
+
+.item-submenu .submenu-option,
+.item-submenu .inline-form button.submenu-option {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 7px 10px;
+    font-size: 0.75rem;
+    text-align: left;
+    color: var(--color-button-dark);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.item-submenu .submenu-option:hover {
+    background-color: var(--color-panel);
+    color: var(--color-focus);
+}
+
+.item-submenu .submenu-delete {
+    color: var(--color-error);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Scrolling and Storage Areas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -543,52 +631,9 @@ Scrolling and Storage Areas
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Color Coding - Expiration Status Color
+Item Circle Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-.item-circle.fresh {
-    border: 4px solid var(--color-fresh);
-    box-shadow: 0 4px 8px rgba(9, 188, 138, 0.15)
-}
-
-.item-circle.expiring-soon {
-    border: 4px solid var(--color-expiring);
-    box-shadow: 0 4px 8px rgba(244, 208, 63, 0.2);
-}
-
-.item-circle.expired {
-    border: 4px solid var(--color-expired);
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
-}
-
-/* Collapse into a column when screen width is 600px or less */
-@media screen and (max-width: 600px) {
-    /* Stacks items vertically on collapse */
-    .flex-container {
-        flex-direction: column; 
-    }
-    .split-container{
-        flex-direction:column;
-        width: 100%;
-        height: auto;
-        min-height: calc(100vh - 80px);
-        overflow: visible;
-    }
-    .middle-column,
-    .right-column{
-        flex: 0 0 auto;
-        width: 100%;
-    }
-
-    .scroll-box,
-    .scrollbox {
-        height: auto;
-        overflow: visible;
-    }
- 
-    /* TODO: handle the full form on vertical collapse for objects....  */
-    /* Completely hides the left column on collapse */
-}
 
 .item-circle {
     display: flex;
@@ -601,7 +646,7 @@ Color Coding - Expiration Status Color
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .category-food-image {
@@ -643,6 +688,115 @@ Color Coding - Expiration Status Color
 
 .status-label {
     display: block;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Color Coding - Expiration Status Color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.item-circle.fresh {
+    border: 4px solid var(--color-fresh);
+    box-shadow: 0 4px 8px rgba(9, 188, 138, 0.15)
+}
+
+.item-circle.expiring-soon {
+    border: 4px solid var(--color-expiring);
+    box-shadow: 0 4px 8px rgba(244, 208, 63, 0.2);
+}
+
+.item-circle.expired {
+    border: 4px solid var(--color-expired);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pantry Item Inner Text Styling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+.item-circle .container .item-name {
+    color: var(--color-button-dark);
+    font-size: var(--font-size-item-name);
+    font-weight: 900;
+    background-color: transparent;
+    text-shadow: 0 0 4px #ffffff, 0 0 6px #ffffff, 0 0 8px #ffffff, 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.item-circle .container .quantity-text {
+    color: var(--color-button-dark);
+    font-size: var(--font-size-item-name);
+    font-weight: 900;
+    background-color: transparent;
+    text-shadow: 0 0 4px #ffffff, 0 0 6px #ffffff, 0 0 8px #ffffff, 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.item-circle.fresh .container .status-label {
+    color: var(--color-status-label-text-fresh); /* Darker green (can be changed) */
+    background-color: rgba(9, 188, 138, 0.15);
+    font-size: var(--font-size-expired-status);
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(1px);
+}
+
+.item-circle.expiring-soon .container .status-label {
+    color: var(--color-status-label-text-expiring); /* Darker yellow/gold (can be changed)*/
+    background-color: rgba(244, 208, 63, 0.2);
+    font-size: var(--font-size-expired-status);
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(2px);
+}
+
+.item-circle.expired .container .status-label {
+    color: var(--color-status-label-text-expired); /* Darker red (can be changed)*/
+    background-color: rgba(231, 76, 60, 0.2);
+    font-size: var(--font-size-expired-status);
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(2px);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Previous Media Parameters, will leave as is
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+/* Collapse into a column when screen width is 600px or less */
+@media screen and (max-width: 600px) {
+    /* Stacks items vertically on collapse */
+    .flex-container {
+        flex-direction: column; 
+    }
+    .split-container{
+        flex-direction:column;
+        width: 100%;
+        height: auto;
+        min-height: calc(100vh - 80px);
+        overflow: visible;
+    }
+    .middle-column,
+    .right-column{
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
+    .scroll-box,
+    .scrollbox {
+        height: auto;
+        overflow: visible;
+    }
+ 
+    /* TODO: handle the full form on vertical collapse for objects....  */
+    /* Completely hides the left column on collapse */
 }
 
 /*
@@ -754,6 +908,29 @@ Pop-up Style
     border: 2px solid var(--color-border);
     border-radius: var(--radius-large);
     text-align: left;
+}
+
+.edit-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.edit-dialog form p {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    width: 100%;
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.edit-dialog form input,
+.edit-dialog form select,
+.edit-dialog form textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .edit-dialog::backdrop,
