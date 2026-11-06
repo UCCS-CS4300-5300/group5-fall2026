@@ -1,6 +1,0 @@
-/workspaces/group5-fall2026/.venv312/bin/python manage.py check => 0
-/workspaces/group5-fall2026/.venv312/bin/python manage.py makemigrations --check --dry-run => 0
-/workspaces/group5-fall2026/.venv312/bin/python -m pytest --cov=core --cov-config=/workspaces/group5-fall2026/quality.coveragerc --cov-branch --cov-report=json:quality-evidence/coverage.json --cov-report=term-missing --junitxml=quality-evidence/tests.xml => 0
-/workspaces/group5-fall2026/.venv312/bin/python -m pylint --load-plugins=pylint_django --django-settings-module=config.quality_test_settings --ignore=tests,migrations --ignore-patterns=tests.py,test_.*.py core => 30
-/workspaces/group5-fall2026/.venv312/bin/python -m radon cc -s -a -e */migrations/*,*/tests/*,*/tests.py,*/test_*.py core => 0
-/workspaces/group5-fall2026/.venv312/bin/python -m radon mi -s -e */migrations/*,*/tests/*,*/tests.py,*/test_*.py core => 0
