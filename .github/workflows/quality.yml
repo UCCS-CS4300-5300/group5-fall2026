@@ -44,7 +44,7 @@ jobs:
       #     npm run build
       - name: Collect real application evidence
         working-directory: project
-        run: 
+        run: |
           export APP_PATH=`pwd`
           python ../scripts/collect_quality.py "$APP_PATH"
 
