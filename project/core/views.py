@@ -305,7 +305,7 @@ def submit_drag_drop(request):
                 'success': True,
                 'status': 'success', 
                 'message': 'Item updated!',
-                'redirect_url': f"{reverse('core:home')}{query}" # reverse('core:home')
+                'redirect_url': f"{reverse('core:home')}{query}"
             })
         
         except (ValueError, KeyError):

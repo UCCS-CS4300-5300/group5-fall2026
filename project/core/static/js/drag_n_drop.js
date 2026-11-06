@@ -118,3 +118,19 @@ searchInput.addEventListener('keyup', function () {
     searchForm.submit();
   }, 500);
 });
+
+
+// Find all elements
+const circles = document.querySelectorAll('.item-circle');
+circles.forEach(circle => {
+  // Add listener for entering the element
+  circle.addEventListener('mouseenter', () => {
+    circle.style.backgroundColor = '#cdcdcd';
+  });
+
+  // Add listener exiting the element
+  circle.addEventListener('mouseleave', () => {
+    circle.style.backgroundColor = '#ffffff';
+  });
+});
+

@@ -31,6 +31,7 @@ jobs:
       - name: Install Prerequisites
         run: |
           pushd $MAIN_FOLDER > /dev/null 2>&1
+            echo "DEBUG='true'" > .env
             echo "Installing Requirements:\n"
             for i in `cat requirements.txt`; do 
               echo "$i"
@@ -42,10 +43,12 @@ jobs:
       - name: Setup Python Prerequisites
         run: |
           pushd $MAIN_FOLDER > /dev/null 2>&1
+            echo "DEBUG='true'" > .env
             # need to feed the prompt yes... :)
             yes yes | python manage.py flush
             python manage.py makemigrations
             python manage.py migrate
+            # python manage.py collectstatic --noinput
           popd > /dev/null 2>&1
 
       # Run the unit tests and collect statement + branch coverage
@@ -54,6 +57,7 @@ jobs:
           # Make the step fail if pytest fails, even though the output is piped through tee
           set -o pipefail
           pushd $MAIN_FOLDER > /dev/null 2>&1
+            echo "DEBUG='true'" > .env
             python -m pytest \
               --cov=. \
               --cov-branch \
@@ -73,6 +77,7 @@ jobs:
       - name: Test the Server to Ensure it Runs
         run: |  
           pushd $MAIN_FOLDER > /dev/null 2>&1
+            echo "DEBUG='true'" > .env
             # Arrange
             echo "python manage.py runserver 0.0.0.0:8000"
 
