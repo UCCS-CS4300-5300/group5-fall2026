@@ -21,7 +21,7 @@ def item(db):
 def form_data(item, **changes):
     data = {
         "pantry": item.pantry.id,
-        "catalog_item": item.catalog_item.id,
+        "catalog_item": str(item.catalog_item),
         "quantity": item.quantity,
         "date_stored": item.date_stored.isoformat(),
         "date_expired": item.date_expired.isoformat(),
