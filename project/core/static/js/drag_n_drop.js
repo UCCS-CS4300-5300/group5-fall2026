@@ -63,13 +63,13 @@ function addDropZoneListeners(dropZone, zoneName) {
     .then(response => response.json())
     .then(data => {
       if (data.success === true) {
-        const droppedElement = document.getElementById(elementId);
-        dropZone.appendChild(droppedElement);
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          window.location.reload();
+        }
       } else {
         alert('Error saving data');
-      }
-      if (data.redirect_url) {
-          window.location.href = data.redirect_url;
       }
     })
     .catch(error => console.error('Error:', error));
@@ -128,4 +128,3 @@ circles.forEach(circle => {
     circle.style.backgroundColor = '#ffffff';
   });
 });
-

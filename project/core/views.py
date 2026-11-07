@@ -268,45 +268,71 @@ def submit_drag_drop(request):
         try:
             # Parse the JSON payload sent by Fetch API
             data = json.loads(request.body)
+            item_id = data.get('item_id')
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-            query = data.get('query_string')
+            query = data.get('query_string', '')
 
-            if target_zone:
+            if not target_zone:
+                raise KeyError
+
+            if target_zone not in dict(PantryItem.STORAGE_LOCATIONS):
+                target_zone = "SHELF"
+
+            if not isinstance(item_id, str) or item_id.startswith("pantry-item-"):
                 item = PantryItem.objects.filter(id=raw_id).first()
-                if item:
-                    logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
-                    item.location = target_zone;
-                    item.save()
-                else:
-                    item = GlobalCatalogItem.objects.filter(id=raw_id).first()
-                    logging.debug(item)
-                    # item = ShelfLife.objects.get(id=raw_id)
-                    if item:
-                        pantry, _ = getOrCreateDefaults()
-                    
-                        # Never trust a posted value against a choices field. An unknown
-                        # location would save happily and then match no shelf-life row, so the
-                        # item would end up with no expiration date for no visible reason.
-                        location = target_zone;
-                    
-                        pantryItem = PantryItem.objects.create(
-                            pantry=pantry,
-                            catalog_item=item,
-                            location=location
-                        )
-                        pantryItem.save()
+
+                if item is None:
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'Item not found'},
+                        status=404
+                    )
+
+                logging.debug(
+                    f"Moving Pantry item {item.catalog_item.name} "
+                    f"with ide {raw_id} to {target_zone}"
+                )
+
+                if item.location != target_zone:
+                    item.date_expired = None
+
+                item.location = target_zone
+                item.save()
+
+            elif item_id and item_id.startswith("catalog-item-"):
+                catalog_item = GlobalCatalogItem.objects.filter(id=raw_id).first()
+
+                if catalog_item is None:
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'Item not found'},
+                        status=404
+                    )
+
+                pantry, _ = getOrCreateDefaults()
+
+                PantryItem.objects.create(
+                    pantry=pantry,
+                    catalog_item=catalog_item,
+                    location=target_zone
+                )
+
             else:
-                raise(KeyError)
+                raise KeyError
 
             return JsonResponse({
                 'success': True,
-                'status': 'success', 
+                'status': 'success',
                 'message': 'Item updated!',
                 'redirect_url': f"{reverse('core:home')}{query}"
             })
-        
+
         except (ValueError, KeyError):
-            return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
-            
-    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
+            return JsonResponse(
+                {'status': 'error', 'message': 'Invalid data'},
+                status=400
+            )
+
+    return JsonResponse(
+        {'status': 'error', 'message': 'Only POST allowed'},
+        status=405
+    )
