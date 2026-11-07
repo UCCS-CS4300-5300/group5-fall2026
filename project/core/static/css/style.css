@@ -80,10 +80,14 @@ body {
 
 .auth-page {
     min-height: 100vh;
+    background-color: #02c2b8;
+    background-image: url("https://www.transparenttextures.com/patterns/wild-flowers.png");
     display: grid;
     place-items: center;
     padding: var(--space-lg);
-    background-color: var(--color-panel);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .auth-card {
