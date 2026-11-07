@@ -24,10 +24,21 @@ Asking happens in two stages, so the common case stays cheap:
    Word overlap cannot surface a food whose words differ entirely:
    "hamburger meat" should find "Beef, ground", whose keywords are just
    "Beef,ground" -- no "hamburger", no "meat". The shortlist can never
-   contain it, so the model has to see everything. That prompt is ~4,400
-   tokens, which fits Groq's free 8,000-a-minute budget once.
+   contain it, so the model has to see everything.
 
-2. Every answer is cached in CatalogMatch, misses included. The catalog is
+   That prompt is expensive. Measured against Groq's free tier it runs
+   about 6,600 tokens, and the budget is 8,000 a minute -- so one of these
+   nearly exhausts the minute and starves the cheap queries behind it. Two
+   back to back are guaranteed to fail. Worse, which one fails depends on
+   what someone searched forty seconds earlier, so the same query succeeds
+   or fails for reasons the user cannot see.
+
+   So every prompt is now measured before it is sent. Too large, and we
+   drop the descriptions and send names alone. Still too large, and we give
+   up without calling the API at all -- better a clean miss than spending
+   the whole minute's budget on a request that will be rejected.
+
+3. Every answer is cached in CatalogMatch, misses included. The catalog is
    frozen (loaded by a data migration), so a match stays correct forever and
    the second person to search "bell pepper" costs nothing.
 
@@ -53,6 +64,10 @@ SHORTLIST_SIZE = 40
 # Reasoning models emit their thinking before the answer, so a tight cap
 # truncates them mid-thought and we get nothing usable back.
 MAX_OUTPUT_TOKENS = 512
+
+# Groq's free tier allows 8,000 tokens a minute. Cap a single prompt well
+# under that so one expensive query cannot starve the cheap ones behind it.
+MAX_PROMPT_TOKENS = 4000
 
 PROMPT = """You match a shopper's words to a food in a fixed list.
 
@@ -91,35 +106,45 @@ def _shortlist(query):
     return GlobalCatalogItem.objects.filter(matches)[:SHORTLIST_SIZE]
 
 
-def _catalog_lines(items):
-    return "\n".join(f"{i.id}|{i.name}|{i.name_subtitle}" for i in items)
+def _catalog_lines(items, descriptions=True):
+    """The candidate list as the prompt shows it.
+
+    Descriptions help the model tell near-identical names apart, but they
+    are most of the prompt's size. Dropping them is the first thing we try
+    when a prompt is too big.
+    """
+    if descriptions:
+        return "\n".join(f"{i.id}|{i.name}|{i.name_subtitle}" for i in items)
+    return "\n".join(f"{i.id}|{i.name}" for i in items)
+
+
+def _estimate_tokens(text):
+    """Rough token count -- English runs about four characters per token.
+
+    This only needs to separate "comfortably inside the budget" from "the
+    API will reject this", so an approximation beats taking on a tokenizer
+    dependency for one decision.
+    """
+    return len(text) // 4
 
 
 def _call_model(prompt):
-    """Send one prompt, return the raw text back.
-
-    Separated out so tests can replace it without touching the network, and
-    so swapping provider is a change in one place. Any OpenAI-compatible
-    endpoint works -- Groq, Mistral, OpenAI itself -- by changing the two
-    environment variables rather than this code.
-    """
     from openai import OpenAI
-
     client = OpenAI(
         api_key=os.environ["AI_API_KEY"],
         base_url=os.environ.get("AI_BASE_URL", "https://api.groq.com/openai/v1"),
+        # The SDK retries rate limits by default, sleeping 45s between attempts,
+        # so a 429 became a 90-second page hang. Fail fast instead -- a missed
+        # match degrades to the normal "no results" message, which is fine.
+        max_retries=0,
+        timeout=10.0,
     )
-
     response = client.chat.completions.create(
         model=os.environ.get("AI_MODEL", ""),
         messages=[{"role": "user", "content": prompt}],
-        # Deterministic on purpose. The same words must always give the same
-        # food -- a search box that answers differently each time is broken,
-        # not clever.
         temperature=0,
         max_tokens=MAX_OUTPUT_TOKENS,
     )
-
     return response.choices[0].message.content
 
 
@@ -168,13 +193,28 @@ def match_to_catalog(query):
 
 
 def _ask(query, candidates):
-    """One round: show the model these candidates, return its pick or None."""
+    """One round: show the model these candidates, return its pick or None.
+
+    Tries the full prompt first. If that would blow the per-minute budget,
+    drops the descriptions and tries again -- a name alone is usually
+    enough to recognise a food. If even that is too large, gives up without
+    sending, rather than spending the whole minute's budget on a request
+    the API will reject anyway.
+    """
     if not candidates:
         return None
 
-    raw = _call_model(
-        PROMPT.format(query=query, catalog=_catalog_lines(candidates)))
-    return _resolve(raw, candidates)
+    for descriptions in (True, False):
+        prompt = PROMPT.format(
+            query=query,
+            catalog=_catalog_lines(candidates, descriptions=descriptions))
+        if _estimate_tokens(prompt) <= MAX_PROMPT_TOKENS:
+            return _resolve(_call_model(prompt), candidates)
+
+    logger.info(
+        "Catalog match skipped for %r: %d candidates exceed the token "
+        "budget even without descriptions", query, len(candidates))
+    return None
 
 
 def _resolve(raw, candidates):
@@ -186,7 +226,7 @@ def _resolve(raw, candidates):
 
     The id has to be one we offered. Anything else -- prose with no number,
     an id from outside the shortlist, an empty reply -- is treated as no
-    match rather than trusted.
+    match.
     """
     if not raw:
         return None
