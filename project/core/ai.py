@@ -22,21 +22,34 @@ Asking happens in two stages, so the common case stays cheap:
 
 2. The whole catalog, only if the model says none of the shortlist fits.
    Word overlap cannot surface a food whose words differ entirely:
-   "hamburger meat" should find "Beef, ground", whose keywords are just
-   "Beef,ground" -- no "hamburger", no "meat". The shortlist can never
+   "hamburger meat" should find id 41, "Beef | ground", whose keywords are
+   just "Beef,ground" -- no "hamburger", no "meat". The shortlist can never
    contain it, so the model has to see everything.
 
-   That prompt is expensive. Measured against Groq's free tier it runs
-   about 6,600 tokens, and the budget is 8,000 a minute -- so one of these
-   nearly exhausts the minute and starves the cheap queries behind it. Two
-   back to back are guaranteed to fail. Worse, which one fails depends on
-   what someone searched forty seconds earlier, so the same query succeeds
-   or fails for reasons the user cannot see.
+   That prompt is expensive: Groq measures it at about 6,600 tokens against
+   a free-tier budget of 8,000 a minute. One of them nearly exhausts the
+   minute, so a cold hard query is roughly a once-a-minute operation. The
+   cache is what makes that acceptable -- only the first person to search a
+   phrase pays, and the catalog never changes.
 
-   So every prompt is now measured before it is sent. Too large, and we
-   drop the descriptions and send names alone. Still too large, and we give
-   up without calling the API at all -- better a clean miss than spending
-   the whole minute's budget on a request that will be rejected.
+   Sending less does not work. Ten foods are named simply "Beef", separated
+   only by their subtitles -- ground, steaks, short ribs, chuck roast. Drop
+   the subtitles to save tokens and the model answers confidently with the
+   wrong Beef, which is worse than a rate limit because nobody notices.
+   Truncating them saves nothing either: they are already a word or two.
+
+   So prompts are measured and sent whole, or not sent at all. A prompt
+   over budget is refused rather than spending the minute on a request the
+   API will reject -- and that refusal raises BudgetExceeded rather than
+   returning None, because "we declined to ask" must not be cached as "no
+   such food". Rate limits are already excluded from the cache for the same
+   reason: a shortage of tokens is not a fact about groceries.
+
+   The expense is structural, not a tuning problem: 661 rows is simply a
+   lot to put in a prompt. The cheaper design is to invert it -- ask the
+   model what the shopper meant in plain words ("hamburger meat" -> "ground
+   beef", ~50 tokens) and let the database do the matching. That is the
+   next change, not this one.
 
 3. Every answer is cached in CatalogMatch, misses included. The catalog is
    frozen (loaded by a data migration), so a match stays correct forever and
@@ -57,6 +70,16 @@ from .models import CatalogMatch, GlobalCatalogItem
 
 logger = logging.getLogger(__name__)
 
+
+class BudgetExceeded(Exception):
+    """The prompt is too large to send.
+
+    Its own exception so that match_to_catalog can tell it apart from the
+    model answering NONE. A refusal to spend tokens is a resource limit,
+    not a verdict about the food, and caching it would make a temporary
+    constraint permanent.
+    """
+
 # How many candidates to put in front of the model. Enough to contain the
 # right answer, small enough to stay well inside a per-minute token budget.
 SHORTLIST_SIZE = 40
@@ -65,9 +88,11 @@ SHORTLIST_SIZE = 40
 # truncates them mid-thought and we get nothing usable back.
 MAX_OUTPUT_TOKENS = 512
 
-# Groq's free tier allows 8,000 tokens a minute. Cap a single prompt well
-# under that so one expensive query cannot starve the cheap ones behind it.
-MAX_PROMPT_TOKENS = 4000
+# Groq's free tier allows 8,000 tokens a minute. The whole-catalog prompt
+# estimates at ~4,550 here and Groq counts it at ~6,600 -- this estimator
+# reads low on short pipe-delimited lines -- so 5,000 admits that prompt and
+# refuses anything materially bigger.
+MAX_PROMPT_TOKENS = 5000
 
 PROMPT = """You match a shopper's words to a food in a fixed list.
 
@@ -106,16 +131,14 @@ def _shortlist(query):
     return GlobalCatalogItem.objects.filter(matches)[:SHORTLIST_SIZE]
 
 
-def _catalog_lines(items, descriptions=True):
+def _catalog_lines(items):
     """The candidate list as the prompt shows it.
 
-    Descriptions help the model tell near-identical names apart, but they
-    are most of the prompt's size. Dropping them is the first thing we try
-    when a prompt is too big.
+    The subtitle is not decoration. Ten foods are named simply "Beef" and
+    the subtitle is the only thing separating ground from brisket, so a
+    name-only list makes the model pick confidently and wrongly.
     """
-    if descriptions:
-        return "\n".join(f"{i.id}|{i.name}|{i.name_subtitle}" for i in items)
-    return "\n".join(f"{i.id}|{i.name}" for i in items)
+    return "\n".join(f"{i.id}|{i.name}|{i.name_subtitle}" for i in items)
 
 
 def _estimate_tokens(text):
@@ -179,6 +202,11 @@ def match_to_catalog(query):
             # a food whose words differ entirely from the query. Show the
             # model everything before giving up.
             item = _ask(query, list(GlobalCatalogItem.objects.all()))
+    except BudgetExceeded as exc:
+        # We declined to ask. Not an answer, so it is not cached -- raise
+        # the budget or shrink the catalog and the same query can succeed.
+        logger.info("Catalog match skipped for %r: %s", query, exc)
+        return None
     except Exception as exc:
         # A dead API or a rate limit must never take search down with it.
         # Not cached either -- this is a temporary failure, not an answer.
@@ -195,26 +223,22 @@ def match_to_catalog(query):
 def _ask(query, candidates):
     """One round: show the model these candidates, return its pick or None.
 
-    Tries the full prompt first. If that would blow the per-minute budget,
-    drops the descriptions and tries again -- a name alone is usually
-    enough to recognise a food. If even that is too large, gives up without
-    sending, rather than spending the whole minute's budget on a request
-    the API will reject anyway.
+    Measures the prompt first and refuses to send an oversized one. A
+    request the API will reject still costs the wait and the round trip,
+    and a clean miss is a better outcome than a 429.
     """
     if not candidates:
         return None
 
-    for descriptions in (True, False):
-        prompt = PROMPT.format(
-            query=query,
-            catalog=_catalog_lines(candidates, descriptions=descriptions))
-        if _estimate_tokens(prompt) <= MAX_PROMPT_TOKENS:
-            return _resolve(_call_model(prompt), candidates)
+    prompt = PROMPT.format(query=query, catalog=_catalog_lines(candidates))
 
-    logger.info(
-        "Catalog match skipped for %r: %d candidates exceed the token "
-        "budget even without descriptions", query, len(candidates))
-    return None
+    if _estimate_tokens(prompt) > MAX_PROMPT_TOKENS:
+        raise BudgetExceeded(
+            f"{len(candidates)} candidates estimate at "
+            f"{_estimate_tokens(prompt)} tokens, over the "
+            f"{MAX_PROMPT_TOKENS} budget")
+
+    return _resolve(_call_model(prompt), candidates)
 
 
 def _resolve(raw, candidates):

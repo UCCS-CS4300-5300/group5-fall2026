@@ -228,3 +228,28 @@ def test_a_manual_row_overrides_the_model(peppers):
         assert ai.match_to_catalog("bell pepper") == peppers
 
     called.assert_not_called()
+
+
+
+@pytest.mark.django_db
+def test_a_refusal_to_spend_tokens_is_not_cached():
+    # A prompt we declined to send says nothing about the food. Caching it
+    # would turn a temporary budget into a permanent verdict, and the query
+    # would stay dead after the budget was raised.
+    with patch.dict("os.environ", {"AI_API_KEY": "test-key"}):
+        with patch.object(ai, "MAX_PROMPT_TOKENS", 1):
+            with patch.object(ai, "_call_model") as called:
+                assert ai.match_to_catalog("bell pepper") is None
+ 
+    called.assert_not_called()
+    assert CatalogMatch.objects.count() == 0
+ 
+ 
+@pytest.mark.django_db
+def test_an_oversized_prompt_is_never_sent():
+    # Spending the minute's budget on a request the API will reject is
+    # worse than not asking: the user waits and still gets nothing.
+    with patch.dict("os.environ", {"AI_API_KEY": "test-key"}):
+        with patch.object(ai, "MAX_PROMPT_TOKENS", 1):
+            with pytest.raises(ai.BudgetExceeded):
+                ai._ask("bell pepper", list(GlobalCatalogItem.objects.all()[:5]))
