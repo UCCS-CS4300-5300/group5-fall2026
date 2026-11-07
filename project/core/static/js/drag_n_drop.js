@@ -32,15 +32,16 @@ function addDropZoneListeners(dropZone, zoneName) {
 
   // Add event listener for the drop action
   dropZone.addEventListener('drop', (e) => {
+
     if (e.target.classList.contains("dropzone")) {
       e.target.classList.remove("dragover");
     }
     e.preventDefault();
     
     const elementId = e.dataTransfer.getData('text/plain');
-    
     // Grab Django's CSRF token from the DOM
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const queryString = window.location.search;
 
     // Submit the fetch action (POST) to then move and update the data
     fetch('/submit-drag-drop/', {
@@ -51,16 +52,22 @@ function addDropZoneListeners(dropZone, zoneName) {
         'X-CSRFToken': csrfToken 
       },
       // Post Payload. 
+      
       body: JSON.stringify({
         item_id: elementId,
         raw_id: elementId.replace(/.*-/g, ""),
-        target_zone: zoneName
+        target_zone: zoneName,
+        query_string: queryString
       })
     })
     .then(response => response.json())
     .then(data => {
-      if (data.status === 'success') {
-        window.location.reload();
+      if (data.success === true) {
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          window.location.reload();
+        }
       } else {
         alert('Error saving data');
       }
@@ -77,6 +84,8 @@ document.addEventListener('mousedown', (event) => {
     draggableCard.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', e.target.id);
     });
+  } else {
+    console.log("issue here")
   }
 });
 
@@ -90,4 +99,32 @@ elements.forEach(dropZone => {
 const pantryElements = document.querySelectorAll('.pantry-box')
 pantryElements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
+});
+
+
+// dynamic search for global pantry
+const searchInput = document.getElementById('search-input');
+const searchForm = document.getElementById('search-form');
+let timeout = null;
+
+searchInput.addEventListener('keyup', function () {
+  clearTimeout(timeout);
+  timeout = setTimeout(function () {
+    searchForm.submit();
+  }, 500);
+});
+
+
+// Find all elements
+const circles = document.querySelectorAll('.item-circle');
+circles.forEach(circle => {
+  // Add listener for entering the element
+  circle.addEventListener('mouseenter', () => {
+    circle.style.backgroundColor = '#cdcdcd';
+  });
+
+  // Add listener exiting the element
+  circle.addEventListener('mouseleave', () => {
+    circle.style.backgroundColor = '#ffffff';
+  });
 });
