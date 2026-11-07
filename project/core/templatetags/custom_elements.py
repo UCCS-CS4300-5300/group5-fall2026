@@ -42,3 +42,10 @@ def render_pantry_item(pantryItem):
     return {
         'product': pantryItem
     }
+
+@register.inclusion_tag('core/partials/catalogItem.html')
+def render_catalog_item(catalog_item):
+    # Json payload to pipe in to partial template
+    return {
+        'catalog_item': catalog_item
+    }
