@@ -77,6 +77,9 @@ function addDropZoneListeners(dropZone, zoneName) {
 }
 
 
+// ----------------------------------------------------------------------------------------
+// Event listeners for the mouse down events
+// ----------------------------------------------------------------------------------------
 // Attach one listener to the parent element or document looking for a food item
 document.addEventListener('mousedown', (event) => {
   draggableCard = getParentWithClassListName(event.target, 'draggable-card') 
@@ -89,7 +92,10 @@ document.addEventListener('mousedown', (event) => {
   }
 });
 
-// Attach listener for the drop via the css class
+
+// ----------------------------------------------------------------------------------------------------
+// Add event listeners for drop dragenter dragleave and dragover events concerning specific drop zones
+// ----------------------------------------------------------------------------------------------------
 const elements = document.querySelectorAll('.grid-lane');
 elements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
@@ -107,7 +113,9 @@ pantryElements1.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
 });
 
-// dynamic search for global pantry
+// ----------------------------------------------------------------------------------------
+// Dynamic search for global pantry
+// ----------------------------------------------------------------------------------------
 const searchInput = document.getElementById('search-input');
 const searchForm = document.getElementById('search-form');
 let timeout = null;
@@ -119,7 +127,9 @@ searchInput.addEventListener('keyup', function () {
   }, 500);
 });
 
-
+// ----------------------------------------------------------------------------------------
+// Highligting for the various circle items
+// ----------------------------------------------------------------------------------------
 // Find all elements
 const circles = document.querySelectorAll('.item-circle');
 circles.forEach(circle => {
@@ -133,4 +143,3 @@ circles.forEach(circle => {
     circle.style.backgroundColor = '#ffffff';
   });
 });
-
