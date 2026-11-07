@@ -60,16 +60,19 @@ def test_search_surfaces_the_match_when_literal_search_finds_nothing(peppers):
 
     with patch.dict("os.environ", {"AI_API_KEY": "test-key"}):
         with patch.object(ai, "_call_model", return_value=str(peppers.id)):
-            results = search_catalog("bell pepper")
+            results = search_catalog("bell pepper", use_ai=True)
 
     assert list(results) == [peppers]
 
 
 @pytest.mark.django_db
-def test_literal_matches_never_call_the_model():
-    # "cereal" matches literally, so the API must not be touched at all
-    with patch.object(ai, "_call_model") as called:
-        assert search_catalog("cereal").exists()
+def test_matching_is_off_unless_the_caller_asks(peppers):
+    # The search box auto-submits as you type, so an always-on fallback
+    # would spend an API call on every prefix -- "bel", "bell p" -- and
+    # cache each as a permanent miss. The user asks for it explicitly.
+    with patch.dict("os.environ", {"AI_API_KEY": "test-key"}):
+        with patch.object(ai, "_call_model") as called:
+            assert not search_catalog("bell pepper").exists()
 
     called.assert_not_called()
 

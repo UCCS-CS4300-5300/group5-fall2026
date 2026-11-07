@@ -23,6 +23,14 @@ logging.basicConfig(
     ]
 )
 
+# The OpenAI SDK and httpx trace every request at DEBUG level -- TLS
+# handshakes, headers, the lot -- which drowns everything else now that the
+# root logger above is set to DEBUG. Our own warnings are the ones worth
+# seeing.
+for noisy in ("httpx", "httpcore", "openai"):
+    logging.getLogger(noisy).setLevel(logging.WARNING)
+
+
 def getOrCreateDefaults():
     """
         Make sure there is a user and a pantry to work with on a /home request.
@@ -50,7 +58,7 @@ def getOrCreateDefaults():
 # TODO: handle the inital splash page as a user login / create request
 # TODO Migrate this to a class
 
-def search_catalog(query, limit=25):
+def search_catalog(query, limit=25, use_ai=False):
     """
         Find catalog foods matching every word in `query`, best match first.
 
@@ -62,10 +70,11 @@ def search_catalog(query, limit=25):
         list happens to contain the word. Name matches rank first so the
         obvious answer is the one at the top.
 
-        When none of that finds anything, falls back to asking a model which
-        catalog food the user meant. Only on zero results, deliberately: the
-        no-results case is the broken one, and an ordinary search should
-        never wait on an API call. See core/ai.py.
+        When none of that finds anything AND the caller passed use_ai, falls
+        back to asking a model which catalog food the user meant. That call
+        costs real tokens against a per-minute budget, so it is off unless
+        asked for -- a caller that wants it says so, and the rest of the
+        codebase and the tests get plain literal search. See core/ai.py.
     """
     if not query or not query.strip():
         return GlobalCatalogItem.objects.none()
@@ -90,14 +99,10 @@ def search_catalog(query, limit=25):
         )
     ).order_by("rank", "name", "name_subtitle")
 
-    if not results.exists():
-        # Literal search found nothing. Ask the model what they meant; it
-        # returns None when there is no key, no answer or no API, and the
-        # user sees the same empty result they would have seen anyway.
+    if not results.exists() and use_ai:
         guess = match_to_catalog(query)
         if guess:
             return GlobalCatalogItem.objects.filter(id=guess.id)
-
     return results[:limit]
 
 
@@ -166,9 +171,16 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         "bag_items": bag_items,
         "pantryItems" : pantryItems,
         "form" : add_form or PantryItemForm(),
+        # Backs the <datalist> the add and edit forms type against. Rendered
+        # once per page, not once per pop-up.
+        "catalog_options" : GlobalCatalogItem.objects.all(),
         "open_edit_id" : invalid_id,
         "query" : query,
-        "searchResults" : search_catalog(query),
+        # The only caller that spends an API call, so it says so out loud.
+        # The search box auto-submits 1500ms after you stop typing -- long
+        # enough that normal typing produces one submit per phrase rather
+        # than one per mid-word pause. See core/static/js/drag_n_drop.js.
+        "searchResults" : search_catalog(query, use_ai=True),
         "searched" : bool(query.strip()),
     }
 
@@ -298,12 +310,12 @@ def submit_drag_drop(request):
                     # item = ShelfLife.objects.get(id=raw_id)
                     if item:
                         pantry, _ = getOrCreateDefaults()
-                    
+
                         # Never trust a posted value against a choices field. An unknown
                         # location would save happily and then match no shelf-life row, so the
                         # item would end up with no expiration date for no visible reason.
                         location = target_zone;
-                    
+
                         pantryItem = PantryItem.objects.create(
                             pantry=pantry,
                             catalog_item=item,
@@ -315,12 +327,12 @@ def submit_drag_drop(request):
 
             return JsonResponse({
                 'success': True,
-                'status': 'success', 
+                'status': 'success',
                 'message': 'Item updated!',
                 'redirect_url': f"{reverse('core:home')}{query}"
             })
-        
+
         except (ValueError, KeyError):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
-            
+
     return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)

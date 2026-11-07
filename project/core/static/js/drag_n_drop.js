@@ -111,7 +111,7 @@ searchInput.addEventListener('keyup', function () {
   clearTimeout(timeout);
   timeout = setTimeout(function () {
     searchForm.submit();
-  }, 500);
+  }, 1500);
 });
 
 

@@ -106,7 +106,7 @@ def test_home_page_Add_item(client):
  
   # location is a required field on the form now
   form_data = {
-    "catalog_item": catalog_item.id,
+    "catalog_item": str(catalog_item),
     "quantity": 20,
     "date_stored": "2026-10-09",
     "date_expired": "2026-10-16",
