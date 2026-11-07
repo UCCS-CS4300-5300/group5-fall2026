@@ -8,7 +8,7 @@ load_dotenv()
 
 BASE_DIR=Path(__file__).resolve().parent.parent
 SECRET_KEY="course-starter-development-key"
-DEBUG = os.environ.get('DEBUG') == 'true'
+DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS=["*"]
 INSTALLED_APPS=[
@@ -68,7 +68,11 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
@@ -86,8 +90,6 @@ STATIC_URL="static/"
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Shelf-Life app settings
 

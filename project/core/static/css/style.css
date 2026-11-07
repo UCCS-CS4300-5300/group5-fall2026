@@ -78,6 +78,43 @@ body {
     color: var(--color-button-dark)
 }
 
+.auth-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-lg);
+    background-color: var(--color-panel);
+}
+
+.auth-card {
+    width: min(420px, 100%);
+    padding: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background-color: var(--color-pantry);
+    text-align: center;
+}
+
+.auth-card form {
+    width: 100%;
+}
+
+.auth-card form p {
+    text-align: left;
+}
+
+.auth-card input {
+    width: 100%;
+}
+
+.auth-card ul.errorlist {
+    margin: var(--space-sm) 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-error);
+    text-align: left;
+}
+
 h1,
 h2,
 h3 {
