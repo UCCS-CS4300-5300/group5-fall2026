@@ -53,13 +53,13 @@
                 <!-- Search the USDA food catalog -->
                 <div class="flex-container">
                     <form id="search-form" action="{% url 'core:home' %}" method="GET" role="search">
-                        <input 
-                            type="text" 
-                            name="q" 
-                            id="search-input" 
-                            value="{{ query | default:'' }}" 
-                            placeholder="Search..." 
-                            autocomplete="off" 
+                        <input
+                            type="text"
+                            name="q"
+                            id="search-input"
+                            value="{{ query | default:'' }}"
+                            placeholder="Search..."
+                            autocomplete="off"
                             autofocus
                             onfocus="this.setSelectionRange(this.value.length, this.value.length);"
                         />
@@ -96,6 +96,14 @@
 
                         <button type="submit">Submit</button>
                     </form>
+
+                    {# Shared by the add form and every edit pop-up, so it is #}
+                    {# rendered once here rather than inside each form.       #}
+                    <datalist id="catalog-options">
+                        {% for food in catalog_options %}
+                            <option value="{{ food }}"></option>
+                        {% endfor %}
+                    </datalist>
                 </div>
 
                 <!-- Bag drop zone -->
