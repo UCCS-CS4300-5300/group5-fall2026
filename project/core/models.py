@@ -4,6 +4,8 @@ from django.contrib.auth.models import User # Django built-in user model
 from django.utils import timezone # Useful for date tracking
 from datetime import timedelta
 from django.conf import settings
+from django.db.models.signals import post_save #for login purposes
+from django.dispatch import receiver #for login purposes
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -15,6 +17,15 @@ logging.basicConfig(
     ]
 )
 
+
+@receiver(post_save, sender=User)
+def create_user_pantry(sender, instance, created, **kwargs):
+    if created:
+        # Create a Pantry for the new user
+        Pantry.objects.create(
+            user=instance,
+            name=f"{instance.username}'s Pantry"
+        )
 
 # Shared list of global item catalog
 class GlobalCatalogItem(models.Model):
