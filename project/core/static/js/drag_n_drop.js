@@ -135,9 +135,35 @@ pantryElements1.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
 });
 
-// ----------------------------------------------------------------------------------------
-// Dynamic search for global pantry
-// ----------------------------------------------------------------------------------------
+// Ellipses menu JS helper functions
+
+function togglePantryMenu(event, productId) {
+    event.stopPropagation();
+    // Close any other open submenus first
+    document.querySelectorAll('.item-submenu').forEach(menu => {
+        if (menu.id !== 'item-submenu-' + productId) {
+            menu.classList.remove('show');
+        }
+    });
+    const submenu = document.getElementById('item-submenu-' + productId);
+    submenu.classList.toggle('show');
+}
+
+function closePantryMenu(productId) {
+    const submenu = document.getElementById('item-submenu-' + productId);
+    if (submenu) {
+        submenu.classList.remove('show');
+    }
+}
+
+// Close menus when clicking anywhere else on the page
+window.addEventListener('click', () => {
+    document.querySelectorAll('.item-submenu').forEach(menu => {
+        menu.classList.remove('show');
+    });
+});
+
+// dynamic search for global pantry
 const searchInput = document.getElementById('search-input');
 const searchForm = document.getElementById('search-form');
 let timeout = null;
