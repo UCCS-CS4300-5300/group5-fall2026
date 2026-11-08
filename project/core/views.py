@@ -8,6 +8,7 @@ from urllib.parse import quote
 from django.contrib.auth.models import User
 from .models import GlobalCatalogItem, Pantry, PantryItem
 from .forms import PantryItemForm
+from .ai import match_to_catalog
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
@@ -31,7 +32,7 @@ logging.basicConfig(
 # TODO: handle the inital splash page as a user login / create request
 # TODO Migrate this to a class
 
-def search_catalog(query, limit=25):
+def search_catalog(query, limit=25, use_ai=False):
     """
         Find catalog foods matching every word in `query`, best match first.
 
@@ -42,6 +43,12 @@ def search_catalog(query, limit=25):
         both match "pasta" -- the second only because its hidden keyword
         list happens to contain the word. Name matches rank first so the
         obvious answer is the one at the top.
+
+        When none of that finds anything AND the caller passed use_ai, falls
+        back to asking a model which catalog food the user meant. That call
+        costs real tokens against a per-minute budget, so it is off unless
+        asked for -- a caller that wants it says so, and the rest of the
+        codebase and the tests get plain literal search. See core/ai.py.
     """
     if not query or not query.strip():
         return GlobalCatalogItem.objects.none()
@@ -66,6 +73,10 @@ def search_catalog(query, limit=25):
         )
     ).order_by("rank", "name", "name_subtitle")
 
+    if not results.exists() and use_ai:
+        guess = match_to_catalog(query)
+        if guess:
+            return GlobalCatalogItem.objects.filter(id=guess.id)
     return results[:limit]
 
 
@@ -163,9 +174,16 @@ def build_home_context(
         "bag_items": bag_items,
         "pantryItems" : pantryItems,
         "form" : add_form or PantryItemForm(),
+        # Backs the <datalist> the add and edit forms type against. Rendered
+        # once per page, not once per pop-up.
+        "catalog_options" : GlobalCatalogItem.objects.all(),
         "open_edit_id" : invalid_id,
         "query" : query,
-        "searchResults" : search_catalog(query),
+        # The only caller that spends an API call, so it says so out loud.
+        # The search box auto-submits 1500ms after you stop typing -- long
+        # enough that normal typing produces one submit per phrase rather
+        # than one per mid-word pause. See core/static/js/drag_n_drop.js.
+        "searchResults" : search_catalog(query, use_ai=True),
         "searched" : bool(query.strip()),
     }
 
@@ -310,24 +328,45 @@ def submit_drag_drop(request):
             data = json.loads(request.body)
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-                        
+            query = data.get('query_string')
+
             if target_zone:
-                item = PantryItem.objects.get(
-                    id=raw_id,
-                    pantry=request.user.pantry,
-                )
-                if item:
+                item = PantryItem.objects.filter(id=raw_id).first()
+                if target_zone == "DELETE":
+                    item.delete();
+                elif item:
                     logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
                     item.location = target_zone;
                     item.save()
                 else:
-                    raise(KeyError)
+                    item = GlobalCatalogItem.objects.filter(id=raw_id).first()
+                    logging.debug(item)
+                    # item = ShelfLife.objects.get(id=raw_id)
+                    if item:
+                        pantry, _ = getOrCreateDefaults()
+
+                        # Never trust a posted value against a choices field. An unknown
+                        # location would save happily and then match no shelf-life row, so the
+                        # item would end up with no expiration date for no visible reason.
+                        location = target_zone;
+
+                        pantryItem = PantryItem.objects.create(
+                            pantry=pantry,
+                            catalog_item=item,
+                            location=location
+                        )
+                        pantryItem.save()
             else:
                 raise(KeyError)
 
-            return JsonResponse({'status': 'success', 'message': 'Item updated!'})
-        
-        except (ValueError, KeyError, PantryItem.DoesNotExist):
+            return JsonResponse({
+                'success': True,
+                'status': 'success',
+                'message': 'Item updated!',
+                'redirect_url': f"{reverse('core:home')}{query}"
+            })
+
+        except (ValueError, KeyError):
             return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
-            
+
     return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)

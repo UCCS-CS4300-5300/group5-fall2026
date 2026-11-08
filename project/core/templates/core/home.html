@@ -1,5 +1,4 @@
-{% load static %}
-{% load custom_elements %}
+{% load static custom_elements %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,6 +36,7 @@
                     <h2 class="app-title">
                         Shelf Life Application: User: {{ user.username }}
                     </h2>
+                    <img class="pantry-box-delete" id="DELETE" src="{% static 'images/main-screen/icons8-trash-cloud-96.png' %}" alt="Trash Icon">
                 </div>
                 {% if user.is_authenticated %}
                     <form action="{% url 'logout' %}" method="post">
@@ -60,59 +60,26 @@
 
                 <!-- Search the USDA food catalog -->
                 <div class="flex-container">
-                    <form action="{% url 'core:home' %}" method="GET" role="search">
-                        <label for="q">Search foods</label>
-
+                    <form id="search-form" action="{% url 'core:home' %}" method="GET" role="search">
                         <input
-                            type="search"
-                            id="q"
+                            type="text"
                             name="q"
-                            value="{{ query }}"
-                            placeholder="milk, ground beef, cereal"
-                        >
-
-                        <button type="submit">Search</button>
+                            id="search-input"
+                            value="{{ query | default:'' }}"
+                            placeholder="Search..."
+                            autocomplete="off"
+                            autofocus
+                            onfocus="this.setSelectionRange(this.value.length, this.value.length);"
+                        />
                     </form>
                 </div>
 
                 {% if searched %}
-                    <div class="flex-container">
+                    <div class="flex-container" id="search-results">
                         {% if searchResults %}
                             <ul class="catalog-results">
                                 {% for food in searchResults %}
-                                    <li>
-                                        <strong>{{ food.name }}</strong>
-
-                                        {% if food.name_subtitle %}
-                                            <br/>
-                                            <small>{{ food.name_subtitle }}</small>
-                                        {% endif %}
-
-                                        <br/>
-                                        <small>{{ food.category }}</small>
-
-                                        <form
-                                            action="{% url 'core:add_from_catalog' food.id %}"
-                                            method="POST"
-                                            class="inline-form"
-                                        >
-                                            {% csrf_token %}
-
-                                            <input type="hidden" name="q" value="{{ query }}">
-
-                                            <label for="loc-{{ food.id }}" class="visually-hidden">
-                                                Store in
-                                            </label>
-
-                                            <select name="location" id="loc-{{ food.id }}">
-                                                <option value="SHELF">Shelf</option>
-                                                <option value="FRIDGE">Fridge</option>
-                                                <option value="FREEZER">Freezer</option>
-                                            </select>
-
-                                            <button type="submit" class="btn">Add</button>
-                                        </form>
-                                    </li>
+                                    {% render_catalog_item food %}
                                 {% endfor %}
                             </ul>
                         {% else %}
@@ -131,13 +98,20 @@
 
                 <div class="flex-container">
                     <p class="menu-subheading">Add Item</p>
-
                     <form action="{% url 'core:add_pantry_item' %}" method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}
 
                         <button type="submit">Submit</button>
                     </form>
+
+                    {# Shared by the add form and every edit pop-up, so it is #}
+                    {# rendered once here rather than inside each form.       #}
+                    <datalist id="catalog-options">
+                        {% for food in catalog_options %}
+                            <option value="{{ food }}"></option>
+                        {% endfor %}
+                    </datalist>
                 </div>
 
                 <!-- Bag drop zone -->
@@ -197,6 +171,8 @@
 
         <!-- TODO: Give credit in about page -->
         <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
+        <!-- <a target="_blank" href="https://icons8.com/icon/109470/trash">Trash</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
+        <!-- <a target="_blank" href="https://icons8.com/icon/lPoyByxq65W4/banana">Banana</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
     </div>
 
     {% if open_edit_id %}

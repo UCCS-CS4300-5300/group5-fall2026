@@ -28,14 +28,13 @@ MIDDLEWARE=[
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware"
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF="config.urls"
 TEMPLATES=[
     {
     "BACKEND":"django.template.backends.django.DjangoTemplates",
-    #"DIRS":[BASE_DIR/"templates"],
     "DIRS":[BASE_DIR/"core"],
     "APP_DIRS":True,
     "OPTIONS":{
@@ -68,11 +67,8 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": (
-            "django.contrib.staticfiles.storage.StaticFilesStorage"
-            if DEBUG
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        ),
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG 
+        else "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
@@ -88,15 +84,16 @@ DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"
 
 STATIC_URL="static/"
 
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+if DEBUG:
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+else:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Shelf-Life app settings
 
 # Days before the expiration date when an item is flagged "Expiring Soon"
 EXPIRING_SOON_DAYS = 3
 STATICFILES_DIRS = [
-    # BASE_DIR / "static",
     BASE_DIR / "core/static",
 ]
 

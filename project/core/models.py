@@ -238,3 +238,51 @@ class PantryItem(models.Model):
 
    def __str__(self):
       return f"Name: {self.catalog_item.name}, Stored: {self.date_stored}, Status: {self.expiration_status}"
+
+class CatalogMatch(models.Model):
+   """
+   What a user's words turned out to mean, remembered.
+
+   Our search is literal, so it fails whenever the shopper's vocabulary and
+   the USDA's differ -- "bell pepper" finds nothing because FoodKeeper has
+   "Peppers". The AI fallback in core/ai.py answers those, and this table
+   remembers the answer.
+
+   Caching is worth it here for a reason specific to our data: the catalog is
+   frozen. It is loaded once by a data migration and never changes, so a
+   match stays correct permanently. The second person to search "bell pepper"
+   costs nothing, answers instantly, and works with the API down.
+   """
+
+   # Normalized before storing, so "Bell Pepper" and "bell  pepper" are one
+   # row rather than three.
+   query = models.CharField(max_length=100, unique=True)
+
+   # Nullable on purpose: a miss is worth caching too. Without it we would
+   # pay for every search of a food the USDA simply does not list.
+   item = models.ForeignKey(GlobalCatalogItem, null=True, blank=True,
+                            on_delete=models.CASCADE,
+                            related_name="matched_queries")
+
+   AI = "ai"
+   MANUAL = "manual"
+   SOURCES = [(AI, "AI"), (MANUAL, "Manual")]
+
+   # Manual rows let us correct a bad match, or pre-seed terms before a demo
+   # without spending a call.
+   source = models.CharField(max_length=10, choices=SOURCES, default=AI)
+
+   created_at = models.DateTimeField(auto_now_add=True)
+
+   class Meta:
+      ordering = ["query"]
+      verbose_name_plural = "catalog matches"
+
+   @staticmethod
+   def normalize(text):
+      """Lowercase, trimmed, single-spaced. The cache key."""
+      return " ".join(text.lower().split())
+
+   def __str__(self):
+      target = self.item.name if self.item else "no match"
+      return f"{self.query} -> {target}"
