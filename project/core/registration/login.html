@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Shelf Life</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-page">
+    <main class="auth-card">
+        <h1>Log in</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit">Log in</button>
+        </form>
+
+        <p>
+            <a href="{% url 'core:signup' %}">Create an account</a>
+        </p>
+    </main>
+</body>
+</html>

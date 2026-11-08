@@ -39,6 +39,17 @@
                     <img class="pantry-box-delete" id="DELETE" src="{% static 'images/main-screen/icons8-trash-cloud-96.png' %}" alt="Trash Icon">
                 </div>
             </nav>
+            <!-- Securely export Django variables to JSON -->
+            {{ request.user.username|json_script:"user-username" }}
+            {{ request.user.is_authenticated|json_script:"user-is-authenticated" }}
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+            {% endif %}
         </header>
 
         <!-- Body for HTML page -->

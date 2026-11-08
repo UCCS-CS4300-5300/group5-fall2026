@@ -7,7 +7,7 @@ from core.models import GlobalCatalogItem, Pantry, PantryItem
 
 def make_item(days_until_expiry):
     user = User.objects.create_user("tester")
-    pantry = Pantry.objects.create(user=user)
+    pantry = user.pantry
     catalog = GlobalCatalogItem.objects.create(name="Milk", category="Dairy")
     return PantryItem(
         pantry=pantry,

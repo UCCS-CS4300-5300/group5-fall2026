@@ -818,3 +818,45 @@ Item-circle button layout styling
 .item-circle .container br {
     display: none !important;
 }
+
+
+.auth-page {
+    min-height: 100vh;
+    background-color: #02c2b8;
+    background-image: url("https://www.transparenttextures.com/patterns/wild-flowers.png");
+    display: grid;
+    place-items: center;
+    padding: var(--space-lg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.auth-card {
+    width: min(420px, 100%);
+    padding: var(--space-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background-color: var(--color-pantry);
+    text-align: center;
+}
+
+.auth-card form {
+    width: 100%;
+}
+
+.auth-card form p {
+    text-align: left;
+}
+
+.auth-card input {
+    width: 100%;
+}
+
+.auth-card ul.errorlist {
+    margin: var(--space-sm) 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-error);
+    text-align: left;
+}

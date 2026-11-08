@@ -101,4 +101,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "core:home"
+LOGOUT_REDIRECT_URL = "login"

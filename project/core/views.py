@@ -12,6 +12,9 @@ from .ai import match_to_catalog
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -30,33 +33,18 @@ logging.basicConfig(
 for noisy in ("httpx", "httpcore", "openai"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # user.pantry = Pantry.objects.create(user=user, name=f"{user.username}'s Pantry")
+            login(request, user)
+            return redirect("core:home")
+    else:
+        form = UserCreationForm()
 
-def getOrCreateDefaults():
-    """
-        Make sure there is a user and a pantry to work with on a /home request.
-        TODO: replace with a real login when the multi-user story lands.
-
-        The pantry starts EMPTY on purpose. It used to be seeded with one
-        PantryItem per catalog entry, which was fine for the ten hardcoded
-        fruits and is not fine for the 661 USDA foods -- the first page
-        request would create 661 pantry items. Users add their own now.
-    """
-
-    user = User.objects.order_by("id").first()
-    if user is None:
-        user = User.objects.create_user(username="user1", password="password")
-
-    pantry = Pantry.objects.filter(user=user).first()
-    if pantry is None:
-        pantry = Pantry.objects.create(user=user, name="Pantry1")
-
-    return [pantry, user]
-
-# The catalog is loaded by the USDA FoodKeeper data migration, not at
-# request time, so populateDefaultCatalog() is gone.
-
-# TODO: handle the inital splash page as a user login / create request
-# TODO Migrate this to a class
+    return render(request, "registration/signup.html", {"form": form})
 
 def search_catalog(query, limit=25, use_ai=False):
     """
@@ -105,17 +93,45 @@ def search_catalog(query, limit=25, use_ai=False):
             return GlobalCatalogItem.objects.filter(id=guess.id)
     return results[:limit]
 
-
+@login_required
 def home(request):
     """
         Home request. Handles the cases where we have an inital request for the user
     """
-    if request.method == "GET":
-        return render(request, "core/home.html", build_home_context(request=request))
-    return redirect("core:home")
+    if request.method != "GET":
+        return redirect("core:home")
 
+    return render(
+        request,
+        "core/home.html",
+        build_home_context(
+            request=request,
+            pantry=request.user.pantry,
+        ),
+    )
 
-def build_home_context(invalid_form=None, invalid_id=None, add_form=None, request=None):
+# def build_home_context(
+#         invalid_form=None,
+#         invalid_id=None,
+#         add_form=None,
+#         request=None,
+#         pantry=None,
+#     ):
+#     """
+#         Builds the home page data. Each pantry item gets its own edit form
+#         for its pop-up. If an edit failed, that item gets the form with the
+#         the template just loops over the list it needs.
+#     """
+
+#     user = request.user if request else None
+#     pantry = pantry or (user.pantry if user and user.is_authenticated else None)
+def build_home_context(
+    invalid_form=None,
+    invalid_id=None,
+    add_form=None,
+    request=None,
+    pantry=None,
+    ):
     """
         Builds the home page data. Each pantry item gets its own edit form
         for its pop-up. If an edit failed, that item gets the form with the
@@ -126,7 +142,8 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         the template just loops over the list it needs.
     """
 
-    pantry, user = getOrCreateDefaults()
+    user = request.user if request else None
+    pantry = pantry or (user.pantry if user and user.is_authenticated else None)
 
     # select_related avoids one extra query per item for the catalog name,
     # which matters now that a pantry can hold a lot of rows. list() makes
@@ -163,7 +180,7 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
     query = request.GET.get("q", "") if request else ""
 
     return {
-        "user" : user,
+        "user" : request.user,
         "pantry" : pantry,
         "shelves_items": shelves_items,
         "fridge_items": fridge_items,
@@ -184,13 +201,13 @@ def build_home_context(invalid_form=None, invalid_id=None, add_form=None, reques
         "searched" : bool(query.strip()),
     }
 
-
+@login_required
 def add_pantry_item(request):
     """
     This function will make it possible to add items into the user's storage layout.
     """
 
-    pantry, user = getOrCreateDefaults()
+    pantry = request.user.pantry;
 
     if request.method == "POST":
         form = PantryItemForm(request.POST)
@@ -202,12 +219,17 @@ def add_pantry_item(request):
             return redirect("core:home")
 
         # Re-render the layout containing errors in case of failure
-        return render(request, "core/home.html", build_home_context(add_form=form))
-
+        return render(
+            request,
+            "core/home.html",
+            build_home_context(request=request, pantry=pantry, add_form=form),
+        )
+        
     return redirect("core:home")
 
 
 @require_POST
+@login_required
 def add_from_catalog(request, item_id):
     """
     Add one catalog food to the pantry in a single click.
@@ -215,7 +237,7 @@ def add_from_catalog(request, item_id):
     No dates are given, so PantryItem.save() fills in the expiration date
     from the USDA shelf life for that food, in whichever location it lands.
     """
-    pantry, user = getOrCreateDefaults()
+    pantry = request.user.pantry;
     catalog_item = get_object_or_404(GlobalCatalogItem, id=item_id)
 
     # Never trust a posted value against a choices field. An unknown
@@ -234,7 +256,8 @@ def add_from_catalog(request, item_id):
         return redirect(f"{reverse('core:home')}?q={quote(query)}")
     return redirect("core:home")
 
-
+@require_POST
+@login_required
 def delete_pantry_item(request, id):
     """
     Delete an active Item using an ID
@@ -245,12 +268,12 @@ def delete_pantry_item(request, id):
         item.delete()
     return redirect("core:home")
 
-
+@login_required
 def edit_pantry_item(request, id):
     """
     Saves changes from an item's edit pop-up
     """
-    item = get_object_or_404(PantryItem, id=id)
+    item = get_object_or_404(PantryItem, id=id, pantry=request.user.pantry)
 
     if request.method == "POST":
         form = PantryItemForm(request.POST, instance=item, auto_id=f"edit{id}_%s")
@@ -259,8 +282,13 @@ def edit_pantry_item(request, id):
             return redirect("core:home")
 
         # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
-        return render(request, "core/home.html", build_home_context(form, id))
-
+        return render(
+            request, "core/home.html", build_home_context(
+                request=request, 
+                invalid_form=form, 
+                invalid_id=id
+                )
+            )
     return redirect("core:home")
 
 
@@ -269,26 +297,58 @@ def test_pantry_view(request):
     Use this to test the pantry items while the main template is being worked
     on by another person
     """
+    return render(
+        request,
+        "core/test_pantry.html",
+        build_home_context(request=request, pantry=request.user.pantry),
+    )
 
-    return render(request, "core/test_pantry.html",build_home_context())
 
-
+@login_required
 def pantry_item_detail(request, item_id):
     """
         Retrieve one pantry item by ID and display its details.
     """
 
-    pantry_item = get_object_or_404(PantryItem, id=item_id)
+    pantry_item = get_object_or_404(PantryItem, id=item_id, pantry=request.user.pantry)
+
+    if request.method == "POST":
+        form = PantryItemForm(request.POST, instance=pantry_item)
+        if form.is_valid():
+            form.save()
+            return redirect("core:pantry_item_detail", item_id=item_id)
+
+        # Invalid input: nothing is saved, the page reloads with the pop-up open and errors shown
+        return render(
+            request,
+            "core/pantry_item_detail.html",
+            {
+                "pantry_item": pantry_item,
+                "form": form,
+            }
+        )
 
     return render(
         request,
         "core/pantry_item_detail.html",
         {
-            "pantry_item": pantry_item
+            "pantry_item": pantry_item,
+            "form": PantryItemForm(instance=pantry_item),
         }
     )
 
+def getOrCreatePantryItem(username, id):
+    user = get_object_or_404(User, username=username) 
+    item = PantryItem.objects.filter(id = id).first()             
+    if not item:
+        item, _ = PantryItem.objects.get_or_create(
+            catalog_item = GlobalCatalogItem.objects.get(id = id),
+            pantry=user.pantry,
+        )
+    return item            
+
 @csrf_protect
+@login_required
 def submit_drag_drop(request):
     if request.method == 'POST':
         try:
@@ -357,10 +417,8 @@ def submit_drag_drop(request):
                         status=404
                     )
 
-                pantry, _ = getOrCreateDefaults()
-
                 PantryItem.objects.create(
-                    pantry=pantry,
+                    pantry=request.user.pantry,
                     catalog_item=catalog_item,
                     location=target_zone
                 )

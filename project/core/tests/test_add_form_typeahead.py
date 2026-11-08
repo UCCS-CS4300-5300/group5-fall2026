@@ -6,11 +6,18 @@ round trip, including the two ways it can legitimately refuse.
 """
 
 import pytest
+from django.contrib.auth.models import User
 from django.urls import reverse
 
 from core.forms import PantryItemForm
 from core.models import GlobalCatalogItem, PantryItem
-from core import views
+
+
+@pytest.fixture
+def logged_in_client(client, db):
+    user = User.objects.create_user(username="typeahead-user", password="password")
+    client.force_login(user)
+    return client
 
 
 def form_data(catalog_item, **overrides):
@@ -92,9 +99,9 @@ def test_a_blank_entry_is_refused():
 
 
 @pytest.mark.django_db
-def test_the_edit_popup_opens_showing_the_name_not_the_id(ground_beef):
-    pantry, _ = views.getOrCreateDefaults()
-    item = PantryItem.objects.create(pantry=pantry, catalog_item=ground_beef,
+def test_the_edit_popup_opens_showing_the_name_not_the_id(logged_in_client, ground_beef):
+    user = User.objects.get(username="typeahead-user")
+    item = PantryItem.objects.create(pantry=user.pantry, catalog_item=ground_beef,
                                      location="FRIDGE")
 
     form = PantryItemForm(instance=item)
@@ -103,17 +110,17 @@ def test_the_edit_popup_opens_showing_the_name_not_the_id(ground_beef):
 
 
 @pytest.mark.django_db
-def test_posting_a_typed_name_adds_the_item(client, ground_beef):
-    response = client.post(reverse("core:add_pantry_item"),
-                           data=form_data("Beef (ground)"))
+def test_posting_a_typed_name_adds_the_item(logged_in_client, ground_beef):
+    response = logged_in_client.post(reverse("core:add_pantry_item"),
+                                     data=form_data("Beef (ground)"))
 
     assert response.status_code == 302
     assert PantryItem.objects.get().catalog_item == ground_beef
 
 
 @pytest.mark.django_db
-def test_the_page_offers_every_food_to_the_datalist(client):
-    response = client.get(reverse("core:home"))
+def test_the_page_offers_every_food_to_the_datalist(logged_in_client):
+    response = logged_in_client.get(reverse("core:home"))
     html = response.content.decode()
 
     assert 'id="catalog-options"' in html

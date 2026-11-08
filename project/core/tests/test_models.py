@@ -53,7 +53,9 @@ def test_duplicate_names_are_allowed():
 def test_unique_pantry():
  # We will test whether a single user can only have one pantry
  user = User.objects.create_user(username="user1", password = "password")
- Pantry.objects.create(user=user, name = "Pantry1")
+ pantry = user.pantry
+ pantry.name = "Pantry1"
+ pantry.save()
  
  # Creating a second pantry for the test
  with pytest.raises(IntegrityError):
@@ -66,7 +68,7 @@ def test_unique_pantry():
 def test_item_passed():
  # This test tests whether a catalog item can be added to the pantry
  user = User.objects.create_user(username="user1", password = "password")
- pantry = Pantry.objects.create(user=user, name = "Pantry1")
+ pantry = user.pantry
  
  catalog_item = GlobalCatalogItem.objects.create(
   name = "Apple",
@@ -92,7 +94,7 @@ def test_expiry_is_calculated_from_usda_data():
  # the location is not optional detail here -- on the shelves it would
  # correctly get no date.
  user = User.objects.create_user(username="cook", password="password")
- pantry = Pantry.objects.create(user=user, name="Pantry1")
+ pantry = user.pantry
  chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
  
  item = PantryItem.objects.create(
@@ -107,7 +109,7 @@ def test_location_changes_the_expiry():
  # LOCATION_TO_STORAGE, filter(storage="FRIDGE") matches nothing and every
  # item silently saves with no date -- this is what catches that.
  user = User.objects.create_user(username="cook2", password="password")
- pantry = Pantry.objects.create(user=user, name="Pantry1")
+ pantry = user.pantry
  chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
  
  fridge = PantryItem.objects.create(
@@ -124,7 +126,7 @@ def test_food_with_no_usda_figure_saves_without_a_date():
  # 14 foods (salt, water, hard liquor) have no USDA duration at all.
  # They must save cleanly rather than crash.
  user = User.objects.create_user(username="cook", password="password")
- pantry = Pantry.objects.create(user=user, name="Pantry1")
+ pantry = user.pantry
  salt = GlobalCatalogItem.objects.filter(name="Salt").first()
  
  item = PantryItem.objects.create(pantry=pantry, catalog_item=salt)
@@ -143,10 +145,9 @@ def test_pantry_item_details(client):
   password="password"
  )
  
- pantry = Pantry.objects.create(
-  user=user,
-  name="Test Pantry"
- )
+ pantry = user.pantry
+ pantry.name = "Test Pantry"
+ pantry.save()
  
  catalog_item = GlobalCatalogItem.objects.create(
   name="Orange",
@@ -160,7 +161,8 @@ def test_pantry_item_details(client):
   date_expired=timezone.localdate() + timedelta(days=7)
  )
  
- # Open the detail page for this item
+ # Open the detail page as the pantry owner.
+ client.force_login(user)
  response = client.get(
   reverse(
    "core:pantry_item_detail",
@@ -180,7 +182,9 @@ def test_pantry_item_details(client):
  
 @pytest.mark.django_db
 def test_missing_pantry_item_returns_404(client):
- # Try to open an item that does not exist
+ # Try to open an item that does not exist as an authenticated user.
+ user = User.objects.create_user(username="missing-detail-user", password="password")
+ client.force_login(user)
  response = client.get(
   reverse(
    "core:pantry_item_detail",
@@ -199,10 +203,9 @@ def test_current_pantry_item_displayed_on_home_page(client):
   password="password"
  )
  
- pantry = Pantry.objects.create(
-  user=user,
-  name="Test Pantry"
- )
+ pantry = user.pantry
+ pantry.name = "Test Pantry"
+ pantry.save()
  
  catalog_item = GlobalCatalogItem.objects.create(
   name="Banana",
@@ -216,6 +219,7 @@ def test_current_pantry_item_displayed_on_home_page(client):
   date_expired=timezone.localdate() + timedelta(days=7)
  )
  
+ client.force_login(user)
  response = client.get(reverse("core:home"))
  
  # The current item should appear on the pantry page
@@ -235,10 +239,9 @@ def test_expired_pantry_item_not_displayed_as_current(client):
   password="password"
  )
  
- pantry = Pantry.objects.create(
-  user=user,
-  name="Test Pantry"
- )
+ pantry = user.pantry
+ pantry.name = "Test Pantry"
+ pantry.save()
  
  catalog_item = GlobalCatalogItem.objects.create(
   name="Old Milk",
@@ -252,6 +255,7 @@ def test_expired_pantry_item_not_displayed_as_current(client):
   date_expired=timezone.localdate() - timedelta(days=1)
  )
  
+ client.force_login(user)
  response = client.get(reverse("core:home"))
  
  assert response.status_code == 200
@@ -266,7 +270,7 @@ def test_expired_pantry_item_not_displayed_as_current(client):
 @pytest.mark.django_db
 def test_expiration_status_boundaries():
   user = User.objects.create_user(username="test", password = "password")
-  pantry = Pantry.objects.create(user=user, name="Status Test")
+  pantry = user.pantry
   item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
 
   today = timezone.localdate()
@@ -285,7 +289,7 @@ def test_expiration_status_boundaries():
 @pytest.mark.django_db
 def test_expiration_status_strict_boundaries():
   user = User.objects.create_user(username="test", password = "password")
-  pantry = Pantry.objects.create(user=user, name="Status Test")
+  pantry = user.pantry
   item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
 
   today = timezone.localdate()
@@ -301,7 +305,7 @@ def test_expiration_status_strict_boundaries():
 @pytest.mark.django_db
 def test_expiration_status_unknown_boundary():
   user = User.objects.create_user(username="test", password = "password")
-  pantry = Pantry.objects.create(user=user, name="Status Test")
+  pantry = user.pantry
   item = GlobalCatalogItem.objects.create(name="Test item", category="Testing")
 
   unknown_item = PantryItem.objects.create(pantry=pantry, catalog_item = item, date_expired = None)

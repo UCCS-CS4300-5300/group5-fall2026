@@ -17,11 +17,10 @@ def pantry_item():
         password="test-password"
     )
 
-    # Test pantry for the item
-    pantry = Pantry.objects.create(
-        user=user,
-        name="Test Pantry"
-    )
+    # The user signal creates the owning pantry automatically.
+    pantry = user.pantry
+    pantry.name = "Test Pantry"
+    pantry.save()
 
     # PantryItem needs a catalog item connected to it
     catalog_item = GlobalCatalogItem.objects.create(
@@ -47,7 +46,8 @@ def test_view_details_popup_contains_item_information(client, pantry_item):
     and that the right info shows up in it.
     """
 
-    # Load the main pantry page
+    # Load the main pantry page as the item's owner.
+    client.force_login(pantry_item.pantry.user)
     response = client.get(reverse("core:home"))
 
     # Make sure the page loaded correctly
@@ -83,10 +83,9 @@ def test_expired_item_still_has_view_details_popup(client):
     )
 
     # Pantry for the expired item
-    pantry = Pantry.objects.create(
-        user=user,
-        name="Expired Test Pantry"
-    )
+    pantry = user.pantry
+    pantry.name = "Expired Test Pantry"
+    pantry.save()
 
     # Different item so it is easy to find in the page
     catalog_item = GlobalCatalogItem.objects.create(
@@ -104,7 +103,8 @@ def test_expired_item_still_has_view_details_popup(client):
         location="FRIDGE"
     )
 
-    # Load the pantry page again
+    # Load the pantry page again as the item's owner.
+    client.force_login(user)
     response = client.get(reverse("core:home"))
 
     assert response.status_code == 200

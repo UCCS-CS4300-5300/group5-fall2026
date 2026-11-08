@@ -1,3 +1,5 @@
+//const { use } = require("react");
+
 // get Parent Element With Class List Name if it exists
 function getParentWithClassListName(element, targetName) {
   let current = element.parentElement;
@@ -58,6 +60,8 @@ function addDropZoneListeners(dropZone, zoneName) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const queryString = window.location.search;
 
+    const username = JSON.parse(document.getElementById('user-username').textContent);
+    const isAuthenticated = JSON.parse(document.getElementById('user-is-authenticated').textContent);
     // Submit the fetch action (POST) to then move and update the data
     fetch('/submit-drag-drop/', {
       method: 'POST',
@@ -70,10 +74,12 @@ function addDropZoneListeners(dropZone, zoneName) {
 
       // Post Payload. 
       body: JSON.stringify({
+        username: username,
+        isAuthenticated: isAuthenticated,
         item_id: elementId,
         raw_id: elementId.replace(/.*-/g, ""),
         target_zone: zoneName,
-        query_string: queryString
+        query_string: queryString,
       })
     })
     .then(response => response.json())
