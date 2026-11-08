@@ -76,6 +76,9 @@ function addDropZoneListeners(dropZone, zoneName) {
 }
 
 
+// ----------------------------------------------------------------------------------------
+// Event listeners for the mouse down events
+// ----------------------------------------------------------------------------------------
 // Attach one listener to the parent element or document looking for a food item
 document.addEventListener('mousedown', (event) => {
   draggableCard = getParentWithClassListName(event.target, 'draggable-card') 
@@ -88,7 +91,10 @@ document.addEventListener('mousedown', (event) => {
   }
 });
 
-// Attach listener for the drop via the css class
+
+// ----------------------------------------------------------------------------------------------------
+// Add event listeners for drop dragenter dragleave and dragover events concerning specific drop zones
+// ----------------------------------------------------------------------------------------------------
 const elements = document.querySelectorAll('.grid-lane');
 elements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
@@ -100,6 +106,11 @@ pantryElements.forEach(dropZone => {
   addDropZoneListeners(dropZone, dropZone.id)
 });
 
+// Attach listener for the drop via the css class
+const pantryElements1 = document.querySelectorAll('.pantry-box-delete')
+pantryElements1.forEach(dropZone => {
+  addDropZoneListeners(dropZone, dropZone.id)
+});
 
 // Ellipses menu JS helper functions
 
@@ -128,6 +139,7 @@ window.addEventListener('click', () => {
         menu.classList.remove('show');
     });
 });
+
 // dynamic search for global pantry
 const searchInput = document.getElementById('search-input');
 const searchForm = document.getElementById('search-form');
@@ -137,10 +149,12 @@ searchInput.addEventListener('keyup', function () {
   clearTimeout(timeout);
   timeout = setTimeout(function () {
     searchForm.submit();
-  }, 500);
+  }, 1500);
 });
 
-
+// ----------------------------------------------------------------------------------------
+// Highligting for the various circle items
+// ----------------------------------------------------------------------------------------
 // Find all elements
 const circles = document.querySelectorAll('.item-circle');
 circles.forEach(circle => {

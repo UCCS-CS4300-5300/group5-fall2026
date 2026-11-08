@@ -860,6 +860,36 @@ Previous Media Parameters, will leave as is
 
 /* Collapse into a column when screen width is 600px or less */
 @media screen and (max-width: 600px) {
+
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+        background-repeat: repeat;
+        background-color: var(--color-kitchen);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow for separation */
+    }
+
+    body {
+        padding-top: 80px;
+    }
+
+    header nav {
+        height: auto;
+        min-height: 70px;
+        flex-wrap: wrap;
+        padding: var(--space-sm) var(--space-md);
+        gap: var(--space-sm);
+        justify-content: center;        
+    }
+
+    header .kitchen-bg {
+        background-color: var(--color-kitchen);
+    }
+
     /* Stacks items vertically on collapse */
     .flex-container {
         flex-direction: column; 

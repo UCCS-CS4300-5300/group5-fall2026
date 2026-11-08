@@ -30,6 +30,7 @@
                     <h2 class="app-title">
                         Shelf Life Application: User: {{ user.username }}
                     </h2>
+                    <img class="pantry-box-delete" id="DELETE" src="{% static 'images/main-screen/icons8-trash-cloud-96.png' %}" alt="Trash Icon">
                 </div>
             </nav>
         </header>
@@ -91,6 +92,23 @@
                             {% endif %}
                         </div>
                     {% endif %}
+                <div class="flex-container">
+                    <p class="menu-subheading">Add Item</p>
+                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+
+                        <button type="submit">Submit</button>
+                    </form>
+
+                    {# Shared by the add form and every edit pop-up, so it is #}
+                    {# rendered once here rather than inside each form.       #}
+                    <datalist id="catalog-options">
+                        {% for food in catalog_options %}
+                            <option value="{{ food }}"></option>
+                        {% endfor %}
+                    </datalist>
+                </div>
 
                     <!-- Add with your own details -->
                     <div class="flex-upper-border">
@@ -189,6 +207,8 @@
 
         <!-- TODO: Give credit in about page -->
         <!-- <img src="{% static 'images/icons8-banana-cloud-96.png' %}" alt="My Logo"> -->
+        <!-- <a target="_blank" href="https://icons8.com/icon/109470/trash">Trash</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
+        <!-- <a target="_blank" href="https://icons8.com/icon/lPoyByxq65W4/banana">Banana</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
     </div>
 
     {% if open_edit_id %}
