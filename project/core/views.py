@@ -304,6 +304,7 @@ def test_pantry_view(request):
     )
 
 
+@login_required
 def pantry_item_detail(request, item_id):
     """
         Retrieve one pantry item by ID and display its details.
@@ -326,7 +327,15 @@ def pantry_item_detail(request, item_id):
                 "form": form,
             }
         )
-    return redirect("core:home")
+
+    return render(
+        request,
+        "core/pantry_item_detail.html",
+        {
+            "pantry_item": pantry_item,
+            "form": PantryItemForm(instance=pantry_item),
+        }
+    )
 
 def getOrCreatePantryItem(username, id):
     user = get_object_or_404(User, username=username) 
@@ -408,10 +417,8 @@ def submit_drag_drop(request):
                         status=404
                     )
 
-                pantry, _ = getOrCreateDefaults()
-
                 PantryItem.objects.create(
-                    pantry=pantry,
+                    pantry=request.user.pantry,
                     catalog_item=catalog_item,
                     location=target_zone
                 )

@@ -10,7 +10,9 @@ ORIGINAL_DATE = datetime.date(2026, 10, 10)
 @pytest.fixture
 def item(db):
     user = User.objects.create_user(username="cook", password="pw")
-    pantry = Pantry.objects.create(user=user, name="Pantry1")
+    pantry = user.pantry
+    pantry.name = "Pantry1"
+    pantry.save()
     milk = GlobalCatalogItem.objects.create(name="Milk", category="Dairy")
     return PantryItem.objects.create(
         pantry=pantry, catalog_item=milk, quantity=1,
@@ -36,12 +38,14 @@ def edit_url(item):
 
 
 def test_home_shows_edit_popup(client, item):
+    client.force_login(item.pantry.user)
     response = client.get(reverse("core:home"))
     assert response.status_code == 200
     assert f'id="edit-dialog-{item.id}"'.encode() in response.content
 
 
 def test_valid_edit_saves(client, item):
+    client.force_login(item.pantry.user)
     response = client.post(edit_url(item), form_data(item, quantity=3, date_expired="2026-10-20"))
     assert response.status_code == 302
     item.refresh_from_db()
@@ -50,6 +54,7 @@ def test_valid_edit_saves(client, item):
 
 
 def test_invalid_edit_changes_nothing(client, item):
+    client.force_login(item.pantry.user)
     response = client.post(edit_url(item), form_data(item, quantity=3, date_expired="not-a-date"))
     assert response.status_code == 200
     assert response.context["open_edit_id"] == item.id
@@ -59,6 +64,7 @@ def test_invalid_edit_changes_nothing(client, item):
 
 
 def test_get_does_not_change_item(client, item):
+    client.force_login(item.pantry.user)
     response = client.get(edit_url(item))
     assert response.status_code == 302
     item.refresh_from_db()
@@ -67,5 +73,7 @@ def test_get_does_not_change_item(client, item):
 
 @pytest.mark.django_db
 def test_missing_item_returns_404(client):
+    user = User.objects.create_user(username="missing-edit-user", password="password")
+    client.force_login(user)
     response = client.post(reverse("core:edit_pantry_item", args=[9999]))
     assert response.status_code == 404

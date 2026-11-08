@@ -1,7 +1,15 @@
 import pytest
+from django.contrib.auth.models import User
 from django.urls import reverse
 from core.models import GlobalCatalogItem, PantryItem
-from core.views import search_catalog, getOrCreateDefaults
+from core.views import search_catalog
+
+
+@pytest.fixture
+def logged_in_client(client, db):
+    user = User.objects.create_user(username="catalog-search-user", password="password")
+    client.force_login(user)
+    return client
 
 
 # --- Searching the catalog ---
@@ -31,16 +39,16 @@ def test_blank_search_returns_nothing():
 
 
 @pytest.mark.django_db
-def test_no_match_offers_manual_entry(client):
-    response = client.get(reverse("core:home"), {"q": "zzzqqq"})
+def test_no_match_offers_manual_entry(logged_in_client):
+    response = logged_in_client.get(reverse("core:home"), {"q": "zzzqqq"})
 
     assert response.status_code == 200
     assert b"add it yourself" in response.content
 
 
 @pytest.mark.django_db
-def test_results_appear_on_the_page(client):
-    response = client.get(reverse("core:home"), {"q": "cereal"})
+def test_results_appear_on_the_page(logged_in_client):
+    response = logged_in_client.get(reverse("core:home"), {"q": "cereal"})
 
     assert response.status_code == 200
     assert b"Cereal" in response.content
@@ -49,13 +57,13 @@ def test_results_appear_on_the_page(client):
 # --- Adding from a search result ---
 
 @pytest.mark.django_db
-def test_adding_from_catalog_sets_a_usda_date(client):
+def test_adding_from_catalog_sets_a_usda_date(logged_in_client):
     # The search result carries a location, and the date follows from it.
     # Raw chicken has no pantry figure, so adding it to the shelves would
     # correctly produce no date -- see the test below.
     chicken = GlobalCatalogItem.objects.get(name="Chicken", name_subtitle="whole")
 
-    response = client.post(
+    response = logged_in_client.post(
         reverse("core:add_from_catalog", args=[chicken.id]),
         {"location": "FRIDGE"},
     )
@@ -68,22 +76,22 @@ def test_adding_from_catalog_sets_a_usda_date(client):
 
 
 @pytest.mark.django_db
-def test_adding_defaults_to_the_shelves(client):
+def test_adding_defaults_to_the_shelves(logged_in_client):
     # No location posted -- the item still saves rather than erroring.
     cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
 
-    client.post(reverse("core:add_from_catalog", args=[cereal.id]))
+    logged_in_client.post(reverse("core:add_from_catalog", args=[cereal.id]))
 
     assert PantryItem.objects.get().location == "SHELF"
 
 
 @pytest.mark.django_db
-def test_a_bogus_location_falls_back_to_the_shelves(client):
+def test_a_bogus_location_falls_back_to_the_shelves(logged_in_client):
     # A posted value is not trusted against the choices field. Saving
     # "KITCHEN" would match no shelf-life row and lose the date silently.
     cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
 
-    client.post(
+    logged_in_client.post(
         reverse("core:add_from_catalog", args=[cereal.id]),
         {"location": "KITCHEN"},
     )
@@ -92,19 +100,19 @@ def test_a_bogus_location_falls_back_to_the_shelves(client):
 
 
 @pytest.mark.django_db
-def test_added_item_survives_a_reload(client):
+def test_added_item_survives_a_reload(logged_in_client):
     cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
-    client.post(reverse("core:add_from_catalog", args=[cereal.id]))
+    logged_in_client.post(reverse("core:add_from_catalog", args=[cereal.id]))
 
-    assert b"Cereal" in client.get(reverse("core:home")).content
+    assert b"Cereal" in logged_in_client.get(reverse("core:home")).content
 
 
 @pytest.mark.django_db
-def test_the_search_stays_on_screen_after_adding(client):
+def test_the_search_stays_on_screen_after_adding(logged_in_client):
     # So several foods can be added from one search without retyping it
     cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
 
-    response = client.post(
+    response = logged_in_client.post(
         reverse("core:add_from_catalog", args=[cereal.id]), {"q": "cereal"}
     )
 
@@ -112,18 +120,18 @@ def test_the_search_stays_on_screen_after_adding(client):
 
 
 @pytest.mark.django_db
-def test_unknown_food_adds_nothing(client):
-    response = client.post(reverse("core:add_from_catalog", args=[999999]))
+def test_unknown_food_adds_nothing(logged_in_client):
+    response = logged_in_client.post(reverse("core:add_from_catalog", args=[999999]))
 
     assert response.status_code == 404
     assert PantryItem.objects.count() == 0
 
 
 @pytest.mark.django_db
-def test_add_requires_a_post(client):
+def test_add_requires_a_post(logged_in_client):
     cereal = GlobalCatalogItem.objects.filter(name="Cereal").first()
 
-    response = client.get(reverse("core:add_from_catalog", args=[cereal.id]))
+    response = logged_in_client.get(reverse("core:add_from_catalog", args=[cereal.id]))
 
     assert response.status_code == 405
     assert PantryItem.objects.count() == 0

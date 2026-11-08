@@ -41,13 +41,17 @@ def addOneItem(pantry, name="Apples", location="SHELF"):
     pantry=pantry, catalog_item=catalog_item, quantity=5, location=location)
  
  
+@pytest.fixture
+def logged_in_client(client, db):
+  user = User.objects.create_user(username="views-user", password="password")
+  client.force_login(user)
+  return client
+
+
 @pytest.mark.django_db
-def test_home_page_setup():
-  # getOrCreateDefaults makes a user and a pantry, and nothing else.
-  # It used to seed one pantry item per catalog entry, which would now
-  # create 661 of them on the first page request.
-  views.getOrCreateDefaults()
- 
+def test_home_page_setup(logged_in_client):
+  # Creating a user through the model creates its empty pantry; it does
+  # not seed one pantry item per catalog entry.
   assert Pantry.objects.count() == 1
   assert PantryItem.objects.count() == 0
  
@@ -56,9 +60,9 @@ def test_home_page_setup():
  
  
 @pytest.mark.django_db
-def test_home_page_empty(client):
+def test_home_page_empty(logged_in_client):
   # A new pantry is empty and each of the three containers says so
-  response = client.get(reverse("core:home"))
+  response = logged_in_client.get(reverse("core:home"))
  
   assert response.status_code == 200
   assert countNumberOfElements(response, "container") == 0
@@ -68,27 +72,26 @@ def test_home_page_empty(client):
   assert b"draggable-card" not in response.content
  
 @pytest.mark.django_db
-def test_home_page_populated(client):
+def test_home_page_populated(logged_in_client):
   # ARRANGE
-  pantry, user = views.getOrCreateDefaults()
+  pantry = User.objects.get(username="views-user").pantry
   addOneItem(pantry)
   addOneItem(pantry, name="Bananas")
- 
+
   # ACT
-  response = client.get(reverse("core:home"))
- 
+  response = logged_in_client.get(reverse("core:home"))
   # ASSERT
   assert countNumberOfElements(response, "container") == PantryItem.objects.count() == 2
  
  
 @pytest.mark.django_db
-def test_items_appear_in_their_own_container(client):
+def test_items_appear_in_their_own_container(logged_in_client):
   # Each item renders under the container it was stored in, not all in one
-  pantry, user = views.getOrCreateDefaults()
+  pantry = User.objects.get(username="views-user").pantry
   addOneItem(pantry, name="Apples", location="SHELF")
   addOneItem(pantry, name="Bananas", location="FRIDGE")
- 
-  response = client.get(reverse("core:home"))
+
+  response = logged_in_client.get(reverse("core:home"))
   context = response.context
  
   assert [i.catalog_item.name for i in context["shelves_items"]] == ["Apples"]
@@ -97,9 +100,9 @@ def test_items_appear_in_their_own_container(client):
  
  
 @pytest.mark.django_db
-def test_home_page_Add_item(client):
+def test_home_page_Add_item(logged_in_client):
   # ARRANGE
-  pantry, user = views.getOrCreateDefaults()
+  user = User.objects.get(username="views-user")
   catalog_item = GlobalCatalogItem.objects.filter(name="Apples").first()
   if catalog_item is None:
     catalog_item = GlobalCatalogItem.objects.create(name="Apples", category="Fruit")
@@ -114,7 +117,7 @@ def test_home_page_Add_item(client):
   }
  
   # ACT
-  response = client.post(reverse('core:add_pantry_item'), data=form_data)
+  response = logged_in_client.post(reverse('core:add_pantry_item'), data=form_data)
  
   # ASSERT
   assert response.status_code == 302          # redirects home on success
@@ -125,37 +128,37 @@ def test_home_page_Add_item(client):
   assert item.catalog_item == catalog_item
   assert item.location == "SHELF"
  
-  response = client.get(reverse("core:home"))
+  response = logged_in_client.get(reverse("core:home"))
   assert countNumberOfElements(response, "container") == 1
- 
- 
+
+
 @pytest.mark.django_db
-def test_home_page_delete_item(client):
+def test_home_page_delete_item(logged_in_client):
   # ARRANGE
-  pantry, user = views.getOrCreateDefaults()
+  pantry = User.objects.get(username="views-user").pantry
   item = addOneItem(pantry)
  
-  response = client.get(reverse("core:home"))
+  response = logged_in_client.get(reverse("core:home"))
 
   assert countNumberOfElements(response, "container") == 1
  
   # ACT
   url = reverse('core:delete_pantry_item', kwargs={'id': item.id})
-  response = client.post(url)
+  response = logged_in_client.post(url)
  
   # ASSERT
   assert response.status_code == 302
   assert PantryItem.objects.count() == 0
  
-  response = client.get(reverse("core:home"))
+  response = logged_in_client.get(reverse("core:home"))
   assert countNumberOfElements(response, "container") == 0
 
 @pytest.mark.django_db
-def test_drag_drop_task_assignment_view(client):
+def test_drag_drop_task_assignment_view(logged_in_client):
     # Setup test data
         
     user = User.objects.create_user(username="user1", password="password")
-    pantry = Pantry.objects.create(user=user, name="Pantry1")
+    pantry = user.pantry
     item, _ = GlobalCatalogItem.objects.get_or_create(
       name = "fruits",
       category = "Fruit",
@@ -178,7 +181,7 @@ def test_drag_drop_task_assignment_view(client):
     }
 
     # Post as JSON or form data matching your JS implementation
-    response = client.post(
+    response = logged_in_client.post(
         url,
         data=json.dumps(payload),
         content_type="application/json"
@@ -189,7 +192,7 @@ def test_drag_drop_task_assignment_view(client):
     assert PantryItem.objects.get(id=pantryItem.id).location == "FRIDGE"
 
 @pytest.mark.django_db
-def test_drag_drop_task_assignment_view_fails_with_bad_data(client):
+def test_drag_drop_task_assignment_view_fails_with_bad_data(logged_in_client):
     # Setup test data
   
     # Simulate the endpoint your JS calls on drop (e.g., /api/assign-task/)
@@ -199,7 +202,7 @@ def test_drag_drop_task_assignment_view_fails_with_bad_data(client):
     }
 
     # Post as JSON or form data matching your JS implementation
-    response = client.post(
+    response = logged_in_client.post(
         url,
         data=json.dumps(payload),
         content_type="application/json"
@@ -209,11 +212,11 @@ def test_drag_drop_task_assignment_view_fails_with_bad_data(client):
     assert response.status_code == 400
 
 @pytest.mark.django_db
-def test_drag_drop_task_assignment_view_fails_with_get(client):
+def test_drag_drop_task_assignment_view_fails_with_get(logged_in_client):
     # get url
     url = reverse("core:submit_drag_drop")
     
-    response = client.get(
+    response = logged_in_client.get(
         url,
         content_type="application/json"
     )
@@ -223,7 +226,7 @@ def test_drag_drop_task_assignment_view_fails_with_get(client):
 
 
 @pytest.mark.django_db
-def test_drag_drop_returns_404_when_item_no_longer_exists(client):
+def test_drag_drop_returns_404_when_item_no_longer_exists(logged_in_client):
     url = reverse("core:submit_drag_drop")
 
     payload = {
@@ -231,7 +234,7 @@ def test_drag_drop_returns_404_when_item_no_longer_exists(client):
         "target_zone": "FRIDGE"
     }
 
-    response = client.post(
+    response = logged_in_client.post(
         url,
         data=json.dumps(payload),
         content_type="application/json"
@@ -245,9 +248,9 @@ def test_drag_drop_returns_404_when_item_no_longer_exists(client):
 
 
 @pytest.mark.django_db
-def test_drag_drop_invalid_location_falls_back_to_shelf(client):
+def test_drag_drop_invalid_location_falls_back_to_shelf(logged_in_client):
     user = User.objects.create_user(username="user2", password="password")
-    pantry = Pantry.objects.create(user=user, name="Pantry2")
+    pantry = user.pantry
     catalog_item, _ = GlobalCatalogItem.objects.get_or_create(
         name="vegetables",
         category="Vegetable",
@@ -265,7 +268,7 @@ def test_drag_drop_invalid_location_falls_back_to_shelf(client):
         "target_zone": "CABINET"
     }
 
-    response = client.post(
+    response = logged_in_client.post(
         url,
         data=json.dumps(payload),
         content_type="application/json"
@@ -278,9 +281,9 @@ def test_drag_drop_invalid_location_falls_back_to_shelf(client):
 
 
 @pytest.mark.django_db
-def test_drag_drop_recalculates_expiration_when_location_changes(client):
+def test_drag_drop_recalculates_expiration_when_location_changes(logged_in_client):
     user = User.objects.create_user(username="cook3", password="password")
-    pantry = Pantry.objects.create(user=user, name="Pantry1")
+    pantry = user.pantry
     chicken = GlobalCatalogItem.objects.get(
         name="Chicken",
         name_subtitle="whole"
@@ -300,7 +303,7 @@ def test_drag_drop_recalculates_expiration_when_location_changes(client):
         "target_zone": "FREEZER"
     }
 
-    response = client.post(
+    response = logged_in_client.post(
         url,
         data=json.dumps(payload),
         content_type="application/json"
