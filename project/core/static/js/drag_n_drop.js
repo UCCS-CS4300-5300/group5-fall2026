@@ -10,6 +10,14 @@ function getParentWithClassListName(element, targetName) {
   return null;
 }
 
+const validDropZones = new Set([
+  'SHELF',
+  'FRIDGE',
+  'FREEZER',
+  'BAG',
+  'DELETE'
+]);
+
 // Add drop Zone Listener. 
 function addDropZoneListeners(dropZone, zoneName) {
   // Add event listener for the drag over to prevent default behaviors
@@ -37,8 +45,15 @@ function addDropZoneListeners(dropZone, zoneName) {
       e.target.classList.remove("dragover");
     }
     e.preventDefault();
+
+    // Ignore anything that is not a valid drop zone
+    if (!validDropZones.has(zoneName)) {
+      console.warn(`Ignored invalid drop zone: ${zoneName}`);
+      return;
+    }
     
     const elementId = e.dataTransfer.getData('text/plain');
+
     // Grab Django's CSRF token from the DOM
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const queryString = window.location.search;
@@ -48,11 +63,12 @@ function addDropZoneListeners(dropZone, zoneName) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+
         // Required by Django for security
         'X-CSRFToken': csrfToken 
       },
+
       // Post Payload. 
-      
       body: JSON.stringify({
         item_id: elementId,
         raw_id: elementId.replace(/.*-/g, ""),
@@ -63,13 +79,13 @@ function addDropZoneListeners(dropZone, zoneName) {
     .then(response => response.json())
     .then(data => {
       if (data.success === true) {
-        const droppedElement = document.getElementById(elementId);
-        dropZone.appendChild(droppedElement);
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          window.location.reload();
+        }
       } else {
         alert('Error saving data');
-      }
-      if (data.redirect_url) {
-          window.location.href = data.redirect_url;
       }
     })
     .catch(error => console.error('Error:', error));
@@ -133,6 +149,7 @@ searchInput.addEventListener('keyup', function () {
 // Find all elements
 const circles = document.querySelectorAll('.item-circle');
 circles.forEach(circle => {
+
   // Add listener for entering the element
   circle.addEventListener('mouseenter', () => {
     circle.style.backgroundColor = '#cdcdcd';

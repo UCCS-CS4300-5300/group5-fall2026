@@ -294,38 +294,79 @@ def submit_drag_drop(request):
         try:
             # Parse the JSON payload sent by Fetch API
             data = json.loads(request.body)
+            item_id = data.get('item_id')
             raw_id = data.get('raw_id')
             target_zone = data.get('target_zone')
-            query = data.get('query_string')
+            query = data.get('query_string', '')
 
-            if target_zone:
+            if not target_zone:
+                raise KeyError
+
+            # DELETE is a valid action from drag-to-delete.
+            # Other unknown locations fall back to SHELF.
+            if (
+                target_zone != "DELETE"
+                and target_zone not in dict(PantryItem.STORAGE_LOCATIONS)
+            ):
+                target_zone = "SHELF"
+
+            # Existing pantry item
+            if (
+                not isinstance(item_id, str)
+                or item_id.startswith("pantry-item-")
+            ):
                 item = PantryItem.objects.filter(id=raw_id).first()
+
+                if item is None:
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'Item not found'},
+                        status=404
+                    )
+
                 if target_zone == "DELETE":
-                    item.delete();
-                elif item:
-                    logging.debug(f"Moving Pantry item {item.catalog_item.name} with ide {raw_id} to {target_zone}")
-                    item.location = target_zone;
-                    item.save()
+                    item.delete()
+
                 else:
-                    item = GlobalCatalogItem.objects.filter(id=raw_id).first()
-                    logging.debug(item)
-                    # item = ShelfLife.objects.get(id=raw_id)
-                    if item:
-                        pantry, _ = getOrCreateDefaults()
+                    logging.debug(
+                        f"Moving Pantry item {item.catalog_item.name} "
+                        f"with ide {raw_id} to {target_zone}"
+                    )
 
-                        # Never trust a posted value against a choices field. An unknown
-                        # location would save happily and then match no shelf-life row, so the
-                        # item would end up with no expiration date for no visible reason.
-                        location = target_zone;
+                    # Recalculate expiration if storage changes
+                    if item.location != target_zone:
+                        item.date_expired = None
 
-                        pantryItem = PantryItem.objects.create(
-                            pantry=pantry,
-                            catalog_item=item,
-                            location=location
-                        )
-                        pantryItem.save()
+                    item.location = target_zone
+                    item.save()
+
+            # Item dragged from catalog/search
+            elif item_id and item_id.startswith("catalog-item-"):
+                if target_zone == "DELETE":
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'Item not found'},
+                        status=404
+                    )
+
+                catalog_item = GlobalCatalogItem.objects.filter(
+                    id=raw_id
+                ).first()
+
+                if catalog_item is None:
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'Item not found'},
+                        status=404
+                    )
+
+                pantry, _ = getOrCreateDefaults()
+
+                PantryItem.objects.create(
+                    pantry=pantry,
+                    catalog_item=catalog_item,
+                    location=target_zone
+                )
+
             else:
-                raise(KeyError)
+                raise KeyError
 
             return JsonResponse({
                 'success': True,
@@ -335,6 +376,12 @@ def submit_drag_drop(request):
             })
 
         except (ValueError, KeyError):
-            return JsonResponse({'status': 'error', 'message': 'Invalid data'}, status=400)
+            return JsonResponse(
+                {'status': 'error', 'message': 'Invalid data'},
+                status=400
+            )
 
-    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
+    return JsonResponse(
+        {'status': 'error', 'message': 'Only POST allowed'},
+        status=405
+    )
