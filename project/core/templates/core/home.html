@@ -21,14 +21,8 @@
             <nav class="kitchen-bg flex-container">
                 <ul class="nav-links">
                     <li class="dropdown">
-                        <a href="#" class="dropdown-trigger">Menu ▾</a>
-
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Pantry</a></li>
-                            <li><a href="#">Shopping List</a></li>
-                            <li><a href="#">Ai assisted Chef</a></li>
-                            <li><a href="#">About</a></li>
-                        </ul>
+                        <!-- Top-left button to toggle sidebar open/closed -->
+                        <a href="#" class="dropdown-trigger" id="menu-dropdown-toggle">&#9776; Menu <span class="menu-arrow">&#9662;</span></a>
                     </li>
                 </ul>
 
@@ -43,69 +37,109 @@
         <!-- Body for HTML page -->
         <div class="split-container">
 
-            <!-- Column 1: Pantry Organizer -->
-            <div class="left-column">
-                <div class="flex-upped-border">
-                    <h2>Pantry Organizer</h2>
-                </div>
-
-                <!-- Search the USDA food catalog -->
-                <div class="flex-container">
-                    <form id="search-form" action="{% url 'core:home' %}" method="GET" role="search">
-                        <input 
-                            type="text" 
-                            name="q" 
-                            id="search-input" 
-                            value="{{ query | default:'' }}" 
-                            placeholder="Search..." 
-                            autocomplete="off" 
-                            autofocus
-                            onfocus="this.setSelectionRange(this.value.length, this.value.length);"
-                        />
-                    </form>
-                </div>
-
-                {% if searched %}
-                    <div class="flex-container" id="search-results">
-                        {% if searchResults %}
-                            <ul class="catalog-results">
-                                {% for food in searchResults %}
-                                    {% render_catalog_item food %}
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p>
-                                No foods match &ldquo;{{ query }}&rdquo;.
-                                Use the form below to add it yourself.
-                            </p>
-                        {% endif %}
+            <!-- Column 1: Collapsible Side Container (Collapsed by default) -->
+            <div class="left-column" id="side-container">
+                
+                <!-- View 1: Main Sidebar Menu (Shown when sidebar opens) -->
+                <div id="sidebar-main-menu" class="sidebar-view">
+                    <div class="flex-upper-border">
+                        <h2>Menu</h2>
                     </div>
-                {% endif %}
-
-                <!-- Add with your own details -->
-                <div class="flex-upper-border">
-                    <h3>Add with details</h3>
+                    <ul class="sidebar-menu-list">
+                        <li><a href="#" class="sidebar-nav-link" data-target="panel-pantry">Pantry Organizer</a></li>
+                        <li><a href="#" class="sidebar-nav-link" data-target="panel-ai">Ai assisted Chef</a></li>
+                        <li><a href="#" class="sidebar-nav-link" data-target="panel-manual">About / Manual</a></li>
+                    </ul>
                 </div>
 
-                <div class="flex-container">
-                    <p class="menu-subheading">Add Item</p>
+                <!-- View 2: Pantry Organizer Feature Panel -->
+                <div id="panel-pantry" class="sidebar-feature-panel" style="display: none;">
+                    <div class="flex-upper-border sidebar-header-row">
+                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
+                        <h2>Pantry Organizer</h2>
+                    </div>
 
-                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
-                        {% csrf_token %}
-                        {{ form.as_p }}
+                    <!-- Search the USDA food catalog -->
+                    <div class="flex-container">
+                        <form id="search-form" action="{% url 'core:home' %}" method="GET" role="search">
+                            <input 
+                                type="text" 
+                                name="q" 
+                                id="search-input" 
+                                value="{{ query | default:'' }}" 
+                                placeholder="Search..." 
+                                autocomplete="off" 
+                                autofocus
+                                onfocus="this.setSelectionRange(this.value.length, this.value.length);"
+                            />
+                        </form>
+                    </div>
 
-                        <button type="submit">Submit</button>
-                    </form>
-                </div>
+                    {% if searched %}
+                        <div class="flex-container" id="search-results">
+                            {% if searchResults %}
+                                <ul class="catalog-results">
+                                    {% for food in searchResults %}
+                                        {% render_catalog_item food %}
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>
+                                    No foods match &ldquo;{{ query }}&rdquo;.
+                                    Use the form below to add it yourself.
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
 
-                <!-- Bag drop zone -->
-                <div class="flex-container">
-                    <div id="BAG" class="kitchen-bg pantry-box dropzone">
-                        {% for product in bag_items %}
-                            {% render_pantry_item product %}
-                        {% endfor %}
+                    <!-- Add with your own details -->
+                    <div class="flex-upper-border">
+                        <h3>Add with details</h3>
+                    </div>
+
+                    <div class="flex-container">
+                        <p class="menu-subheading">Add Item</p>
+
+                        <form action="{% url 'core:add_pantry_item' %}" method="POST">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
+
+                    <!-- Bag drop zone -->
+                    <div class="flex-container">
+                        <div id="BAG" class="kitchen-bg pantry-box dropzone">
+                            {% for product in bag_items %}
+                                {% render_pantry_item product %}
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
+
+                <!-- View 3: AI Assisted Chef Feature Panel -->
+                <div id="panel-ai" class="sidebar-feature-panel" style="display: none;">
+                    <div class="flex-upper-border sidebar-header-row">
+                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
+                        <h2>Ai assisted Chef</h2>
+                    </div>
+                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
+                        <p>AI feature implementation goes here. Generate recipes or suggestions using items currently inside your pantry!</p>
+                    </div>
+                </div>
+
+                <!-- View 4: About / Manual Feature Panel -->
+                <div id="panel-manual" class="sidebar-feature-panel" style="display: none;">
+                    <div class="flex-upper-border sidebar-header-row">
+                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
+                        <h2>About / Manual</h2>
+                    </div>
+                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
+                        <p>Welcome to Shelf Life! Use the drag-and-drop feature to move items between Shelves, Freezer, and Fridge. Click the ellipses (...) on any item to view details, edit, or delete.</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Column 2: Shelves -->
@@ -164,6 +198,7 @@
         </script>
     {% endif %}
 
+    <script src="{% static 'js/collapsible_menu.js' %}"></script>
     <script src="{% static 'js/drag_n_drop.js' %}"></script>
 </body>
 </html>
