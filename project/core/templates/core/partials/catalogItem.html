@@ -1,5 +1,5 @@
 {% load static custom_elements %}
-<div id="pantry-item-{{ catalog_item.id }}" class="draggable-card" draggable="true">
+<div id="catalog-item-{{ catalog_item.id }}" class="draggable-card" draggable="true">    
     <div class="item-circle {{ product.expiration_status | slugify }}">
         <img class="category-food-image"
              src="{% static 'images/food-categories-images/' %}{{ catalog_item.category | food_category_image }}"
