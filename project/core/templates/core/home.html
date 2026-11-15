@@ -287,7 +287,11 @@
                 alert('Error saving data');
             }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error)
+                // force the UI to refresh if there is no server present...
+                window.location.reload();
+            });
 
         }
 
