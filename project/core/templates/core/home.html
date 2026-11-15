@@ -88,13 +88,13 @@
                     </div>
 
                     {% if searched %}
-                        <div class="flex-container" id="search-results">
+                        <div class="flex-container pantry-box dropzone" id="search-results">
                             {% if searchResults %}
-                                <ul class="catalog-results">
+                                <!-- <ul class="catalog-results"> -->
                                     {% for food in searchResults %}
                                         {% render_catalog_item food %}
                                     {% endfor %}
-                                </ul>
+                                <!-- </ul> -->
                             {% else %}
                                 <p>
                                     No foods match &ldquo;{{ query }}&rdquo;.
@@ -228,8 +228,71 @@
             document.getElementById("edit-dialog-{{ open_edit_id }}").showModal();
         </script>
     {% endif %}
+    <script type="module">
+        import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs/+esm';
+        const containers = document.querySelectorAll('.dropzone, .pantry-box-delete');
+        // search-results
+        containers.forEach((container) => {
+            new Sortable(container, {
+                group: 'shared', // Sharing the same group name allows moving between divs
+                animation: 150,  // Smooth sorting animation in ms
+                ghostClass: 'blue-background-class', // Optional class applied to the drop placeholder
+                onAdd: function (evt) {
+                    const itemEl = evt.item;          // The dragged element
+                    const toContainer = evt.to;       // Destination container
+                    const fromContainer = evt.from;   // Origin container
+                    sendUpdate(evt);
+                }
+            });
+        });
+        async function sendUpdate(e) {
+            const elementId = e.item.id;
+            const zoneName = e.to.id;
+            console.log(elementId)
+            // Grab Django's CSRF token from the DOM
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const queryString = window.location.search;
 
+            const username = JSON.parse(document.getElementById('user-username').textContent);
+            const isAuthenticated = JSON.parse(document.getElementById('user-is-authenticated').textContent);
+            // Submit the fetch action (POST) to then move and update the data
+            fetch('/submit-drag-drop/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+
+                    // Required by Django for security
+                    'X-CSRFToken': csrfToken 
+                },
+
+                // Post Payload. 
+                body: JSON.stringify({
+                    username: username,
+                    isAuthenticated: isAuthenticated,
+                    item_id: elementId,
+                    raw_id: elementId.replace(/.*-/g, ""),
+                    target_zone: zoneName,
+                    query_string: queryString,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.success === true) {
+                if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+                } else {
+                window.location.reload();
+                }
+            } else {
+                alert('Error saving data');
+            }
+            })
+            .catch(error => console.error('Error:', error));
+
+        }
+
+    </script>
     <script src="{% static 'js/collapsible_menu.js' %}"></script>
-    <script src="{% static 'js/drag_n_drop.js' %}"></script>
+    <script src="{% static 'js/pantry_item.js' %}"></script>
 </body>
 </html>
