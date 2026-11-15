@@ -314,3 +314,66 @@ def test_drag_drop_recalculates_expiration_when_location_changes(logged_in_clien
     assert response.status_code == 200
     assert pantry_item.location == "FREEZER"
     assert (pantry_item.date_expired - pantry_item.date_stored).days == 360
+
+@pytest.mark.django_db
+def test_drag_drop_catalog_item_404_resp(logged_in_client):
+    user = User.objects.create_user(username="cook3", password="password")
+    pantry = user.pantry
+    chicken = GlobalCatalogItem.objects.get(
+        name="Chicken",
+        name_subtitle="whole"
+    )
+
+    pantry_item = PantryItem.objects.create(
+        pantry=pantry,
+        catalog_item=chicken,
+        location="FRIDGE"
+    )
+
+    url = reverse("core:submit_drag_drop")
+    payload = {
+        "raw_id": chicken.id,
+        "target_zone": "SHELF"
+    }
+
+    response = logged_in_client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    pantry_item.refresh_from_db()
+
+    assert response.status_code == 404
+
+@pytest.mark.django_db
+def test_drag_drop_catalog_item_Non_404_resp(logged_in_client):
+    user = User.objects.create_user(username="cook3", password="password")
+    pantry = user.pantry
+    chicken = GlobalCatalogItem.objects.get(
+        name="Chicken",
+        name_subtitle="whole"
+    )
+
+    pantry_item = PantryItem.objects.create(
+        pantry=pantry,
+        catalog_item=chicken,
+        location="FRIDGE"
+    )
+
+    url = reverse("core:submit_drag_drop")
+    payload = {
+        "raw_id": chicken.id,
+        "target_zone": "DELETE",
+        "item_id": f"catalog-item-{chicken.id}"
+    }
+
+    response = logged_in_client.post(
+        url,
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    pantry_item.refresh_from_db()
+
+    assert response.status_code == 200
