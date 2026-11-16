@@ -1073,12 +1073,141 @@ Pop-up Style
 }
 
 .edit-dialog::backdrop,
-.details-dialog::backdrop {
+.details-dialog::backdrop,
+.how-to-dialog::backdrop {
     background: var(--color-backdrop);
 }
 
 .edit-dialog .errorlist {
     color: var(--color-error);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How-To / Instructions Popup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+.how-to-trigger {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    margin-left: 8px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 3px solid #6f2cff;
+    border-radius: 50%;
+
+    background-color: #ffffff;
+    color: #6f2cff;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.how-to-trigger:hover {
+    background-color: #f3ecff;
+}
+
+.how-to-dialog {
+    width: min(90vw, 650px);
+    max-height: 80vh;
+
+    padding: var(--space-lg);
+
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-large);
+
+    text-align: left;
+    overflow-y: auto;
+}
+
+.how-to-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.how-to-header h2 {
+    margin: 0;
+}
+
+.how-to-close-btn {
+    min-width: 40px;
+    min-height: 40px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+
+    background-color: #ffffff;
+    color: var(--color-button-dark);
+
+    font-size: 1.4rem;
+    font-weight: bold;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.how-to-close-btn:hover {
+    background-color: var(--color-panel);
+}
+
+.how-to-content section {
+    margin-bottom: var(--space-lg);
+}
+
+.how-to-content section:last-child {
+    margin-bottom: 0;
+}
+
+.how-to-content h3 {
+    margin-top: 0;
+    margin-bottom: var(--space-xs);
+}
+
+.how-to-content p {
+    line-height: 1.5;
+}
+
+.how-to-footer {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-top: var(--space-lg);
+}
+
+.how-to-footer button {
+    padding: var(--space-sm) var(--space-lg);
+
+    border: none;
+    border-radius: var(--radius-small);
+
+    background-color: var(--color-button-dark);
+    color: var(--color-button-text);
+
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.how-to-footer button:hover {
+    background-color: var(--color-button-hover);
 }
 
 /*
