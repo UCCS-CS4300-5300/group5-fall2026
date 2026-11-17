@@ -402,11 +402,7 @@ def submit_drag_drop(request):
             # Item dragged from catalog/search
             elif item_id and item_id.startswith("catalog-item-"):
                 if target_zone == "DELETE":
-                    return JsonResponse(
-                        {'status': 'error', 'message': 'Item not found'},
-                        status=404
-                    )
-
+                    pass;
                 catalog_item = GlobalCatalogItem.objects.filter(
                     id=raw_id
                 ).first()
