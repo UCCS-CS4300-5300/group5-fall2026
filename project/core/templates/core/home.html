@@ -24,6 +24,17 @@
                         <!-- Top-left button to toggle sidebar open/closed -->
                         <a href="#" class="dropdown-trigger" id="menu-dropdown-toggle">&#9776; Menu <span class="menu-arrow">&#9662;</span></a>
                     </li>
+
+                    <li>
+                        <button
+                            type="button"
+                            class="how-to-trigger"
+                            aria-label="Open instructions"
+                            onclick="document.getElementById('how-to-dialog').showModal()"
+                        >
+                            ?
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="flex-upper-border">
@@ -45,6 +56,99 @@
                 <a href="{% url 'login' %}">Log in</a>
             {% endif %}
         </header>
+        <!-- How-To / Instructions popup -->
+        <dialog id="how-to-dialog" class="how-to-dialog">
+            <div class="how-to-header">
+                <h2>How to Use Shelf Life</h2>
+
+                <button
+                    type="button"
+                    class="how-to-close-btn"
+                    aria-label="Close instructions"
+                    onclick="this.closest('dialog').close()"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <div class="how-to-content">
+                <section>
+                    <h3>Getting Started</h3>
+                    <p>
+                        Shelf Life helps you organize the food in your pantry, fridge, freezer,
+                        and bag so you can keep track of where everything is stored and when it
+                        expires. The app also includes an AI Assisted Chef feature that can help
+                        suggest meal ideas based on the food you already have.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Adding Food</h3>
+                    <p>
+                        Open the Pantry Organizer from the Menu and search for the food item you
+                        want to add. After selecting the item, drag it into the Shelves, Fridge,
+                        Freezer, or Bag area to place it in your pantry. Some forms may also let
+                        you enter details like quantity and dates before saving.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Moving Food</h3>
+                    <p>
+                        You can move food items by dragging them from one storage area to another,
+                        such as from the Shelves to the Fridge or Freezer. You can also update an
+                        item’s location by opening its menu, choosing Edit, and changing the
+                        storage location there. Shelf Life will update the item’s stored location
+                        and expiration information when needed.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Viewing and Editing Items</h3>
+                    <p>
+                        Click the three-dot menu on any pantry item to open more options. From
+                        there, you can view item details such as category, quantity, storage
+                        location, expiration date, and status, or choose Edit to update the item.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Deleting Food</h3>
+                    <p>
+                        To remove an item, open the three-dot menu and choose Delete, or drag the
+                        item to the trash area if that option is available. This helps you remove
+                        items that were used, thrown away, or added by mistake.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>Expiration Status</h3>
+                    <p>
+                        Each food item is labeled with a status such as Fresh, Expiring Soon,
+                        Expired, or Unknown. These labels help you quickly decide what should be
+                        used first and what may no longer be safe to keep.
+                    </p>
+                </section>
+
+                <section>
+                    <h3>AI Assisted Chef</h3>
+                    <p>
+                        The AI Assisted Chef uses the food currently in your pantry to suggest
+                        recipe ideas and meal inspiration. This can help you make better use of
+                        the ingredients you already have and reduce food waste.
+                    </p>
+                </section>
+            </div>
+
+            <div class="how-to-footer">
+                <button
+                    type="button"
+                    onclick="this.closest('dialog').close()"
+                >
+                    Close
+                </button>
+            </div>
+        </dialog>
 
         <!-- Body for HTML page -->
         <div class="split-container">
@@ -60,7 +164,15 @@
                     <ul class="sidebar-menu-list">
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-pantry">Pantry Organizer</a></li>
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-ai">Ai assisted Chef</a></li>
-                        <li><a href="#" class="sidebar-nav-link" data-target="panel-manual">About / Manual</a></li>
+                        <li>
+                            <a
+                                href="#"
+                                class="sidebar-nav-link"
+                                onclick="event.preventDefault(); document.getElementById('how-to-dialog').showModal();"
+                            >
+                                About / Manual
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -155,17 +267,6 @@
                     </div>
                     <div class="flex-container" style="padding: var(--space-md); text-align: left;">
                         <p>AI feature implementation goes here. Generate recipes or suggestions using items currently inside your pantry!</p>
-                    </div>
-                </div>
-
-                <!-- View 4: About / Manual Feature Panel -->
-                <div id="panel-manual" class="sidebar-feature-panel" style="display: none;">
-                    <div class="flex-upper-border sidebar-header-row">
-                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
-                        <h2>About / Manual</h2>
-                    </div>
-                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
-                        <p>Welcome to Shelf Life! Use the drag-and-drop feature to move items between Shelves, Freezer, and Fridge. Click the ellipses (...) on any item to view details, edit, or delete.</p>
                     </div>
                 </div>
 
