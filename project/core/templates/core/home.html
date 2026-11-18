@@ -60,6 +60,7 @@
                     <ul class="sidebar-menu-list">
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-pantry">Pantry Organizer</a></li>
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-ai">Ai assisted Chef</a></li>
+                        <li><a href="#" class="sidebar-nav-link" data-target="panel-statistics">Statistics</a></li>
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-manual">About / Manual</a></li>
                     </ul>
                 </div>
@@ -167,6 +168,37 @@
                     <div class="flex-container" style="padding: var(--space-md); text-align: left;">
                         <p>Welcome to Shelf Life! Use the drag-and-drop feature to move items between Shelves, Freezer, and Fridge. Click the ellipses (...) on any item to view details, edit, or delete.</p>
                     </div>
+                </div>
+
+                <!-- View 5: Food Statistics Feature Panel -->
+                <div id="panel-statistics" class="sidebar-feature-panel" style="display: none;">
+                    <div class="flex-upper-border sidebar-header-row">
+                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
+                        <h2>Food Statistics</h2>
+                    </div>
+
+                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
+                        <p>
+                            Track how food leaves your pantry and review your
+                            consumption and waste over time.
+                        </p>
+                    </div>
+
+                    <ul class="sidebar-menu-list">
+                        <li>
+                            <div id="statistics-history-option">
+                                <strong>Consumed / Trashed History</strong>
+                                <p>Review food that has been consumed or thrown away.</p>
+                            </div>
+                        </li>
+
+                        <li>
+                            <div id="statistics-leaderboard-option">
+                                <strong>Top Consumed / Trashed Foods</strong>
+                                <p>See which foods are consumed or thrown away most often.</p>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
 
             </div>
