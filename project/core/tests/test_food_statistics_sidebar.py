@@ -51,4 +51,5 @@ def test_statistics_sidebar_contains_future_statistics_options():
 
     assert 'data-target="panel-pantry"' in content
     assert 'data-target="panel-ai"' in content
-    assert 'data-target="panel-manual"' in content
+    assert 'id="how-to-dialog"' in content
+    assert "About / Manual" in content
