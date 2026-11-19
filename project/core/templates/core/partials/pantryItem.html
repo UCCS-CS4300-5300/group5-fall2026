@@ -2,8 +2,8 @@
 <div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true">
     <div class="item-circle {{ product.expiration_status|slugify }}">
         <img class="category-food-image"
-             src="{% static 'images/food-categories-images/' %}{{ product.catalog_item.category|food_category_image }}"
-             alt="{{ product.catalog_item.category }} food category">
+             src="{% static 'images/food-categories-images/' %}{{ product.category|food_category_image }}"
+             alt="{{ product.category|default:'Custom' }} food category">
 
         <!-- Ellipses menu container and dropdown submenu -->
         <div class="item-menu-container">
@@ -52,7 +52,7 @@
 
         <div class="container">
             <span class="item-name">
-                {{ product.catalog_item.name }}
+                {{ product.display_name }}
             </span>
             <br/>
             <span class="quantity-text">
@@ -67,8 +67,8 @@
 
             <!-- Details popup -->
             <dialog id="details-dialog-{{ product.id }}" class="details-dialog">
-                <h3>{{ product.catalog_item.name }}</h3>
-                <p><strong>Category:</strong> {{ product.catalog_item.category }}</p>
+                <h3>{{ product.display_name }}</h3>
+                <p><strong>Category:</strong> {{ product.category|default:"Custom food" }}</p>
                 <p><strong>Quantity:</strong> {{ product.quantity }}</p>
                 <p><strong>Storage Location:</strong> {{ product.get_location_display }}</p>
                 <p><strong>Date Stored:</strong> {{ product.date_stored }}</p>
@@ -82,7 +82,7 @@
 
             <!-- Edit popup -->
             <dialog id="edit-dialog-{{ product.id }}" class="edit-dialog">
-                <h3>Edit {{ product.catalog_item.name }}</h3>
+                <h3>Edit {{ product.display_name }}</h3>
                 <form
                     action="{% url 'core:edit_pantry_item' product.id %}"
                     method="POST"
