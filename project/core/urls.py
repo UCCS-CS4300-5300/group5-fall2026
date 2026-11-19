@@ -22,4 +22,7 @@ urlpatterns=[
         name='pantry_item_detail'
     ),
     path('submit-drag-drop/', views.submit_drag_drop, name='submit_drag_drop'),
+
+    # AI Chef
+    path('ai-chef/', views.ai_chef_chat, name='ai_chef_chat')
 ]
