@@ -854,6 +854,181 @@ Pantry Item Inner Text Styling
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AI Assisted Chef Sidebar styling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+#panel-ai {
+    height: 100%;
+}
+
+.chef-panel-body [hidden] {
+    display: none !important;
+}
+
+.chef-panel-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: calc(100vh - 170px);
+    position: relative;
+}
+
+.chef-bell-stage,
+.chef-loading {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-lg) var(--space-sm);
+    text-align: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.chef-bell-stage.phasing-out {
+    opacity: 0;
+    transform: scale(0.85) translateY(-8px);
+    pointer-events: none;
+}
+
+.chef-bell-btn {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 2px solid var(--color-button-dark);
+    background-color: var(--color-panel);
+    color: var(--color-button-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.chef-bell-btn:hover {
+    background-color: var(--color-pantry);
+    transform: scale(1.05);
+}
+
+.chef-bell-icon {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.chef-bell-label {
+    margin: 0;
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    color: var(--color-button-dark);
+}
+
+.chef-spinner {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 6px solid var(--color-border);
+    border-top-color: var(--color-button-dark);
+    animation: chef-spin 0.9s linear infinite;
+}
+
+.chef-loading-text {
+    margin: 0;
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    color: var(--color-button-dark);
+}
+
+@keyframes chef-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.chef-chat-room {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: var(--space-sm);
+    padding-top: var(--space-sm);
+}
+
+.chef-messages {
+    flex: 1 1 auto;
+    min-height: 240px;
+    max-height: 55vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background-color: var(--color-panel);
+}
+
+.chef-message {
+    padding: var(--space-sm);
+    border-radius: var(--radius-small);
+    font-size: 0.92rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.chef-message.assistant {
+    background-color: var(--color-pantry);
+    border: 1px solid var(--color-border);
+    color: var(--color-button-dark);
+}
+
+.chef-message.user {
+    background-color: var(--color-button-dark);
+    color: var(--color-button-text);
+    align-self: flex-end;
+    max-width: 90%;
+}
+
+.chef-chat-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    padding: var(--space-sm);
+    background-color: var(--color-pantry);
+}
+
+.chef-message-input {
+    width: 100%;
+    min-height: var(--touch-target);
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    font-size: 0.92rem;
+}
+
+.chef-send-btn {
+    width: 100%;
+    min-height: var(--touch-target);
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    border-radius: var(--radius-small);
+    background-color: var(--color-button-dark);
+    color: var(--color-button-text);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.chef-send-btn:hover {
+    background-color: var(--color-button-hover);
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Previous Media Parameters, will leave as is
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
