@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 # Free tier model: (There are two options with gemini: "gemini-3.8-flash" or "gemini-3.5-flash-lite")
 DEFAULT_CHEF_MODEL = os.getenv("AI_CHEF_MODEL", "gemini-3.5-flash-lite")
 
+API_KEY_ENV_VAR = "GEMINI_API_KEY"
+CHEF_API_KEY = ""
+
 FALLBACK_MESSAGE_1 = "The Chef is cleaning the kitchen, come back later..."
 FALLBACK_MESSAGE_2 = "The Chef is busy right now, come back later..."
 
@@ -84,7 +87,7 @@ def build_content(pantry_summary, user_message=None, history=None):
 # This function is in charge of sending the prompt to Gemini and handling fallbacks if anything goes wrong
 def ask_chef(pantry_items, user_message=None, history=None, fallback_message=FALLBACK_MESSAGE_1):
     # Look up the GEMINI_API_KEY environment variable directly
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    api_key = (CHEF_API_KEY or os.getenv(API_KEY_ENV_VAR, "")).strip()
     if not api_key:
         logger.warning("AI Chef fallback triggered: GEMINI_API_KEY is not set.")
         return {"ok": False, "reply": fallback_message, "fallback": True}
