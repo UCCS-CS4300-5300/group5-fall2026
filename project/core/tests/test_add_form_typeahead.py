@@ -84,11 +84,13 @@ def test_an_ambiguous_bare_name_is_refused(ground_beef):
 
 
 @pytest.mark.django_db
-def test_an_unknown_food_is_refused():
+def test_an_unknown_food_becomes_a_custom_item():
+    # This used to be an error. As of #127 a name the catalog doesn't have
+    # is a custom food, not a mistake. See test_custom_foods.py.
     form = PantryItemForm(data=form_data("Dad's chili"))
 
-    assert not form.is_valid()
-    assert "No catalog food called" in str(form.errors["catalog_item"])
+    assert form.is_valid(), form.errors
+    assert form.cleaned_data["catalog_item"] is None
 
 
 @pytest.mark.django_db

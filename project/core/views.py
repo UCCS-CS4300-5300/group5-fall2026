@@ -388,12 +388,14 @@ def submit_drag_drop(request):
 
                 else:
                     logging.debug(
-                        f"Moving Pantry item {item.catalog_item.name} "
+                        f"Moving Pantry item {item.display_name} "
                         f"with ide {raw_id} to {target_zone}"
                     )
 
-                    # Recalculate expiration if storage changes
-                    if item.location != target_zone:
+                    # Clearing the date lets save() recompute it from USDA
+                    # data. A custom food has nothing to recompute from, so
+                    # clearing it would throw away the only date it has.
+                    if item.location != target_zone and item.catalog_item:
                         item.date_expired = None
 
                     item.location = target_zone
@@ -402,11 +404,7 @@ def submit_drag_drop(request):
             # Item dragged from catalog/search
             elif item_id and item_id.startswith("catalog-item-"):
                 if target_zone == "DELETE":
-                    return JsonResponse(
-                        {'status': 'error', 'message': 'Item not found'},
-                        status=404
-                    )
-
+                    pass;
                 catalog_item = GlobalCatalogItem.objects.filter(
                     id=raw_id
                 ).first()
