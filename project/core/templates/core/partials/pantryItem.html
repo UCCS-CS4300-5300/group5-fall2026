@@ -1,6 +1,49 @@
 {% load static custom_elements %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script>
+    function addToast(message, duration = 4000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <span><strong>${message}</span>
+            <button class="close-btn" aria-label="Close">&times;</button>
+        `;
+
+        // Manual close button
+        toast.querySelector('.close-btn').addEventListener('click', () => {
+            removeToast(toast);
+        });
+
+        // Pause auto-dismiss while user is hovering or dragging
+        let timeoutId = setTimeout(() => removeToast(toast), duration);
+
+        toast.addEventListener('mouseenter', () => clearTimeout(timeoutId));
+        toast.addEventListener('mouseleave', () => {
+            timeoutId = setTimeout(() => removeToast(toast), duration);
+        });
+
+        document.getElementById('toast-container').prepend(toast);
+    }
+
+    function removeToast(toastElement) {
+        toastElement.style.opacity = '0';
+        toastElement.style.transform = 'translateX(20px)';
+        setTimeout(() => toastElement.remove(), 200);
+    }
+</script>
+
 <div id="pantry-item-{{ product.id }}" class="draggable-card" draggable="true">
     <div class="item-circle {{ product.expiration_status|slugify }}">
+        {% if product.expiration_status == "Expired" %}
+            <script>
+                addToast("{{product.expiration_status}}: {{product.display_name}}")
+            </script>
+        {% elif product.expiration_status == "Unknown" %}
+            <script>
+                addToast("Expriation status {{product.expiration_status}}: {{product.display_name}}")
+            </script>
+        {% endif %}
         <img class="category-food-image"
              src="{% static 'images/food-categories-images/' %}{{ product.category|food_category_image }}"
              alt="{{ product.category|default:'Custom' }} food category">
