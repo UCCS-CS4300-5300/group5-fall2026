@@ -1,12 +1,12 @@
 import logging
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Case, Count, IntegerField, Max, Q, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 from urllib.parse import quote
 from django.contrib.auth.models import User
-from .models import GlobalCatalogItem, Pantry, PantryItem
+from .models import GlobalCatalogItem, Pantry, PantryItem, PantryItemHistory
 from .forms import PantryItemForm
 from .ai import match_to_catalog
 import json
@@ -176,6 +176,16 @@ def build_home_context(
         elif item.location == "BAG":
             bag_items.append(item)
 
+    deleted_food_history = (
+    PantryItemHistory.objects
+    .filter(pantry=pantry)
+    .values("item_name")
+    .annotate(
+        times_deleted=Count("id"),
+        last_deleted=Max("deleted_at")
+    )
+    .order_by("-times_deleted", "item_name")
+)
 
     query = request.GET.get("q", "") if request else ""
 
@@ -187,6 +197,7 @@ def build_home_context(
         "freezer_items":freezer_items,
         "bag_items": bag_items,
         "pantryItems" : pantryItems,
+        "deleted_food_history": deleted_food_history,
         "form" : add_form or PantryItemForm(),
         # Backs the <datalist> the add and edit forms type against. Rendered
         # once per page, not once per pop-up.
@@ -263,9 +274,20 @@ def delete_pantry_item(request, id):
     Delete an active Item using an ID
     """
 
-    item = get_object_or_404(PantryItem, id=id)
+    item = get_object_or_404(
+        PantryItem,
+        id=id,
+        pantry=request.user.pantry
+    )
+
     if request.method == "POST":
+        PantryItemHistory.objects.create(
+            pantry=item.pantry,
+            item_name=item.catalog_item.name
+        )
+
         item.delete()
+
     return redirect("core:home")
 
 @login_required
@@ -384,6 +406,10 @@ def submit_drag_drop(request):
                     )
 
                 if target_zone == "DELETE":
+                    PantryItemHistory.objects.create(
+                        pantry=item.pantry,
+                        item_name=item.catalog_item.name
+                    )
                     item.delete()
 
                 else:

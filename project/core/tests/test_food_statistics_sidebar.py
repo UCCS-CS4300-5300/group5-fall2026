@@ -3,6 +3,7 @@ import pytest
 from django.contrib.auth.models import User
 from django.test import Client
 from django.urls import reverse
+from textual import content
 
 
 @pytest.mark.django_db
@@ -44,8 +45,7 @@ def test_statistics_sidebar_contains_future_statistics_options():
     content = response.content.decode("utf-8")
 
     assert 'id="statistics-history-option"' in content
-    assert "Consumed / Trashed History" in content
-
+    assert "Trashed Food History" in content
     assert 'id="statistics-leaderboard-option"' in content
     assert "Top Consumed / Trashed Foods" in content
 

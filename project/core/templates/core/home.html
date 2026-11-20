@@ -288,9 +288,30 @@
                     <ul class="sidebar-menu-list">
                         <li>
                             <div id="statistics-history-option">
-                                <strong>Consumed / Trashed History</strong>
-                                <p>Review food that has been consumed or thrown away.</p>
-                            </div>
+                                <strong>Trashed Food History</strong>
+
+                                {% if deleted_food_history %}
+                                    <ul class="statistics-history-list">
+                                        {% for entry in deleted_food_history %}
+                                            <li class="statistics-history-item">
+                                                <strong>{{ entry.item_name }}</strong>
+
+                                                <p>
+                                                    Deleted {{ entry.times_deleted }}
+                                                    time{{ entry.times_deleted|pluralize }}
+                                                </p>
+
+                                                <p>
+                                                    Last deleted:
+                                                    {{ entry.last_deleted|date:"M j, Y" }}
+                                                </p>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No deleted food history yet.</p>
+                                {% endif %}
+                            </div>    
                         </li>
 
                         <li>
