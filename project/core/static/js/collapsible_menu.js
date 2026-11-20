@@ -21,6 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // The sidebar renders open on every page load, and a drag and drop
+    // does a full page reload, so it reopened after every single move.
+    // Put it back where the user left it instead.
+    const SIDEBAR_KEY = 'sidebarCollapsed';
+
+    if (sideContainer) {
+        try {
+            if (sessionStorage.getItem(SIDEBAR_KEY) === 'true') {
+                sideContainer.classList.add('collapsed');
+            }
+        } catch (err) {
+            // Private browsing or blocked storage. Opening by default is
+            // the old behaviour, so there is nothing to recover from.
+        }
+    }
+
     // Check if the URL has a search query (e.g. ?q=apples). 
     // If it does, automatically open the sidebar and jump straight to the Pantry Organizer panel!
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,6 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showPanel('panel-pantry');
         if (sideContainer) {
             sideContainer.classList.remove('collapsed');
+
+            // A search opens the sidebar on purpose, so record that or the
+            // next reload would close it again underneath the results.
+            try {
+                sessionStorage.setItem(SIDEBAR_KEY, 'false');
+            } catch (err) {
+                // Nothing to do.
+            }
         }
         if (menuArrow) {
             menuArrow.style.display = 'none'; // Ensure arrow is hidden when open on startup search
@@ -39,6 +63,15 @@ document.addEventListener('DOMContentLoaded', () => {
         menuDropdownToggle.addEventListener('click', (e) => {
             e.preventDefault();
             sideContainer.classList.toggle('collapsed');
+
+            // Remember it so the next page load matches.
+            try {
+                sessionStorage.setItem(
+                    SIDEBAR_KEY,
+                    sideContainer.classList.contains('collapsed'));
+            } catch (err) {
+                // The toggle still worked, it just will not persist.
+            }
         });
     }
 
