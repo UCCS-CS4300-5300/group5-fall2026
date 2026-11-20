@@ -26,8 +26,6 @@ def test_collapsible_menu_structure_and_triggers():
     assert 'id="sidebar-main-menu"' in content
     assert 'data-target="panel-pantry"' in content
     assert 'data-target="panel-ai"' in content
-    assert 'id="how-to-dialog"' in content
-    assert 'About / Manual' in content
     assert 'id="panel-pantry"' in content
     assert 'id="panel-ai"' in content
 

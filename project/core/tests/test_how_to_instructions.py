@@ -52,6 +52,5 @@ def test_how_to_instructions_explain_main_features():
     assert "Expiration Status" in content
     assert "AI Assisted Chef" in content
 
-    # The menu still provides access to the instructions.
-    assert "About / Manual" in content
+    # The instructions remain accessible from the page-level help trigger.
     assert "showModal()" in content
