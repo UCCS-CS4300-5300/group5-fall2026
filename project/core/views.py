@@ -177,15 +177,17 @@ def build_home_context(
             bag_items.append(item)
 
     deleted_food_history = (
-    PantryItemHistory.objects
-    .filter(pantry=pantry)
-    .values("item_name")
-    .annotate(
-        times_deleted=Count("id"),
-        last_deleted=Max("deleted_at")
+        PantryItemHistory.objects
+        .filter(pantry=pantry)
+        .values("item_name")
+        .annotate(
+            times_deleted=Count("id"),
+            last_deleted=Max("deleted_at")
+        )
+        .order_by("-times_deleted", "item_name")
     )
-    .order_by("-times_deleted", "item_name")
-)
+
+    top_trashed_foods = deleted_food_history[:5]
 
     query = request.GET.get("q", "") if request else ""
 
@@ -198,6 +200,7 @@ def build_home_context(
         "bag_items": bag_items,
         "pantryItems" : pantryItems,
         "deleted_food_history": deleted_food_history,
+        "top_trashed_foods": top_trashed_foods,
         "form" : add_form or PantryItemForm(),
         # Backs the <datalist> the add and edit forms type against. Rendered
         # once per page, not once per pop-up.

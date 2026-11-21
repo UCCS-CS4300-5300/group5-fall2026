@@ -47,8 +47,7 @@ def test_statistics_sidebar_contains_future_statistics_options():
     assert 'id="statistics-history-option"' in content
     assert "Trashed Food History" in content
     assert 'id="statistics-leaderboard-option"' in content
-    assert "Top Consumed / Trashed Foods" in content
-
+    assert "Top Trashed Foods" in content
     assert 'data-target="panel-pantry"' in content
     assert 'data-target="panel-ai"' in content
     assert 'id="how-to-dialog"' in content

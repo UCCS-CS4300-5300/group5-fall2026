@@ -316,8 +316,23 @@
 
                         <li>
                             <div id="statistics-leaderboard-option">
-                                <strong>Top Consumed / Trashed Foods</strong>
-                                <p>See which foods are consumed or thrown away most often.</p>
+                                <strong>Top Trashed Foods</strong>
+
+                                {% if top_trashed_foods %}
+                                    <ol class="statistics-leaderboard-list">
+                                        {% for entry in top_trashed_foods %}
+                                            <li class="statistics-leaderboard-item">
+                                                <strong>{{ entry.item_name }}</strong>
+                                                <p>
+                                                    Deleted {{ entry.times_deleted }}
+                                                    time{{ entry.times_deleted|pluralize }}
+                                                </p>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
+                                {% else %}
+                                    <p>No trashed food data yet.</p>
+                                {% endif %}
                             </div>
                         </li>
                     </ul>
