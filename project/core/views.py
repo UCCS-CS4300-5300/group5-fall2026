@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from .ai_chef import ask_chef, FALLBACK_MESSAGE_1, FALLBACK_MESSAGE_2
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -441,3 +442,40 @@ def submit_drag_drop(request):
         {'status': 'error', 'message': 'Only POST allowed'},
         status=405
     )
+
+@csrf_protect
+@require_POST
+@login_required
+def ai_chef_chat(request):
+    try:
+        data=json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"ok": False, "reply":FALLBACK_MESSAGE_1, "fallback":True},
+            status=400
+        )
+
+    action = data.get("action", "init")
+    pantry_items = (
+        PantryItem.objects.select_related("catalog_item")
+        .filter(pantry=request.user.pantry)
+        .order_by("date_expired")
+    )
+
+    if action == "init":
+        result = ask_chef(pantry_items, fallback_message=FALLBACK_MESSAGE_1)
+    else:
+        user_message = (data.get("message") or "").strip()
+        history = data.get("history") if isinstance(data.get("history"), list) else []
+        if not user_message:
+            return JsonResponse(
+                {"ok": False, "reply": "Ask the chef a question first!", "fallback": False},
+                status=400,
+            )
+        result = ask_chef(
+            pantry_items,
+            user_message=user_message,
+            history=history,
+            fallback_message=FALLBACK_MESSAGE_2,
+        )
+    return JsonResponse(result)
