@@ -7,6 +7,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const featurePanels = document.querySelectorAll('.sidebar-feature-panel');
     const backToMenuButtons = document.querySelectorAll('.back-to-menu-btn');
 
+    // A drag and drop does a full page reload, so anything the sidebar
+    // remembers has to survive that or the user fights it on every move.
+    const SIDEBAR_KEY = 'sidebarCollapsed';
+    const VIEW_KEY = 'sidebarView';
+
+    function remember(key, value) {
+        try {
+            sessionStorage.setItem(key, value);
+        } catch (err) {
+            // Private browsing or blocked storage. The click still worked,
+            // it just will not survive the next load.
+        }
+    }
+
+    function recall(key) {
+        try {
+            return sessionStorage.getItem(key);
+        } catch (err) {
+            return null;
+        }
+    }
+
     // Helper function to switch to a specific panel
     function showPanel(panelId) {
         if (sidebarMainMenu) {
@@ -21,16 +43,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Check if the URL has a search query (e.g. ?q=apples). 
-    // If it does, automatically open the sidebar and jump straight to the Pantry Organizer panel!
+    function showMainMenu() {
+        featurePanels.forEach(panel => {
+            panel.style.display = 'none';
+        });
+        if (sidebarMainMenu) {
+            sidebarMainMenu.style.display = 'block';
+        }
+    }
+
+    // Open or closed. home.html also applies this before paint, so the
+    // sidebar does not render open and then snap shut; this is the copy
+    // that keeps working if that inline script is ever removed.
+    if (sideContainer && recall(SIDEBAR_KEY) === 'true') {
+        sideContainer.classList.add('collapsed');
+    }
+
+    // Which view was showing. Without this, pressing the back arrow and
+    // then dragging an item would drop you back in the panel you just left.
+    const storedView = recall(VIEW_KEY);
+    if (storedView && storedView !== 'menu') {
+        showPanel(storedView);
+    }
+
+    // Landing on a ?q= URL should open the sidebar on the Pantry Organizer
+    // so the results are visible. A drag and drop reload keeps ?q= in the
+    // URL though, so this runs on every move. Only steer the user on the
+    // first load, when nothing is remembered; after that their own choices
+    // win, whether that is collapsing the sidebar or going back to the menu.
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('q') && urlParams.get('q').trim() !== '') {
+    const firstVisit = storedView === null;
+
+    if (urlParams.has('q') && urlParams.get('q').trim() !== '' && firstVisit) {
         showPanel('panel-pantry');
-        if (sideContainer) {
+        remember(VIEW_KEY, 'panel-pantry');
+
+        if (sideContainer && recall(SIDEBAR_KEY) !== 'true') {
             sideContainer.classList.remove('collapsed');
+            remember(SIDEBAR_KEY, 'false');
         }
         if (menuArrow) {
-            menuArrow.style.display = 'none'; // Ensure arrow is hidden when open on startup search
+            menuArrow.style.display = 'none';
         }
     }
 
@@ -39,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         menuDropdownToggle.addEventListener('click', (e) => {
             e.preventDefault();
             sideContainer.classList.toggle('collapsed');
+            remember(SIDEBAR_KEY, sideContainer.classList.contains('collapsed'));
         });
     }
 
@@ -47,7 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetPanelId = link.getAttribute('data-target');
+
+            // A nav link with no data-target would hide the menu and then
+            // find no panel to show, leaving the sidebar blank with no way
+            // back. The About / Manual link opens a dialog and has none.
+            if (!targetPanelId) {
+                return;
+            }
+
             showPanel(targetPanelId);
+            remember(VIEW_KEY, targetPanelId);
         });
     });
 
@@ -55,16 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     backToMenuButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-
-            // Hide all feature panels
-            featurePanels.forEach(panel => {
-                panel.style.display = 'none';
-            });
-
-            // Show main menu view again
-            if (sidebarMainMenu) {
-                sidebarMainMenu.style.display = 'block';
-            }
+            showMainMenu();
+            remember(VIEW_KEY, 'menu');
         });
     });
 });
