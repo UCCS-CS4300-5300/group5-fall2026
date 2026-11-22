@@ -160,7 +160,15 @@ class PantryItem(models.Model):
    # foreign key is used for indicating which model it belongs to and
    # on the following field it makes sure there are can be duplicates
    pantry = models.ForeignKey(Pantry, on_delete=models.CASCADE, related_name="items")
-   catalog_item = models.ForeignKey(GlobalCatalogItem, on_delete=models.CASCADE)
+   # Nullable so the pantry can hold food the USDA has never heard of.
+   # A custom item carries its name in custom_name instead, has no shelf
+   # life to compute from, and falls back to the unknown-food image.
+   catalog_item = models.ForeignKey(
+      GlobalCatalogItem, on_delete=models.CASCADE, null=True, blank=True)
+
+   # Only set when catalog_item is None. Use display_name rather than
+   # reading either of these directly.
+   custom_name = models.CharField(max_length=100, blank=True)
    quantity = models.PositiveSmallIntegerField(default=1)
 
    date_stored = models.DateField(default=timezone.localdate)
@@ -191,6 +199,29 @@ class PantryItem(models.Model):
    }
 
    # TODO: Do we want to use a color border around the circle/image food item for drawing the user's Eye to the fact that the food is expiring?
+
+   @property
+   def display_name(self):
+      """What to call this item, catalog food or not.
+
+      Templates and logs use this instead of catalog_item.name, which is
+      None for a custom item and renders as an empty string.
+      """
+      if self.catalog_item:
+         return self.catalog_item.name
+      return self.custom_name
+
+   @property
+   def category(self):
+      """The food category, or blank for a custom item.
+
+      Blank is deliberate: food_category_image falls back to the
+      unknown-food image for any category it does not recognise, which is
+      the question mark the issue asks for.
+      """
+      if self.catalog_item:
+         return self.catalog_item.category
+      return ""
 
    @property
    def expiration_status(self):
@@ -237,7 +268,7 @@ class PantryItem(models.Model):
       super().save(*args, **kwargs) #saves the item into the database
 
    def __str__(self):
-      return f"Name: {self.catalog_item.name}, Stored: {self.date_stored}, Status: {self.expiration_status}"
+      return f"Name: {self.display_name}, Stored: {self.date_stored}, Status: {self.expiration_status}"
 
 class CatalogMatch(models.Model):
    """
