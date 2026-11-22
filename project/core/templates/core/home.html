@@ -179,6 +179,7 @@
                     <ul class="sidebar-menu-list">
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-pantry">Pantry Organizer</a></li>
                         <li><a href="#" class="sidebar-nav-link" data-target="panel-ai">Ai assisted Chef</a></li>
+                        <li><a href="#" class="sidebar-nav-link" data-target="panel-statistics">Statistics</a></li>
                         <li>
                             <a
                                 href="#"
@@ -311,6 +312,73 @@
                     </div>
                 </div>
 
+                <!-- View 4: Food Statistics Feature Panel -->
+                <div id="panel-statistics" class="sidebar-feature-panel" style="display: none;">
+                    <div class="flex-upper-border sidebar-header-row">
+                        <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
+                        <h2>Food Statistics</h2>
+                    </div>
+
+                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
+                        <p>
+                            Track how food leaves your pantry and review your
+                            consumption and waste over time.
+                        </p>
+                    </div>
+
+                    <ul class="sidebar-menu-list">
+                        <li>
+                            <div id="statistics-history-option">
+                                <strong>Trashed Food History</strong>
+
+                                {% if deleted_food_history %}
+                                    <ul class="statistics-history-list">
+                                        {% for entry in deleted_food_history %}
+                                            <li class="statistics-history-item">
+                                                <strong>{{ entry.item_name }}</strong>
+
+                                                <p>
+                                                    Deleted {{ entry.times_deleted }}
+                                                    time{{ entry.times_deleted|pluralize }}
+                                                </p>
+
+                                                <p>
+                                                    Last deleted:
+                                                    {{ entry.last_deleted|date:"M j, Y" }}
+                                                </p>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No deleted food history yet.</p>
+                                {% endif %}
+                            </div>    
+                        </li>
+
+                        <li>
+                            <div id="statistics-leaderboard-option">
+                                <strong>Top Trashed Foods</strong>
+
+                                {% if top_trashed_foods %}
+                                    <ol class="statistics-leaderboard-list">
+                                        {% for entry in top_trashed_foods %}
+                                            <li class="statistics-leaderboard-item">
+                                                <strong>{{ entry.item_name }}</strong>
+                                                <p>
+                                                    Deleted {{ entry.times_deleted }}
+                                                    time{{ entry.times_deleted|pluralize }}
+                                                </p>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
+                                {% else %}
+                                    <p>No trashed food data yet.</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
             <!-- Column 2: Shelves -->
@@ -404,10 +472,10 @@
                     'Content-Type': 'application/json',
 
                     // Required by Django for security
-                    'X-CSRFToken': csrfToken 
+                    'X-CSRFToken': csrfToken
                 },
 
-                // Post Payload. 
+                // Post Payload.
                 body: JSON.stringify({
                     username: username,
                     isAuthenticated: isAuthenticated,

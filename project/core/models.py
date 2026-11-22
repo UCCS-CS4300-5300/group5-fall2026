@@ -270,6 +270,28 @@ class PantryItem(models.Model):
    def __str__(self):
       return f"Name: {self.display_name}, Stored: {self.date_stored}, Status: {self.expiration_status}"
 
+class PantryItemHistory(models.Model):
+    """
+    Stores a record whenever a pantry item is deleted so food statistics
+    can show deletion history even after the original PantryItem is gone.
+    """
+
+    pantry = models.ForeignKey(
+        Pantry,
+        on_delete=models.CASCADE,
+        related_name="item_history"
+    )
+
+    item_name = models.CharField(max_length=100)
+
+    deleted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-deleted_at"]
+
+    def __str__(self):
+        return f"{self.item_name} deleted at {self.deleted_at}"
+
 class CatalogMatch(models.Model):
    """
    What a user's words turned out to mean, remembered.
