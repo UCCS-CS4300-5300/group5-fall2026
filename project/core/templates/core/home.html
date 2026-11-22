@@ -269,10 +269,45 @@
                 <div id="panel-ai" class="sidebar-feature-panel" style="display: none;">
                     <div class="flex-upper-border sidebar-header-row">
                         <button type="button" class="back-to-menu-btn" aria-label="Back to menu">&larr;</button>
-                        <h2>Ai assisted Chef</h2>
+                        <h2>AI Assisted Chef</h2>
                     </div>
-                    <div class="flex-container" style="padding: var(--space-md); text-align: left;">
-                        <p>AI feature implementation goes here. Generate recipes or suggestions using items currently inside your pantry!</p>
+
+                    <div class="chef-panel-body">
+
+                        <!-- Part of the Bell trigger for the AI -->
+                         <div id="chef-bell-stage" class="chef-bell-stage">
+                            <button
+                                type="button"
+                                id="chef-bell-btn"
+                                class="chef-bell-btn"
+                                aria-label="Ring bell to summon AI Chef">
+                                
+                                <span class="chef-bell-icon" aria-hidden="true">&#128276;</span>
+                            </button>
+                            <p class="chef-bell-label">Ring for Chef</p>
+                         </div>
+
+                         <!-- Loading Indicator for the AI chef -->
+                          <div id="chef-loading" class="chef-loading" hidden>
+                            <div class="chef-spinner" aria-hidden="true"></div>
+                            <p class="chef-loading-text" id="chef-loading-text">Summoning the Chef...</p>
+                          </div>
+
+                          <!-- Chatroom (will remain hidden until bell finished phasing out / response arrives)-->
+                           <div id="chef-chat-room" class="chef-chat-room" hidden>
+                            <div id="chef-messages" class="chef-messages" aria-live="polite"></div>
+
+                            <form id="chef-chat-form" class="chef-chat-form">
+                                <input 
+                                    type="text"
+                                    id="chef-message-input"
+                                    class="chef-message-input"
+                                    placeholder="Ask about recipes or substitutions..."
+                                    autocomplete="off"
+                                    >
+                                <button type="submit" class="chef-send-btn">Send</button>
+                            </form>
+                           </div>
                     </div>
                 </div>
 
@@ -403,6 +438,7 @@
         }
 
     </script>
+    <script src="{% static 'js/ai_chef.js' %}"></script>
     <script src="{% static 'js/collapsible_menu.js' %}"></script>
     <script src="{% static 'js/pantry_item.js' %}"></script>
 </body>
