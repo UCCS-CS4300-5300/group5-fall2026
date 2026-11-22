@@ -1306,17 +1306,11 @@ Item-circle button layout styling
     text-align: left;
 }
 
-
-body {
-    font-family: system-ui, -apple-system, sans-serif;
-    padding: 2rem;
-}
-
 #toast-container {
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 320px;
+    width: 280px;
     display: flex;
     flex-direction: column;
     gap: 10px;
