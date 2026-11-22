@@ -26,17 +26,6 @@
                         <!-- Top-left button to toggle sidebar open/closed -->
                         <a href="#" class="dropdown-trigger" id="menu-dropdown-toggle">&#9776; Menu <span class="menu-arrow">&#9662;</span></a>
                     </li>
-
-                    <li>
-                        <button
-                            type="button"
-                            class="how-to-trigger"
-                            aria-label="Open instructions"
-                            onclick="document.getElementById('how-to-dialog').showModal()"
-                        >
-                            ?
-                        </button>
-                    </li>
                 </ul>
 
                 <div class="flex-upper-border">
@@ -49,14 +38,6 @@
             <!-- Securely export Django variables to JSON -->
             {{ request.user.username|json_script:"user-username" }}
             {{ request.user.is_authenticated|json_script:"user-is-authenticated" }}
-            {% if user.is_authenticated %}
-                <form action="{% url 'logout' %}" method="post">
-                        {% csrf_token %}
-                    <button type="submit">Log out</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Log in</a>
-            {% endif %}
         </header>
         <!-- How-To / Instructions popup -->
         <dialog id="how-to-dialog" class="how-to-dialog">
@@ -188,6 +169,17 @@
                                 About / Manual
                             </a>
                         </li>
+
+                        {% if user.is_authenticated %}
+                            <li>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="sidebar-logout-btn">
+                                        Log out
+                                    </button>
+                                </form>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
 
