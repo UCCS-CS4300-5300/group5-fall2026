@@ -16,6 +16,8 @@
 </head>
 
 <body>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
     <div>
         <header>
             <nav class="kitchen-bg flex-container">
@@ -155,6 +157,19 @@
 
             <!-- Column 1: Collapsible Side Container (Collapsed by default) -->
             <div class="left-column" id="side-container">
+                <script>
+                    // Applied here, not in collapsible_menu.js, so the class
+                    // lands before the browser paints. On DOMContentLoaded the
+                    // sidebar has already been drawn open and you watch it snap
+                    // shut on every reload.
+                    try {
+                        if (sessionStorage.getItem('sidebarCollapsed') === 'true') {
+                            document.getElementById('side-container').classList.add('collapsed');
+                        }
+                    } catch (err) {
+                        // Storage blocked. Opening by default is the old behaviour.
+                    }
+                </script>
                 
                 <!-- View 1: Main Sidebar Menu (Shown when sidebar opens) -->
                 <div id="sidebar-main-menu" class="sidebar-view">
