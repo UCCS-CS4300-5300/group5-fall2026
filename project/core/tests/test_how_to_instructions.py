@@ -21,8 +21,9 @@ def test_how_to_instructions_are_available_from_home_page():
 
     content = response.content.decode("utf-8")
 
-    # How-To trigger and popup
-    assert 'class="how-to-trigger"' in content
+    # The menu entry is the only route into the popup now that the header
+    # question mark is gone, so assert on it rather than dropping the check.
+    assert "About / Manual" in content
     assert 'id="how-to-dialog"' in content
     assert "How to Use Shelf Life" in content
 

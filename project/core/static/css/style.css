@@ -1115,8 +1115,11 @@ Mobile Layout
         justify-content: center;
     }
 
+    /* At 390px the full title wrapped to two lines and ran into the trash
+       icon beside it. Heading size fits on one line on a phone. */
     .app-title {
-        font-size: var(--font-size-title);
+        font-size: var(--font-size-heading);
+        line-height: 1.2;
         text-align: center;
     }
 
@@ -1262,34 +1265,6 @@ Pop-up Style
 How-To / Instructions Popup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-.how-to-trigger {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    min-height: 42px;
-    margin-left: 8px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 3px solid #6f2cff;
-    border-radius: 50%;
-
-    background-color: #ffffff;
-    color: #6f2cff;
-
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-
-    cursor: pointer;
-}
-
-.how-to-trigger:hover {
-    background-color: #f3ecff;
-}
 
 .how-to-dialog {
     width: min(90vw, 650px);
@@ -1530,4 +1505,44 @@ Item-circle button layout styling
 
 .close-btn:hover {
     color: #ffffff;
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sidebar Log Out
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+/* The menu list styles li a, and this is a submit button, so it needs its
+   own rule to sit flush with the three links above it. The selector has to
+   outrank .left-column form button[type="submit"], which would otherwise
+   paint it dark, and font-family does not inherit into buttons. */
+.left-column form button.sidebar-logout-btn,
+.left-column form button[type="submit"].sidebar-logout-btn {
+    display: block;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-panel);
+    color: var(--color-button-dark);
+    text-align: left;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.left-column form button.sidebar-logout-btn:hover,
+.left-column form button[type="submit"].sidebar-logout-btn:hover {
+    background-color: var(--color-button-dark);
+    color: var(--color-button-text);
+}
+
+/* .left-column form sets column flex and a gap on every form in the sidebar,
+   which would add a stray gap under a form holding one button. */
+.sidebar-menu-list li form {
+    gap: 0;
+    margin: 0;
 }
