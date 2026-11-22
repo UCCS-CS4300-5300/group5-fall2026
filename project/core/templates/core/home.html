@@ -16,6 +16,8 @@
 </head>
 
 <body>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
     <div>
         <header>
             <nav class="kitchen-bg flex-container">
@@ -215,23 +217,6 @@
                             {% endif %}
                         </div>
                     {% endif %}
-                <div class="flex-container">
-                    <p class="menu-subheading">Add Item</p>
-                    <form action="{% url 'core:add_pantry_item' %}" method="POST">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-
-                        <button type="submit">Submit</button>
-                    </form>
-
-                    {# Shared by the add form and every edit pop-up, so it is #}
-                    {# rendered once here rather than inside each form.       #}
-                    <datalist id="catalog-options">
-                        {% for food in catalog_options %}
-                            <option value="{{ food }}"></option>
-                        {% endfor %}
-                    </datalist>
-                </div>
 
                     <!-- Add with your own details -->
                     <div class="flex-upper-border">
@@ -247,6 +232,14 @@
 
                             <button type="submit">Submit</button>
                         </form>
+
+                        {# Shared by the add form and every edit pop-up, so it #}
+                        {# is rendered once here rather than inside each form. #}
+                        <datalist id="catalog-options">
+                            {% for food in catalog_options %}
+                                <option value="{{ food }}"></option>
+                            {% endfor %}
+                        </datalist>
                     </div>
 
                     <!-- Bag drop zone -->
