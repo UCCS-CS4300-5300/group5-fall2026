@@ -285,9 +285,11 @@ def delete_pantry_item(request, id):
     )
 
     if request.method == "POST":
+        # display_name, not catalog_item.name: a custom food has no catalog
+        # row, so this raised AttributeError and returned a 500.
         PantryItemHistory.objects.create(
             pantry=item.pantry,
-            item_name=item.catalog_item.name
+            item_name=item.display_name
         )
 
         item.delete()
@@ -410,9 +412,11 @@ def submit_drag_drop(request):
                     )
 
                 if target_zone == "DELETE":
+                    # Same reason as delete_pantry_item: a custom food has
+                    # no catalog_item to read a name from.
                     PantryItemHistory.objects.create(
                         pantry=item.pantry,
-                        item_name=item.catalog_item.name
+                        item_name=item.display_name
                     )
                     item.delete()
 
